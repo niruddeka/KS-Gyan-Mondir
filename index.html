@@ -19,35 +19,20 @@
         .subject-card { background: white; border-radius: 20px; padding: 15px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 2px solid white; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 110px; cursor: pointer; }
         .dash-icon { background: white; padding: 20px; border-radius: 20px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: flex; flex-direction: column; align-items: center; cursor: pointer; }
         
+        /* --- Toast Design Added --- */
         #custom-toast {
-            visibility: hidden;
-            min-width: 250px;
-            background-color: #333;
-            color: #fff;
-            text-align: center;
-            border-radius: 10px;
-            padding: 16px;
-            position: fixed;
-            z-index: 10000;
-            left: 50%;
-            bottom: 30px;
-            transform: translateX(-50%);
-            font-size: 14px;
-            font-weight: bold;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            visibility: hidden; min-width: 250px; background-color: #333; color: #fff;
+            text-align: center; border-radius: 10px; padding: 16px; position: fixed;
+            z-index: 10000; left: 50%; bottom: 30px; transform: translateX(-50%);
+            font-size: 14px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
-        #custom-toast.show {
-            visibility: visible;
-            animation: fadein 0.5s, fadeout 0.5s 2.5s;
-        }
+        #custom-toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
         @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
     </style>
 </head>
 <body>
-<div id="custom-toast"></div>
-
-<header class="shadow-xl flex items-center justify-between sticky top-0 z-50">
+<div id="custom-toast"></div> <header class="shadow-xl flex items-center justify-between sticky top-0 z-50">
     <div class="flex items-center gap-4">
         <img id="main-logo" src="https://via.placeholder.com/100" class="w-10 h-10 rounded-full border-2 border-white bg-white object-cover">
         <h1 class="text-lg font-black tracking-tighter text-white uppercase">KS GYAN MONDIR</h1>
@@ -61,22 +46,12 @@
         <input id="s-name" placeholder="সম্পূৰ্ণ নাম *" class="input-box">
         <input id="s-phone" placeholder="মোবাইল আইডি (Phone) *" class="input-box">
         <input id="s-pass" placeholder="পাছৱৰ্ড বনোৱা *" class="input-box">
-        <select id="s-class" class="input-box font-bold">
-            <option value="">শ্ৰেণী বাচনি কৰা *</option>
-            <script>for(let i=3; i<=12; i++) document.write(`<option value="${i}">Class ${i}</option>`);</script>
-        </select>
+        <select id="s-class" class="input-box font-bold"><option value="">শ্ৰেণী বাচনি কৰা *</option><script>for(let i=3; i<=12; i++) document.write(`<option value="${i}">Class ${i}</option>`);</script></select>
         <button onclick="showFeesTable()" class="w-full bg-orange-500 text-white py-2 rounded-xl font-bold text-[10px] mb-4 uppercase">মাচুল চাওক</button>
-        <select id="s-school" class="input-box font-bold">
-            <option value="">বিদ্যালয় বাচনি কৰা *</option>
-            <option value="শংকৰদেৱ শিশু নিকেতন">শংকৰদেৱ শিশু নিকেতন</option>
-            <option value="চৰকাৰী বিদ্যালয়">চৰকাৰী বিদ্যালয়</option>
-            <option value="জাতীয় বিদ্যালয়">জাতীয় বিদ্যালয়</option>
-        </select>
+        <select id="s-school" class="input-box font-bold"><option value="">বিদ্যালয় বাচনি কৰা *</option><option value="শংকৰদেৱ শিশু নিকেতন">শংকৰদেৱ শিশু নিকেতন</option><option value="চৰকাৰী বিদ্যালয়">চৰকাৰী বিদ্যালয়</option><option value="জাতীয় বিদ্যালয়">জাতীয় বিদ্যালয়</option></select>
         <div class="grid grid-cols-2 gap-2">
-            <input id="s-vill" placeholder="গাঁও *" class="input-box text-xs">
-            <input id="s-po" placeholder="ডাকঘৰ *" class="input-box text-xs">
-            <input id="s-dist" placeholder="জিলা *" class="input-box text-xs">
-            <input id="s-state" placeholder="ৰাজ্য *" class="input-box text-xs" value="অসম">
+            <input id="s-vill" placeholder="গাঁও *" class="input-box text-xs"><input id="s-po" placeholder="ডাকঘৰ *" class="input-box text-xs">
+            <input id="s-dist" placeholder="জিলা *" class="input-box text-xs"><input id="s-state" placeholder="ৰাজ্য *" class="input-box text-xs" value="অসম">
             <input id="s-pin" placeholder="পিন ক'ড *" class="input-box text-xs col-span-2">
         </div>
         <p class="text-[10px] font-bold text-gray-400 mt-2 uppercase">তোমাৰ ফটো আপলোড কৰা *</p>
@@ -145,26 +120,24 @@
         <span class="font-black text-xs uppercase tracking-widest">Admin Dashboard</span>
         <button onclick="logout()" class="bg-white text-indigo-900 px-3 py-1 rounded-lg text-[10px] font-black uppercase">Exit</button>
     </div>
-
-    <div class="glass-card p-5 mb-8 border-l-8 border-orange-500 shadow-lg">
-        <h3 class="text-[10px] font-black uppercase mb-4 text-orange-700 tracking-widest italic">Update Student Fees</h3>
-        <div class="grid grid-cols-2 gap-3 mb-4">
-            <select id="fee-cls" class="input-box text-xs font-bold">
-                <option value="">শ্ৰেণী বাচনি কৰা</option>
-                <script>for(let i=3; i<=12; i++) document.write(`<option value="${i}">Class ${i}</option>`);</script>
-            </select>
-            <select id="fee-sub" class="input-box text-xs font-bold">
-                <option value="">বিষয় বাচনি কৰা</option>
-                <script>
-                    const sub_opts = ["অসমীয়া", "ইংৰাজী", "গণিত", "বিজ্ঞান", "সমাজ বিজ্ঞান", "হিন্দী", "সংস্কৃত", "ঐচ্ছিক গণিত", "নীতিশিক্ষা", "সকলো বিষয়"];
-                    sub_opts.forEach(s => document.write(`<option value="${s}">${s}</option>`));
-                </script>
-            </select>
-        </div>
-        <input id="fee-amount" placeholder="মাচুলৰ পৰিমাণ (যেনে: 500)" class="input-box text-xs text-center font-bold">
-        <button onclick="updateFeesInDB()" class="bg-orange-600 text-white w-full py-3 rounded-xl text-xs font-black uppercase shadow-md">Update Fees Now</button>
-    </div> 
-
+<div class="glass-card p-5 mb-8 border-l-8 border-orange-500 shadow-lg">
+    <h3 class="text-[10px] font-black uppercase mb-4 text-orange-700 tracking-widest italic">Update Student Fees</h3>
+    <div class="grid grid-cols-2 gap-3 mb-4">
+        <select id="fee-cls" class="input-box text-xs font-bold">
+            <option value="">শ্ৰেণী বাচনি কৰা</option>
+            <script>for(let i=3; i<=12; i++) document.write(`<option value="${i}">Class ${i}</option>`);</script>
+        </select>
+        <select id="fee-sub" class="input-box text-xs font-bold">
+            <option value="">বিষয় বাচনি কৰা</option>
+            <script>
+                const subs = ["অসমীয়া", "ইংৰাজী", "গণিত", "বিজ্ঞান", "সমাজ বিজ্ঞান", "হিন্দী", "সংস্কৃত", "ঐচ্ছিক গণিত", "নীতিশিক্ষা", "সকলো বিষয়"];
+                subs.forEach(s => document.write(`<option value="${s}">${s}</option>`));
+            </script>
+        </select>
+    </div>
+    <input id="fee-amount" placeholder="মাচুলৰ পৰিমাণ (যেনে: 500)" class="input-box text-xs text-center font-bold">
+    <button onclick="updateFeesInDB()" class="bg-orange-600 text-white w-full py-3 rounded-xl text-xs font-black uppercase shadow-md">Update Fees Now</button>
+</div> 
     <div class="glass-card p-5 mb-8 border-l-8 border-yellow-500 shadow-lg">
         <h3 class="text-[10px] font-black uppercase mb-4 text-yellow-700 tracking-widest">App Branding (Logo & QR)</h3>
         <div class="grid grid-cols-2 gap-4 text-[9px] font-bold text-gray-500 mb-4">
@@ -172,6 +145,7 @@
             <div class="bg-gray-50 p-2 rounded-lg">Payment QR:<br><input type="file" id="adm-qr-file" class="mt-1 w-full"></div>
         </div>
         <button onclick="saveAdminSettings()" class="bg-blue-600 text-white w-full py-3 rounded-xl text-xs font-black uppercase shadow-md mb-6">Update Branding & Settings</button>
+        
         <input id="adm-upi" placeholder="Update UPI ID" class="input-box text-xs">
         <input id="adm-wa" placeholder="WhatsApp Number" class="input-box text-xs">
         <input id="adm-notif" placeholder="Global Notice Text" class="input-box text-xs">
@@ -185,6 +159,7 @@
         <input id="c-link" placeholder="YouTube URL" class="input-box text-xs">
         <p class="text-[10px] font-bold mb-1 uppercase text-gray-400">Choose PDF Material:</p>
         <input type="file" id="c-pdf-file" accept="application/pdf" class="text-[10px] w-full mb-4">
+
         <div class="grid grid-cols-2 gap-2">
             <button onclick="uploadContent('video')" class="bg-red-600 text-white py-3 rounded-xl text-[10px] font-black shadow-md uppercase">Upload Video</button>
             <button onclick="uploadContent('pdf')" class="bg-teal-600 text-white py-3 rounded-xl text-[10px] font-black shadow-md uppercase">Upload PDF</button>
@@ -230,7 +205,7 @@
         });
         db.ref('admin/fees').on('value', s => { window.feesData = s.val() || {}; });
         const cSub = document.getElementById('c-sub');
-        if(cSub) subjects.forEach(s => { cSub.innerHTML += `<option value="${s.name}">${s.name}</option>`; });
+        subjects.forEach(s => { if(cSub) cSub.innerHTML += `<option value="${s.name}">${s.name}</option>`; });
     };
 
     function showScreen(id) {
@@ -240,12 +215,7 @@
         if(id === 'admin-panel') { fetchStudentsAdmin(); fetchAdminDoubts(); }
     }
 
-    function showToast(message) {
-        var x = document.getElementById("custom-toast");
-        x.innerHTML = message; x.className = "show";
-        setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
-    }
-
+    // --- Student Logic (FIXED Grid Display) ---
     function loginAuto(ph) { 
         showScreen('home-screen'); 
         db.ref('students/' + ph).on('value', s => { 
@@ -256,14 +226,16 @@
             } else { 
                 document.getElementById('lock-msg').classList.add('hidden'); 
                 document.getElementById('main-content').classList.remove('hidden'); 
-                renderGrid(); loadInboxCount(ph); 
+                renderGrid();
+                loadInboxCount(ph); 
             } 
         }); 
     }
 
     function renderGrid() { 
         const area = document.getElementById('subject-grid'); 
-        if(!area) return; area.innerHTML = ""; 
+        if(!area) return;
+        area.innerHTML = ""; 
         subjects.forEach(s => { 
             area.innerHTML += `<div onclick="openSubject('${s.name}')" class="subject-card"><div class="text-3xl mb-2">${s.icon}</div><div class="font-bold text-xs uppercase">${s.name}</div></div>`; 
         }); 
@@ -275,12 +247,13 @@
         const listArea = document.getElementById('course-content-list');
         listArea.innerHTML = "<p class='text-center mt-5 text-gray-400'>Loading...</p>";
         db.ref(`content/${ph}/${sub}`).once('value', s => {
-            listArea.innerHTML = ""; const data = s.val();
+            listArea.innerHTML = "";
+            const data = s.val();
             if(!data) { listArea.innerHTML = "<p class='text-center mt-10 text-gray-400 font-bold'>একো নাই।</p>"; return; }
             if(data.videos) for(let k in data.videos) {
                 const v = data.videos[k]; let pdf = "";
                 if(data.pdfs) for(let pk in data.pdfs) if(data.pdfs[pk].title === v.title) pdf = data.pdfs[pk].fileData;
-                listArea.innerHTML += `<div onclick="playVideo('${v.title}', '${v.link}', '${pdf}')" class="bg-white p-5 rounded-3xl shadow-sm border flex items-center gap-4 cursor-pointer">▶️ <div class="font-bold text-[10px] uppercase">${v.title}</div></div>`;
+                listArea.innerHTML += `<div onclick="playVideo('${v.title}', '${v.link}', '${pdf}')" class="bg-white p-5 rounded-3xl shadow-sm border flex items-center gap-4 cursor-pointer active:scale-95 transition">▶️ <div class="font-bold text-[10px] uppercase tracking-tighter">${v.title}</div></div>`;
             }
         });
     }
@@ -289,7 +262,9 @@
         const ph = localStorage.getItem('ks_student_id');
         const q = prompt("তোমাৰ প্ৰশ্নটো ইয়াত লিখা:");
         if(q && q.trim() !== "") {
-            db.ref(`doubts`).push({ ph: ph, question: q, time: new Date().toLocaleString() }).then(() => showToast("প্ৰশ্নটো এডমিনলৈ পঠোৱা হৈছে!"));
+            db.ref(`doubts`).push({ ph: ph, question: q, time: new Date().toLocaleString() }).then(() => {
+                showToast("প্ৰশ্নটো এডমিনলৈ পঠোৱা হৈছে!");
+            }).catch(e => showToast("Error: " + e.message));
         }
     }
 
@@ -301,16 +276,16 @@
         if(pdf && pdf !== "undefined") { btn.classList.remove('hidden'); btn.onclick = () => window.open(pdf); } else btn.classList.add('hidden');
     }
 
-    function stopVideo() { document.getElementById('course-video-wrapper').innerHTML = "ভিডিঅ' বাচনি কৰা..."; document.getElementById('pdf-download-btn').classList.add('hidden'); }
+    function stopVideo() { document.getElementById('course-video-wrapper').innerHTML = "ভিডিঅ' বাচনি কৰা..."; document.getElementById('current-video-title').innerText = "Class Title"; document.getElementById('pdf-download-btn').classList.add('hidden'); }
     function stopVideoAndBack() { stopVideo(); showScreen('home-screen'); }
 
-    // Admin Settings Branding
+    // --- Admin Functions ---
     function saveAdminSettings() { 
         const upi = document.getElementById('adm-upi').value, wa = document.getElementById('adm-wa').value, notif = document.getElementById('adm-notif').value;
         const logo = document.getElementById('adm-logo-file').files[0], qr = document.getElementById('adm-qr-file').files[0];
         const updateDB = (l=null, q=null) => {
             let obj = { upi, wa, notif }; if(l) obj.appLogo = l; if(q) obj.qr = q;
-            db.ref('admin/config').update(obj).then(() => showToast("✅ চেভ কৰা হ'ল!"));
+            db.ref('admin/config').update(obj).then(() => showToast("Saved!"));
         };
         if(logo || qr) {
             if(logo) { let r=new FileReader(); r.onload=e=>updateDB(e.target.result, null); r.readAsDataURL(logo); }
@@ -321,16 +296,8 @@
     function uploadContent(type) {
         const ph = document.getElementById('c-ph').value, sub = document.getElementById('c-sub').value, t = document.getElementById('c-title').value;
         if(!ph || !sub || !t) return showToast("⚠️ ছাত্ৰৰ আইডি আৰু শিৰোনাম ভৰাওক!");
-        if(type==='video') { 
-            const link = document.getElementById('c-link').value; 
-            db.ref(`content/${ph}/${sub}/videos`).push({title:t, link:link}).then(()=>showToast("✅ ভিডিঅ' আপলোড হ'ল!")); 
-        } else { 
-            const file = document.getElementById('c-pdf-file').files[0]; 
-            if(!file) return showToast("Select PDF!"); 
-            const reader = new FileReader(); 
-            reader.onload = e => db.ref(`content/${ph}/${sub}/pdfs`).push({title:t, fileData: e.target.result}).then(()=>showToast("✅ PDF চেভ হ'ল!")); 
-            reader.readAsDataURL(file); 
-        }
+        if(type==='video') { const link = document.getElementById('c-link').value; db.ref(`content/${ph}/${sub}/videos`).push({title:t, link:link}).then(()=>showToast("Success!")); }
+        else { const file = document.getElementById('c-pdf-file').files[0]; if(!file) return showToast("Select PDF!"); const reader = new FileReader(); reader.onload = e => db.ref(`content/${ph}/${sub}/pdfs`).push({title:t, fileData: e.target.result}).then(()=>showToast("PDF Saved!")); reader.readAsDataURL(file); }
     }
 
     function fetchStudentsAdmin() {
@@ -345,7 +312,7 @@
                             <h4 class="font-black text-indigo-900 text-sm">${u.name}</h4>
                             <p>📞 Phone/ID: ${u.ph} | 🔐 Pass: <b class="text-red-500">${u.ps}</b></p>
                             <p>🏫 School: ${u.school} | Cls: ${u.cls}</p>
-                            <p>📍 Addr: ${u.vill}, ${u.po}, ${u.dist}, <b class="text-indigo-600">${u.state}</b></p>
+                            <p>📍 Addr: ${u.vill}, ${u.po}, ${u.dist}, <b class="text-indigo-600">${u.state}</b>, ${u.pin}</p>
                             <p class="text-blue-600 font-bold mt-1">🆔 UTR: ${u.utr}</p>
                         </div>
                     </div>
@@ -368,52 +335,34 @@
     }
 
     function replyDoubt(ph, doubtKey) {
-        const rTxt = document.getElementById('reply-' + doubtKey).value; 
-        if(rTxt) db.ref(`messages/${ph}`).push({ text: "উত্তৰ: " + rTxt, time: new Date().toLocaleString() }).then(() => { 
-            document.getElementById('reply-' + doubtKey).value = ""; db.ref(`doubts/${doubtKey}`).remove(); showToast("✅ ৰিপ্লাই পঠোৱা হ'ল!"); 
-        });
+        const rTxt = document.getElementById('reply-' + doubtKey).value; if(rTxt) db.ref(`messages/${ph}`).push({ text: "উত্তৰ: " + rTxt, time: new Date().toLocaleString() }).then(() => { document.getElementById('reply-' + doubtKey).value = ""; db.ref(`doubts/${doubtKey}`).remove(); showToast("Replied!"); });
     }
 
     function handleApprove(ph, name, status) {
         db.ref('students/' + ph).update({ active: status }).then(() => {
             if(status === true) {
-                const msg = `প্ৰিয় ${name}, KS Gyan Mondir লৈ তোমাক স্বাগতম। তোমাৰ উজ্জ্বল ভৱিষ্যতৰ বাবে শুভেচ্ছা থাকিল।`;
+                const msg = `প্ৰিয় ${name}, KS Gyan Mondir লৈ তোমাক স্বাগতম। তুমি আমাৰ লগত জড়িত হোৱাটো আমাৰ বাবে আনন্দৰ কথা। তোমাৰ লক্ষ্য পূৰণৰ বাবে আমি সদায় তোমাক সহায় কৰিম। তোমাৰ উজ্জ্বল ভৱিষ্যতৰ বাবে শুভেচ্ছা থাকিল।`;
                 db.ref(`messages/${ph}`).push({ text: msg, time: new Date().toLocaleString() });
-                showToast("✅ অনুমোদন জনোৱা হ'ল!");
-            } else {
-                showToast("🔒 একাউণ্ট লক কৰা হ'ল!");
+                showToast("অনুমোদন কৰা হ'ল আৰু বাৰ্তা প্ৰেৰণ কৰা হ'ল!");
             }
         });
     }
 
     function sendDirectMsg(ph) {
-        const txt = document.getElementById('direct-msg-' + ph).value; 
-        if(txt) db.ref(`messages/${ph}`).push({ text: "ADMIN: " + txt, time: new Date().toLocaleString() }).then(() => { 
-            document.getElementById('direct-msg-' + ph).value = ""; showToast("📩 মেছেজ পঠোৱা হ'ল!"); 
-        });
+        const txt = document.getElementById('direct-msg-' + ph).value; if(txt) db.ref(`messages/${ph}`).push({ text: "ADMIN: " + txt, time: new Date().toLocaleString() }).then(() => { document.getElementById('direct-msg-' + ph).value = ""; showToast("Message sent!"); });
     }
 
     function register() {
         const ph = document.getElementById('s-phone').value, n = document.getElementById('s-name').value, ps = document.getElementById('s-pass').value, utr = document.getElementById('s-utr').value;
-        if(!ph || !n || !ps || !utr) return showToast("⚠️ সকলো তথ্য পূৰণ কৰা!");
+        if(!ph || !n || !ps || !utr) return showToast("সকলো তথ্য পূৰণ কৰা!");
         const photo = document.getElementById('s-photo').files[0], pay = document.getElementById('s-pay-shot').files[0];
-        if(!photo || !pay) return showToast("📸 ফটো আপলোড কৰা!");
+        if(!photo || !pay) return showToast("ফটো আপলোড কৰা!");
         const r1 = new FileReader(), r2 = new FileReader();
         r1.onload = e1 => { r2.onload = e2 => {
-            db.ref('students/' + ph).set({ name: n, ph, ps, utr, cls: document.getElementById('s-class').value, school: document.getElementById('s-school').value, vill: document.getElementById('s-vill').value, po: document.getElementById('s-po').value, dist: document.getElementById('s-dist').value, state: document.getElementById('s-state').value, pin: document.getElementById('s-pin').value, studentPhoto: e1.target.result, payShot: e2.target.result, active: false }).then(() => { 
-                showToast("✅ পঞ্জীয়ন সফল! অনুমোদনৰ বাবে অপেক্ষা কৰক।"); showScreen('login-screen'); 
-            });
+            db.ref('students/' + ph).set({ name: n, ph, ps, utr, cls: document.getElementById('s-class').value, school: document.getElementById('s-school').value, vill: document.getElementById('s-vill').value, po: document.getElementById('s-po').value, dist: document.getElementById('s-dist').value, state: document.getElementById('s-state').value, pin: document.getElementById('s-pin').value, studentPhoto: e1.target.result, payShot: e2.target.result, active: false }).then(() => { showToast("পঞ্জীয়ন সফল! অনুমোদনৰ বাবে অপেক্ষা কৰক।"); showScreen('login-screen'); });
         }; r2.readAsDataURL(pay); }; r1.readAsDataURL(photo);
     }
-
-    function doLogin() { 
-        const ph = document.getElementById('l-phone').value, ps = document.getElementById('l-pass').value; 
-        db.ref('students/' + ph).once('value', s => { 
-            const u = s.val(); if(u && u.ps === ps) { localStorage.setItem('ks_student_id', ph); loginAuto(ph); } 
-            else showToast("❌ ভুল আইডি বা পাছৱৰ্ড!"); 
-        }); 
-    }
-
+    function doLogin() { const ph = document.getElementById('l-phone').value, ps = document.getElementById('l-pass').value; db.ref('students/' + ph).once('value', s => { const u = s.val(); if(u && u.ps === ps) { localStorage.setItem('ks_student_id', ph); loginAuto(ph); } else showToast("Wrong ID or Password!"); }); }
     function logout() { localStorage.removeItem('ks_student_id'); location.reload(); }
     function triggerAdmin() { clicks++; if(clicks>=5) { showScreen('admin-login-screen'); clicks=0; } setTimeout(()=>clicks=0, 2000); }
     
@@ -422,58 +371,38 @@
         else showToast("❌ ভুল পিন দিছে!"); 
     }
 
-    function updateFeesInDB() {
-        const cls = document.getElementById('fee-cls').value, sub = document.getElementById('fee-sub').value, amt = document.getElementById('fee-amount').value;
-        if(!cls || !sub || !amt) return showToast("⚠️ সকলো তথ্য ভৰোৱা!");
-        db.ref(`admin/fees/${cls}/${sub}`).set(amt).then(() => {
-            showToast(`✅ Class ${cls} - ${sub} ৰ মাচুল ₹${amt} লৈ আপডেট হ'ল।`);
-            document.getElementById('fee-amount').value = "";
-        });
-    }
-
     function loadInboxCount(ph) { db.ref(`messages/${ph}`).on('value', s => document.getElementById('msg-count').innerText = s.exists() ? Object.keys(s.val()).length : 0); }
-
     function showInbox() {
         const ph = localStorage.getItem('ks_student_id');
         db.ref(`messages/${ph}`).once('value', s => {
             const existing = document.getElementById('inbox-modal'); if(existing) existing.remove();
-            let list = `<div id="inbox-modal" class="fixed inset-0 bg-white z-[200] p-6 flex flex-col"><h2 class="font-black text-xl mb-4 border-b pb-2 uppercase">My Inbox</h2><div class="flex-1 overflow-auto">`;
-            if(!s.exists()) list += "<p class='text-gray-400 font-bold mt-10 text-center'>একো নাই।</p>"; 
-            else s.forEach(m => list += `<div class="bg-indigo-50 p-4 rounded-xl mb-4 border-l-4 border-indigo-600 shadow-sm relative"><p class="text-[9px] text-gray-500 mb-1">${m.val().time || ""}</p><p class="text-sm font-bold text-indigo-900 pr-8">${m.val().text}</p><button onclick="deleteMessage('${ph}', '${m.key}')" class="absolute top-2 right-2 text-red-500 font-bold p-2">✕</button></div>`);
+            let list = `<div id="inbox-modal" class="fixed inset-0 bg-white z-[200] p-6 flex flex-col"><h2 class="font-black text-xl mb-4 border-b pb-2 uppercase tracking-tighter">My Inbox</h2><div class="flex-1 overflow-auto">`;
+            if(!s.exists()) list += "<p class='text-gray-400 font-bold mt-10 text-center uppercase tracking-widest'>একো নাই।</p>"; else s.forEach(m => list += `<div class="bg-indigo-50 p-4 rounded-xl mb-4 border-l-4 border-indigo-600 shadow-sm relative"><p class="text-[9px] text-gray-500 mb-1">${m.val().time || ""}</p><p class="text-sm font-bold text-indigo-900 pr-8">${m.val().text}</p><button onclick="deleteMessage('${ph}', '${m.key}')" class="absolute top-2 right-2 text-red-500 font-bold p-2">✕</button></div>`);
             list += `</div><button onclick="this.parentElement.remove()" class="btn-3d mt-4 shadow-xl">Close</button></div>`;
             const d = document.createElement('div'); d.innerHTML = list; document.body.appendChild(d.firstChild);
         });
     }
-
     function deleteMessage(ph, key) { if(confirm("Delete message?")) { db.ref(`messages/${ph}/${key}`).remove().then(() => showInbox()); } }
-
-    function showIDCard() { 
-        const ph = localStorage.getItem('ks_student_id'); 
-        db.ref('students/' + ph).once('value', s => { 
-            const u = s.val(); 
-            let html = `<div class="fixed inset-0 bg-black/80 z-[200] flex items-center justify-center p-4"><div class="bg-white w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl text-center p-6"><img src="${u.studentPhoto}" class="w-24 h-24 mx-auto rounded-full border-4 border-indigo-100 object-cover mb-4"><h3 class="text-xl font-bold text-indigo-900 tracking-tighter">${u.name}</h3><p class="text-indigo-600 font-bold uppercase text-[10px]">Class ${u.cls}</p><button onclick="this.closest('.fixed').remove()" class="w-full bg-gray-100 p-2 font-bold text-gray-500 uppercase text-[9px] mt-6 tracking-widest">Close</button></div></div>`; 
-            const div = document.createElement('div'); div.innerHTML = html; document.body.appendChild(div.firstElementChild); 
-        }); 
+    function showIDCard() { const ph = localStorage.getItem('ks_student_id'); db.ref('students/' + ph).once('value', s => { const u = s.val(); let html = `<div class="fixed inset-0 bg-black/80 z-[200] flex items-center justify-center p-4"><div class="bg-white w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl text-center p-6"><img src="${u.studentPhoto}" class="w-24 h-24 mx-auto rounded-full border-4 border-indigo-100 object-cover mb-4"><h3 class="text-xl font-bold text-indigo-900 tracking-tighter">${u.name}</h3><p class="text-indigo-600 font-bold uppercase text-[10px]">Class ${u.cls}</p><button onclick="this.closest('.fixed').remove()" class="w-full bg-gray-100 p-2 font-bold text-gray-500 uppercase text-[9px] mt-6 tracking-widest">Close</button></div></div>`; const div = document.createElement('div'); div.innerHTML = html; document.body.appendChild(div.firstElementChild); }); }
+    function showFeesTable() { const cls = document.getElementById('s-class').value; if(!cls) return showToast("শ্ৰেণী বাচনি কৰা!"); let table = `<div class='bg-white p-6 rounded-3xl w-80 shadow-2xl'><h3 class='font-black mb-4 border-b pb-2 text-sm uppercase text-center text-indigo-900'>Class ${cls} Fees</h3><table class='w-full text-xs'>`; subjects.forEach(s => { const p = (window.feesData && window.feesData[cls] && window.feesData[cls][s.name]) ? window.feesData[cls][s.name] : '0'; table += `<tr><td class='p-2 border uppercase font-bold text-gray-400'>${s.name}</td><td class='p-2 border font-bold text-orange-600'>₹${p}</td></tr>`; }); table += `</table><button onclick='this.parentElement.parentElement.remove()' class='btn-3d mt-4 py-2 text-xs shadow-md'>CLOSE</button></div>`; const div = document.createElement('div'); div.className = 'fixed inset-0 bg-black/70 z-[300] flex items-center justify-center p-4'; div.innerHTML = table; document.body.appendChild(div); }
+    function manageContent() { const ph = document.getElementById('c-ph').value, sub = document.getElementById('c-sub').value, area = document.getElementById('manage-area'); db.ref(`content/${ph}/${sub}`).once('value', s => { area.innerHTML = ""; const d = s.val(); if(!d) return; for(let ty in d) for(let k in d[ty]) area.innerHTML += `<div class="flex justify-between p-2 bg-gray-100 mb-1 text-[9px] rounded font-bold uppercase shadow-sm"><span>${d[ty][k].title}</span><button onclick="db.ref('content/${ph}/${sub}/${ty}/${k}').remove().then(()=>manageContent())" class="text-red-600 font-bold uppercase">Del</button></div>`; }); }
+    function updateFeesInDB() {
+        const cls = document.getElementById('fee-cls').value;
+        const sub = document.getElementById('fee-sub').value;
+        const amt = document.getElementById('fee-amount').value;
+        if(!cls || !sub || !amt) { return showToast("শ্ৰেণী, বিষয় আৰু মাচুল ভৰোৱাটো জৰুৰী!"); }
+        db.ref(`admin/fees/${cls}/${sub}`).set(amt).then(() => {
+            showToast(`✅ Class ${cls} - ${sub} ৰ মাচুল ₹${amt} লৈ আপডেট কৰা হ'ল।`);
+            document.getElementById('fee-amount').value = "";
+        }).catch(e => showToast("Error: " + e.message));
     }
 
-    function showFeesTable() { 
-        const cls = document.getElementById('s-class').value; 
-        if(!cls) return showToast("⚠️ শ্ৰেণী বাচনি কৰা!"); 
-        let table = `<div class='bg-white p-6 rounded-3xl w-80 shadow-2xl'><h3 class='font-black mb-4 border-b pb-2 text-sm uppercase text-center text-indigo-900'>Class ${cls} Fees</h3><table class='w-full text-xs'>`; 
-        subjects.forEach(s => { 
-            const p = (window.feesData && window.feesData[cls] && window.feesData[cls][s.name]) ? window.feesData[cls][s.name] : '0'; 
-            table += `<tr><td class='p-2 border uppercase font-bold text-gray-400'>${s.name}</td><td class='p-2 border font-bold text-orange-600'>₹${p}</td></tr>`; 
-        }); 
-        table += `</table><button onclick='this.parentElement.parentElement.remove()' class='btn-3d mt-4 py-2 text-xs shadow-md'>CLOSE</button></div>`; 
-        const div = document.createElement('div'); div.className = 'fixed inset-0 bg-black/70 z-[300] flex items-center justify-center p-4'; div.innerHTML = table; document.body.appendChild(div); 
-    }
-
-    function manageContent() { 
-        const ph = document.getElementById('c-ph').value, sub = document.getElementById('c-sub').value, area = document.getElementById('manage-area'); 
-        db.ref(`content/${ph}/${sub}`).once('value', s => { 
-            area.innerHTML = ""; const d = s.val(); if(!d) return; 
-            for(let ty in d) for(let k in d[ty]) area.innerHTML += `<div class="flex justify-between p-2 bg-gray-100 mb-1 text-[9px] rounded font-bold uppercase shadow-sm"><span>${d[ty][k].title}</span><button onclick="db.ref('content/${ph}/${sub}/${ty}/${k}').remove().then(()=>manageContent())" class="text-red-600 font-bold uppercase">Del</button></div>`; 
-        }); 
+    /* --- showToast Function Added --- */
+    function showToast(message) {
+        var x = document.getElementById("custom-toast");
+        x.innerHTML = message;
+        x.className = "show";
+        setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
     }
 </script>
 </body>
