@@ -38,7 +38,7 @@
         <input id="s-pass" placeholder="পাছৱৰ্ড বনোৱা *" class="input-box">
         <select id="s-class" class="input-box font-bold"><option value="">শ্ৰেণী বাচনি কৰা *</option><script>for(let i=3; i<=12; i++) document.write(`<option value="${i}">Class ${i}</option>`);</script></select>
         <button onclick="showFeesTable()" class="w-full bg-orange-500 text-white py-2 rounded-xl font-bold text-[10px] mb-4 uppercase">মাচুল চাওক</button>
-        <select id="s-school" class="input-box font-bold"><option value="">বিদ্যালয় বাচনি কৰা *</option><option value="শংকৰদেৱ শিশু নিকেতন">শংকৰডেৱ শিশু নিকেতন</option><option value="চৰকাৰী বিদ্যালয়">চৰকাৰী বিদ্যালয়</option><option value="জাতীয় বিদ্যালয়">জাতীয় বিদ্যালয়</option></select>
+        <select id="s-school" class="input-box font-bold"><option value="">বিদ্যালয় বাচনি কৰা *</option><option value="শংকৰদেৱ শিশু নিকেতন">শংকৰদেৱ শিশু নিকেতন</option><option value="চৰকাৰী বিদ্যালয়">চৰকাৰী বিদ্যালয়</option><option value="জাতীয় বিদ্যালয়">জাতীয় বিদ্যালয়</option></select>
         <div class="grid grid-cols-2 gap-2">
             <input id="s-vill" placeholder="গাঁও *" class="input-box text-xs"><input id="s-po" placeholder="ডাকঘৰ *" class="input-box text-xs">
             <input id="s-dist" placeholder="জিলা *" class="input-box text-xs"><input id="s-state" placeholder="ৰাজ্য *" class="input-box text-xs" value="অসম">
@@ -393,5 +393,6 @@ function updateFeesInDB() {
 </body>
 
 </html>
+
 
 
