@@ -110,7 +110,25 @@
         <span class="font-black text-xs uppercase tracking-widest">Admin Dashboard</span>
         <button onclick="logout()" class="bg-white text-indigo-900 px-3 py-1 rounded-lg text-[10px] font-black uppercase">Exit</button>
     </div>
-
+<div class="glass-card p-5 mb-8 border-l-8 border-orange-500 shadow-lg">
+    <h3 class="text-[10px] font-black uppercase mb-4 text-orange-700 tracking-widest italic">Update Student Fees</h3>
+    <div class="grid grid-cols-2 gap-3 mb-4">
+        <select id="fee-cls" class="input-box text-xs font-bold">
+            <option value="">শ্ৰেণী বাচনি কৰা</option>
+            <script>for(let i=3; i<=12; i++) document.write(`<option value="${i}">Class ${i}</option>`);</script>
+        </select>
+        <select id="fee-sub" class="input-box text-xs font-bold">
+            <option value="">বিষয় বাচনি কৰা</option>
+            <script>
+                // তোমাৰ সকলো বিষয় ইয়াত দিয়া হৈছে
+                const subs = ["অসমীয়া", "ইংৰাজী", "গণিত", "বিজ্ঞান", "সমাজ বিজ্ঞান", "হিন্দী", "সংস্কৃত", "ঐচ্ছিক গণিত", "নীতিশিক্ষা", "সকলো বিষয়"];
+                subs.forEach(s => document.write(`<option value="${s}">${s}</option>`));
+            </script>
+        </select>
+    </div>
+    <input id="fee-amount" placeholder="মাচুলৰ পৰিমাণ (যেনে: 500)" class="input-box text-xs text-center font-bold">
+    <button onclick="updateFeesInDB()" class="bg-orange-600 text-white w-full py-3 rounded-xl text-xs font-black uppercase shadow-md">Update Fees Now</button>
+</div> 
     <div class="glass-card p-5 mb-8 border-l-8 border-yellow-500 shadow-lg">
         <h3 class="text-[10px] font-black uppercase mb-4 text-yellow-700 tracking-widest">App Branding (Logo & QR)</h3>
         <div class="grid grid-cols-2 gap-4 text-[9px] font-bold text-gray-500 mb-4">
@@ -359,4 +377,5 @@
     function manageContent() { const ph = document.getElementById('c-ph').value, sub = document.getElementById('c-sub').value, area = document.getElementById('manage-area'); db.ref(`content/${ph}/${sub}`).once('value', s => { area.innerHTML = ""; const d = s.val(); if(!d) return; for(let ty in d) for(let k in d[ty]) area.innerHTML += `<div class="flex justify-between p-2 bg-gray-100 mb-1 text-[9px] rounded font-bold uppercase shadow-sm"><span>${d[ty][k].title}</span><button onclick="db.ref('content/${ph}/${sub}/${ty}/${k}').remove().then(()=>manageContent())" class="text-red-600 font-bold uppercase">Del</button></div>`; }); }
 </script>
 </body>
+
 </html>
