@@ -18,10 +18,36 @@
         header { background: #2563eb; border-radius: 0 0 30px 30px; color: white; padding: 20px; }
         .subject-card { background: white; border-radius: 20px; padding: 15px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 2px solid white; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 110px; cursor: pointer; }
         .dash-icon { background: white; padding: 20px; border-radius: 20px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+    /* Toast Message Design */
+#custom-toast {
+    visibility: hidden;
+    min-width: 250px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 10px;
+    padding: 16px;
+    position: fixed;
+    z-index: 10000;
+    left: 50%;
+    bottom: 30px;
+    transform: translateX(-50%);
+    font-size: 14px;
+    font-weight: bold;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+#custom-toast.show {
+    visibility: visible;
+    animation: fadein 0.5s, fadeout 0.5s 2.5s;
+}
+
+@keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+@keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
     </style>
 </head>
 <body>
-
+<div id="custom-toast"></div>
 <header class="shadow-xl flex items-center justify-between sticky top-0 z-50">
     <div class="flex items-center gap-4">
         <img id="main-logo" src="https://via.placeholder.com/100" class="w-10 h-10 rounded-full border-2 border-white bg-white object-cover">
@@ -79,7 +105,7 @@
             <div onclick="showIDCard()" class="dash-icon">🆔<div class="text-[8px] font-bold mt-1 uppercase">ID Card</div></div>
             <div onclick="showInbox()" class="dash-icon relative">📩<div class="text-[8px] font-bold mt-1 uppercase">Inbox</div><div id="msg-count" class="absolute -top-1 -right-1 bg-red-600 text-white text-[8px] rounded-full w-4 h-4 flex items-center justify-center font-bold">0</div></div>
             <div onclick="askDoubt()" class="dash-icon">❓<div class="text-[8px] font-bold mt-1 uppercase">Doubt</div></div>
-            <div onclick="alert('সোনকালে আহিব!')" class="dash-icon">📝<div class="text-[8px] font-bold mt-1 uppercase">Quiz</div></div>
+            <div onclick="showToast('সোনকালে আহিব!')" class="dash-icon">📝<div class="text-[8px] font-bold mt-1 uppercase">Quiz</div></div>
         </div>
         <div class="bg-white p-4 rounded-2xl border-l-8 border-red-600 mb-6 shadow-md text-xs font-bold text-indigo-900"><p id="notif-text">Loading Notification...</p></div>
         <div id="subject-grid" class="grid grid-cols-3 gap-3"></div>
@@ -181,7 +207,7 @@
     const db = firebase.database();
     
     let currentUPI = "", activeAdminPIN = "KS1234", clicks = 0;
-    const subjects = [ { name: "অসমীয়া", icon: "📚" }, { name: "ইংৰাজী", icon: "🅰️" }, { name: "গণিত", icon: "🧮" }, { name: "বিজ্ঞান", icon: "🔬" }, { name: "সমাজ বিজ্ঞান", icon: "🌍" }, { name: "হিন্দি", icon: "🇮🇳" }, { name: "সংস্কৃত", icon: "📜" }, { name: "ঐচ্ছিক গণিত", icon: "📐" }, { name: "নীতিশিক্ষা", icon: "💡" }, { name: "সকলো বিষয়", icon: "🎒" } ];
+    const subjects = [ { name: "অসমীয়া", icon: "📚" }, { name: "ইংৰাজী", icon: "🅰️" }, { name: "গণিত", icon: "🧮" }, { name: "বিজ্ঞান", icon: "🔬" }, { name: "সমাজ বিজ্ঞান", icon: "🌍" }, { name: "হিন্দী", icon: "🕉️" }, { name: "সংস্কৃত", icon: "✡️" }, { name: "ঐচ্ছিক গণিত", icon: "📐" }, { name: "নীতিশিক্ষা", icon: "🪷" }, { name: "সকলো বিষয়", icon: "🎒" } ];
 
     window.onload = function() {
         const user = localStorage.getItem('ks_student_id');
@@ -256,8 +282,8 @@
         const q = prompt("তোমাৰ প্ৰশ্নটো ইয়াত লিখা:");
         if(q && q.trim() !== "") {
             db.ref(`doubts`).push({ ph: ph, question: q, time: new Date().toLocaleString() }).then(() => {
-                alert("প্ৰশ্নটো এডমিনলৈ পঠোৱা হৈছে!");
-            }).catch(e => alert("Error: " + e.message));
+                showToast("প্ৰশ্নটো এডমিনলৈ পঠোৱা হৈছে!");
+            }).catch(e => showToast("Error: " + e.message));
         }
     }
 
@@ -288,7 +314,7 @@
 
     function uploadContent(type) {
         const ph = document.getElementById('c-ph').value, sub = document.getElementById('c-sub').value, t = document.getElementById('c-title').value;
-        if(!ph || !sub || !t) return alert("Fill student ID and Title!");
+        if(!ph || !sub || !t) return showToast("⚠️ ছাত্ৰৰ আইডি আৰু শিৰোনাম ভৰাওক!");
         if(type==='video') { const link = document.getElementById('c-link').value; db.ref(`content/${ph}/${sub}/videos`).push({title:t, link:link}).then(()=>alert("Success!")); }
         else { const file = document.getElementById('c-pdf-file').files[0]; if(!file) return alert("Select PDF!"); const reader = new FileReader(); reader.onload = e => db.ref(`content/${ph}/${sub}/pdfs`).push({title:t, fileData: e.target.result}).then(()=>alert("PDF Saved!")); reader.readAsDataURL(file); }
     }
@@ -336,7 +362,7 @@
             if(status === true) {
                 const msg = `প্ৰিয় ${name}, KS Gyan Mondir লৈ তোমাক স্বাগতম। তুমি আমাৰ লগত জড়িত হোৱাটো আমাৰ বাবে আনন্দৰ কথা। তোমাৰ লক্ষ্য পূৰণৰ বাবে আমি সদায় তোমাক সহায় কৰিম। তোমাৰ উজ্জ্বল ভৱিষ্যতৰ বাবে শুভেচ্ছা থাকিল।`;
                 db.ref(`messages/${ph}`).push({ text: msg, time: new Date().toLocaleString() });
-                alert("Approved & Message Sent!");
+                showToast("অনুমোদন কৰা হ'ল আৰু বাৰ্তা প্ৰেৰণ কৰা হ'ল!");
             }
         });
     }
@@ -348,9 +374,9 @@
     // --- Shared Core ---
     function register() {
         const ph = document.getElementById('s-phone').value, n = document.getElementById('s-name').value, ps = document.getElementById('s-pass').value, utr = document.getElementById('s-utr').value;
-        if(!ph || !n || !ps || !utr) return alert("Fill all fields!");
+        if(!ph || !n || !ps || !utr) return showToast("সকলো তথ্য পূৰণ কৰা!");
         const photo = document.getElementById('s-photo').files[0], pay = document.getElementById('s-pay-shot').files[0];
-        if(!photo || !pay) return alert("Upload photos!");
+        if(!photo || !pay) return showToast("ফটো আপলোড কৰা!");
         const r1 = new FileReader(), r2 = new FileReader();
         r1.onload = e1 => { r2.onload = e2 => {
             db.ref('students/' + ph).set({ name: n, ph, ps, utr, cls: document.getElementById('s-class').value, school: document.getElementById('s-school').value, vill: document.getElementById('s-vill').value, po: document.getElementById('s-po').value, dist: document.getElementById('s-dist').value, state: document.getElementById('s-state').value, pin: document.getElementById('s-pin').value, studentPhoto: e1.target.result, payShot: e2.target.result, active: false }).then(() => { alert("পঞ্জীয়ন সফল! অনুমোদনৰ বাবে অপেক্ষা কৰক।"); showScreen('login-screen'); });
@@ -359,7 +385,8 @@
     function doLogin() { const ph = document.getElementById('l-phone').value, ps = document.getElementById('l-pass').value; db.ref('students/' + ph).once('value', s => { const u = s.val(); if(u && u.ps === ps) { localStorage.setItem('ks_student_id', ph); loginAuto(ph); } else alert("Wrong ID or Password!"); }); }
     function logout() { localStorage.removeItem('ks_student_id'); location.reload(); }
     function triggerAdmin() { clicks++; if(clicks>=5) { showScreen('admin-login-screen'); clicks=0; } setTimeout(()=>clicks=0, 2000); }
-    function verifyAdminPIN() { if(document.getElementById('adm-pass-login').value === activeAdminPIN) showScreen('admin-panel'); else alert("Wrong PIN!"); }
+    function verifyAdminPIN() { if(document.getElementById('adm-pass-login').value === activeAdminPIN) showScreen('admin-panel'); else showToast("ইয়াক তুমি অসমীয়াত অতি সহজকৈ এনেদৰে লিখিব পাৰা:
+"ভুল পিন (PIN) দিছে!"); }
     function loadInboxCount(ph) { db.ref(`messages/${ph}`).on('value', s => document.getElementById('msg-count').innerText = s.exists() ? Object.keys(s.val()).length : 0); }
     function showInbox() {
         const ph = localStorage.getItem('ks_student_id');
@@ -373,7 +400,7 @@
     }
     function deleteMessage(ph, key) { if(confirm("Delete message?")) { db.ref(`messages/${ph}/${key}`).remove().then(() => showInbox()); } }
     function showIDCard() { const ph = localStorage.getItem('ks_student_id'); db.ref('students/' + ph).once('value', s => { const u = s.val(); let html = `<div class="fixed inset-0 bg-black/80 z-[200] flex items-center justify-center p-4"><div class="bg-white w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl text-center p-6"><img src="${u.studentPhoto}" class="w-24 h-24 mx-auto rounded-full border-4 border-indigo-100 object-cover mb-4"><h3 class="text-xl font-bold text-indigo-900 tracking-tighter">${u.name}</h3><p class="text-indigo-600 font-bold uppercase text-[10px]">Class ${u.cls}</p><button onclick="this.closest('.fixed').remove()" class="w-full bg-gray-100 p-2 font-bold text-gray-500 uppercase text-[9px] mt-6 tracking-widest">Close</button></div></div>`; const div = document.createElement('div'); div.innerHTML = html; document.body.appendChild(div.firstElementChild); }); }
-    function showFeesTable() { const cls = document.getElementById('s-class').value; if(!cls) return alert("Select Class!"); let table = `<div class='bg-white p-6 rounded-3xl w-80 shadow-2xl'><h3 class='font-black mb-4 border-b pb-2 text-sm uppercase text-center text-indigo-900'>Class ${cls} Fees</h3><table class='w-full text-xs'>`; subjects.forEach(s => { const p = (window.feesData && window.feesData[cls] && window.feesData[cls][s.name]) ? window.feesData[cls][s.name] : '0'; table += `<tr><td class='p-2 border uppercase font-bold text-gray-400'>${s.name}</td><td class='p-2 border font-bold text-orange-600'>₹${p}</td></tr>`; }); table += `</table><button onclick='this.parentElement.parentElement.remove()' class='btn-3d mt-4 py-2 text-xs shadow-md'>CLOSE</button></div>`; const div = document.createElement('div'); div.className = 'fixed inset-0 bg-black/70 z-[300] flex items-center justify-center p-4'; div.innerHTML = table; document.body.appendChild(div); }
+    function showFeesTable() { const cls = document.getElementById('s-class').value; if(!cls) return showToast("শ্ৰেণী বাচনি কৰা!"); let table = `<div class='bg-white p-6 rounded-3xl w-80 shadow-2xl'><h3 class='font-black mb-4 border-b pb-2 text-sm uppercase text-center text-indigo-900'>Class ${cls} Fees</h3><table class='w-full text-xs'>`; subjects.forEach(s => { const p = (window.feesData && window.feesData[cls] && window.feesData[cls][s.name]) ? window.feesData[cls][s.name] : '0'; table += `<tr><td class='p-2 border uppercase font-bold text-gray-400'>${s.name}</td><td class='p-2 border font-bold text-orange-600'>₹${p}</td></tr>`; }); table += `</table><button onclick='this.parentElement.parentElement.remove()' class='btn-3d mt-4 py-2 text-xs shadow-md'>CLOSE</button></div>`; const div = document.createElement('div'); div.className = 'fixed inset-0 bg-black/70 z-[300] flex items-center justify-center p-4'; div.innerHTML = table; document.body.appendChild(div); }
     function manageContent() { const ph = document.getElementById('c-ph').value, sub = document.getElementById('c-sub').value, area = document.getElementById('manage-area'); db.ref(`content/${ph}/${sub}`).once('value', s => { area.innerHTML = ""; const d = s.val(); if(!d) return; for(let ty in d) for(let k in d[ty]) area.innerHTML += `<div class="flex justify-between p-2 bg-gray-100 mb-1 text-[9px] rounded font-bold uppercase shadow-sm"><span>${d[ty][k].title}</span><button onclick="db.ref('content/${ph}/${sub}/${ty}/${k}').remove().then(()=>manageContent())" class="text-red-600 font-bold uppercase">Del</button></div>`; }); }
 function updateFeesInDB() {
     const cls = document.getElementById('fee-cls').value;
@@ -381,18 +408,25 @@ function updateFeesInDB() {
     const amt = document.getElementById('fee-amount').value;
 
     if(!cls || !sub || !amt) {
-        return alert("Class, Subject আৰু Amount ভৰোৱাটো জৰুৰী!");
+        return showToast("শ্ৰেণী, বিষয় আৰু মাচুল ভৰোৱাটো জৰুৰী!");
     }
 
     db.ref(`admin/fees/${cls}/${sub}`).set(amt).then(() => {
-        alert(`Class ${cls} - ${sub} ৰ মাচুল ₹${amt} লৈ আপডেট কৰা হ'ল।`);
+        showToast(`শ্ৰেণী ${cls} - ${বিষয়} ৰ মাচুল ₹${amt} লৈ আপডেট কৰা হ'ল।`);
         document.getElementById('fee-amount').value = "";
-    }).catch(e => alert("Update Error: " + e.message));
+    }).catch(e => showToast("Update Error: " + e.message));
+}
+function showToast(message) {
+    var x = document.getElementById("custom-toast");
+    x.innerHTML = message;
+    x.className = "show";
+    setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
 }
 </script>
 </body>
 
 </html>
+
 
 
 
