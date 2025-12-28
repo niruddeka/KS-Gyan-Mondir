@@ -98,7 +98,7 @@
 <main id="home-screen" class="container mx-auto p-4 hidden">
     <div id="lock-msg" class="hidden text-center glass-card p-10 mt-10 border-t-8 border-red-600 shadow-2xl animate-pulse">
         <h2 class="text-red-600 font-black text-xl mb-2">Account Locked</h2>
-        <p class="text-gray-600 font-bold text-sm">অনুগ্ৰহ কৰি অনুমোদনৰ বাবে অপেক্ষা কৰক।</p>
+        <p class="text-gray-600 font-bold text-sm">অনুগ্ৰহ কৰি অনুমোদনৰ বাবে অপেক্ষা কৰা।</p>
     </div>
     <div id="main-content" class="hidden">
         <div class="grid grid-cols-4 gap-3 mb-6">
@@ -412,9 +412,9 @@ function updateFeesInDB() {
     }
 
     db.ref(`admin/fees/${cls}/${sub}`).set(amt).then(() => {
-        showToast(`শ্ৰেণী ${cls} - ${বিষয়} ৰ মাচুল ₹${amt} লৈ আপডেট কৰা হ'ল।`);
-        document.getElementById('fee-amount').value = "";
-    }).catch(e => showToast("Update Error: " + e.message));
+    showToast(`✅ Class ${cls} - ${sub} ৰ মাচুল ₹${amt} লৈ আপডেট কৰা হ'ল।`);
+    document.getElementById('fee-amount').value = "";
+}).catch(e => showToast("Error: " + e.message));
 }
 function showToast(message) {
     var x = document.getElementById("custom-toast");
@@ -426,6 +426,7 @@ function showToast(message) {
 </body>
 
 </html>
+
 
 
 
