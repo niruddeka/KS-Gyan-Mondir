@@ -156,8 +156,8 @@
             <select id="fee-sub" class="input-box text-xs font-bold">
                 <option value="">বিষয় বাচনি কৰা</option>
                 <script>
-                    const subs_list = ["অসমীয়া", "ইংৰাজী", "গণিত", "বিজ্ঞান", "সমাজ বিজ্ঞান", "হিন্দী", "সংস্কৃত", "ঐচ্ছিক গণিত", "নীতিশিক্ষা", "সকলো বিষয়"];
-                    subs_list.forEach(s => document.write(`<option value="${s}">${s}</option>`));
+                    const sub_opts = ["অসমীয়া", "ইংৰাজী", "গণিত", "বিজ্ঞান", "সমাজ বিজ্ঞান", "হিন্দী", "সংস্কৃত", "ঐচ্ছিক গণিত", "নীতিশিক্ষা", "সকলো বিষয়"];
+                    sub_opts.forEach(s => document.write(`<option value="${s}">${s}</option>`));
                 </script>
             </select>
         </div>
@@ -166,12 +166,12 @@
     </div> 
 
     <div class="glass-card p-5 mb-8 border-l-8 border-yellow-500 shadow-lg">
-        <h3 class="text-[10px] font-black uppercase mb-4 text-yellow-700 tracking-widest">App Branding</h3>
+        <h3 class="text-[10px] font-black uppercase mb-4 text-yellow-700 tracking-widest">App Branding (Logo & QR)</h3>
         <div class="grid grid-cols-2 gap-4 text-[9px] font-bold text-gray-500 mb-4">
             <div class="bg-gray-50 p-2 rounded-lg">App Logo:<br><input type="file" id="adm-logo-file" class="mt-1 w-full"></div>
             <div class="bg-gray-50 p-2 rounded-lg">Payment QR:<br><input type="file" id="adm-qr-file" class="mt-1 w-full"></div>
         </div>
-        <button onclick="saveAdminSettings()" class="bg-blue-600 text-white w-full py-3 rounded-xl text-xs font-black uppercase shadow-md mb-6">Update Settings</button>
+        <button onclick="saveAdminSettings()" class="bg-blue-600 text-white w-full py-3 rounded-xl text-xs font-black uppercase shadow-md mb-6">Update Branding & Settings</button>
         <input id="adm-upi" placeholder="Update UPI ID" class="input-box text-xs">
         <input id="adm-wa" placeholder="WhatsApp Number" class="input-box text-xs">
         <input id="adm-notif" placeholder="Global Notice Text" class="input-box text-xs">
@@ -193,7 +193,10 @@
         <div id="manage-area" class="mt-4"></div>
     </div>
 
+    <h3 class="text-[10px] font-black uppercase mb-4 text-gray-500 tracking-[3px] mt-10">ছাত্ৰৰ প্ৰশ্ন আৰু ৰিপ্লাই (Doubts)</h3>
     <div id="admin-doubts-area" class="space-y-4 mb-10"></div>
+
+    <h3 class="text-[10px] font-black uppercase mb-4 text-gray-500 tracking-[3px] mt-10 text-center">Student Management (Approvals)</h3>
     <div id="admin-student-list" class="space-y-6"></div>
 </main>
 
@@ -239,8 +242,7 @@
 
     function showToast(message) {
         var x = document.getElementById("custom-toast");
-        x.innerHTML = message;
-        x.className = "show";
+        x.innerHTML = message; x.className = "show";
         setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
     }
 
@@ -254,8 +256,7 @@
             } else { 
                 document.getElementById('lock-msg').classList.add('hidden'); 
                 document.getElementById('main-content').classList.remove('hidden'); 
-                renderGrid(); 
-                loadInboxCount(ph); 
+                renderGrid(); loadInboxCount(ph); 
             } 
         }); 
     }
@@ -288,7 +289,7 @@
         const ph = localStorage.getItem('ks_student_id');
         const q = prompt("তোমাৰ প্ৰশ্নটো ইয়াত লিখা:");
         if(q && q.trim() !== "") {
-            db.ref(`doubts`).push({ ph: ph, question: q, time: new Date().toLocaleString() }).then(() => showToast("প্ৰশ্নটো পঠোৱা হৈছে!"));
+            db.ref(`doubts`).push({ ph: ph, question: q, time: new Date().toLocaleString() }).then(() => showToast("প্ৰশ্নটো এডমিনলৈ পঠোৱা হৈছে!"));
         }
     }
 
@@ -303,23 +304,33 @@
     function stopVideo() { document.getElementById('course-video-wrapper').innerHTML = "ভিডিঅ' বাচনি কৰা..."; document.getElementById('pdf-download-btn').classList.add('hidden'); }
     function stopVideoAndBack() { stopVideo(); showScreen('home-screen'); }
 
+    // Admin Settings Branding
     function saveAdminSettings() { 
         const upi = document.getElementById('adm-upi').value, wa = document.getElementById('adm-wa').value, notif = document.getElementById('adm-notif').value;
         const logo = document.getElementById('adm-logo-file').files[0], qr = document.getElementById('adm-qr-file').files[0];
         const updateDB = (l=null, q=null) => {
             let obj = { upi, wa, notif }; if(l) obj.appLogo = l; if(q) obj.qr = q;
-            db.ref('admin/config').update(obj).then(() => showToast("Saved!"));
+            db.ref('admin/config').update(obj).then(() => showToast("✅ চেভ কৰা হ'ল!"));
         };
-        if(logo) { let r=new FileReader(); r.onload=e=>updateDB(e.target.result, null); r.readAsDataURL(logo); }
-        else if(qr) { let r=new FileReader(); r.onload=e=>updateDB(null, e.target.result); r.readAsDataURL(qr); }
-        else updateDB();
+        if(logo || qr) {
+            if(logo) { let r=new FileReader(); r.onload=e=>updateDB(e.target.result, null); r.readAsDataURL(logo); }
+            if(qr) { let r=new FileReader(); r.onload=e=>updateDB(null, e.target.result); r.readAsDataURL(qr); }
+        } else updateDB();
     }
 
     function uploadContent(type) {
         const ph = document.getElementById('c-ph').value, sub = document.getElementById('c-sub').value, t = document.getElementById('c-title').value;
-        if(!ph || !sub || !t) return showToast("⚠️ আইডি আৰু শিৰোনাম ভৰাওক!");
-        if(type==='video') { const link = document.getElementById('c-link').value; db.ref(`content/${ph}/${sub}/videos`).push({title:t, link:link}).then(()=>showToast("Success!")); }
-        else { const file = document.getElementById('c-pdf-file').files[0]; if(!file) return showToast("Select PDF!"); const reader = new FileReader(); reader.onload = e => db.ref(`content/${ph}/${sub}/pdfs`).push({title:t, fileData: e.target.result}).then(()=>showToast("PDF Saved!")); reader.readAsDataURL(file); }
+        if(!ph || !sub || !t) return showToast("⚠️ ছাত্ৰৰ আইডি আৰু শিৰোনাম ভৰাওক!");
+        if(type==='video') { 
+            const link = document.getElementById('c-link').value; 
+            db.ref(`content/${ph}/${sub}/videos`).push({title:t, link:link}).then(()=>showToast("✅ ভিডিঅ' আপলোড হ'ল!")); 
+        } else { 
+            const file = document.getElementById('c-pdf-file').files[0]; 
+            if(!file) return showToast("Select PDF!"); 
+            const reader = new FileReader(); 
+            reader.onload = e => db.ref(`content/${ph}/${sub}/pdfs`).push({title:t, fileData: e.target.result}).then(()=>showToast("✅ PDF চেভ হ'ল!")); 
+            reader.readAsDataURL(file); 
+        }
     }
 
     function fetchStudentsAdmin() {
@@ -329,18 +340,21 @@
                 const u = d.val();
                 area.innerHTML += `<div class="glass-card p-5 mb-4 border-l-8 ${u.active?'border-green-600':'border-red-600'}">
                     <div class="flex gap-4">
-                        <img src="${u.studentPhoto}" class="w-16 h-16 rounded-xl object-cover">
+                        <img src="${u.studentPhoto}" class="w-16 h-16 rounded-xl object-cover border">
                         <div class="text-[9px] flex-1">
                             <h4 class="font-black text-indigo-900 text-sm">${u.name}</h4>
-                            <p>📞 ID: ${u.ph} | 🔐 Pass: ${u.ps}</p>
-                            <p>🏫 ${u.school} | Cls: ${u.cls}</p>
-                            <p class="text-blue-600 font-bold">🆔 UTR: ${u.utr}</p>
+                            <p>📞 Phone/ID: ${u.ph} | 🔐 Pass: <b class="text-red-500">${u.ps}</b></p>
+                            <p>🏫 School: ${u.school} | Cls: ${u.cls}</p>
+                            <p>📍 Addr: ${u.vill}, ${u.po}, ${u.dist}, <b class="text-indigo-600">${u.state}</b></p>
+                            <p class="text-blue-600 font-bold mt-1">🆔 UTR: ${u.utr}</p>
                         </div>
                     </div>
                     <div class="flex gap-2 mt-4">
-                        <button onclick="handleApprove('${u.ph}', '${u.name}', ${!u.active})" class="bg-indigo-600 text-white px-3 py-1 rounded text-[8px] flex-1">${u.active?'Lock':'Approve'}</button>
-                        <button onclick="if(confirm('Delete?')) db.ref('students/${u.ph}').remove()" class="bg-red-600 text-white px-3 py-1 rounded text-[8px]">Delete</button>
+                        <img src="${u.payShot}" onclick="window.open(this.src)" class="h-10 w-1/4 rounded border object-cover cursor-pointer">
+                        <button onclick="handleApprove('${u.ph}', '${u.name}', ${!u.active})" class="bg-indigo-600 text-white px-3 py-1 rounded text-[8px] font-bold uppercase flex-1 shadow-md">${u.active?'Lock User':'Approve User'}</button>
+                        <button onclick="if(confirm('Delete student?')) db.ref('students/${u.ph}').remove()" class="bg-red-600 text-white px-3 py-1 rounded text-[8px] font-bold uppercase shadow-md">Delete</button>
                     </div>
+                    <div class="flex gap-2 mt-3"><input id="direct-msg-${u.ph}" placeholder="Personal Message..." class="input-box text-[9px] mb-0 flex-1 py-1"><button onclick="sendDirectMsg('${u.ph}')" class="bg-gray-800 text-white px-3 rounded text-[9px] font-bold uppercase">Send</button></div>
                 </div>`;
             });
         });
@@ -349,28 +363,46 @@
     function fetchAdminDoubts() {
         db.ref('doubts').on('value', s => {
             const area = document.getElementById('admin-doubts-area'); area.innerHTML = "";
-            s.forEach(d => area.innerHTML += `<div class="bg-white p-4 border rounded-2xl mb-4 text-xs shadow-sm"><p class="text-blue-600 font-bold">Student ID: ${d.val().ph}</p><p>${d.val().question}</p></div>`);
+            s.forEach(d => area.innerHTML += `<div class="bg-white p-4 border rounded-2xl mb-4 text-xs shadow-sm border-l-4 border-yellow-500"><p class="text-blue-600 font-bold mb-1 uppercase">Student ID: ${d.val().ph}</p><p class="font-bold text-gray-800 bg-gray-50 p-2 rounded-lg mb-3">${d.val().question}</p><div class="flex gap-2"><input id="reply-${d.key}" placeholder="Type reply..." class="input-box text-[10px] mb-0 flex-1 py-2 shadow-inner"><button onclick="replyDoubt('${d.val().ph}', '${d.key}')" class="bg-green-600 text-white px-4 rounded-xl text-[10px] font-bold shadow-md uppercase">Reply</button><button onclick="db.ref('doubts/${d.key}').remove()" class="bg-red-500 text-white px-3 rounded-xl text-[10px] font-bold shadow-md">X</button></div></div>`);
+        });
+    }
+
+    function replyDoubt(ph, doubtKey) {
+        const rTxt = document.getElementById('reply-' + doubtKey).value; 
+        if(rTxt) db.ref(`messages/${ph}`).push({ text: "উত্তৰ: " + rTxt, time: new Date().toLocaleString() }).then(() => { 
+            document.getElementById('reply-' + doubtKey).value = ""; db.ref(`doubts/${doubtKey}`).remove(); showToast("✅ ৰিপ্লাই পঠোৱা হ'ল!"); 
         });
     }
 
     function handleApprove(ph, name, status) {
         db.ref('students/' + ph).update({ active: status }).then(() => {
             if(status === true) {
-                const msg = `প্ৰিয় ${name}, KS Gyan Mondir লৈ তোমাক স্বাগতম।`;
+                const msg = `প্ৰিয় ${name}, KS Gyan Mondir লৈ তোমাক স্বাগতম। তোমাৰ উজ্জ্বল ভৱিষ্যতৰ বাবে শুভেচ্ছা থাকিল।`;
                 db.ref(`messages/${ph}`).push({ text: msg, time: new Date().toLocaleString() });
-                showToast("অনুমোদন কৰা হ'ল!");
+                showToast("✅ অনুমোদন জনোৱা হ'ল!");
+            } else {
+                showToast("🔒 একাউণ্ট লক কৰা হ'ল!");
             }
+        });
+    }
+
+    function sendDirectMsg(ph) {
+        const txt = document.getElementById('direct-msg-' + ph).value; 
+        if(txt) db.ref(`messages/${ph}`).push({ text: "ADMIN: " + txt, time: new Date().toLocaleString() }).then(() => { 
+            document.getElementById('direct-msg-' + ph).value = ""; showToast("📩 মেছেজ পঠোৱা হ'ল!"); 
         });
     }
 
     function register() {
         const ph = document.getElementById('s-phone').value, n = document.getElementById('s-name').value, ps = document.getElementById('s-pass').value, utr = document.getElementById('s-utr').value;
-        if(!ph || !n || !ps || !utr) return showToast("সকলো তথ্য পূৰণ কৰা!");
+        if(!ph || !n || !ps || !utr) return showToast("⚠️ সকলো তথ্য পূৰণ কৰা!");
         const photo = document.getElementById('s-photo').files[0], pay = document.getElementById('s-pay-shot').files[0];
-        if(!photo || !pay) return showToast("ফটো আপলোড কৰা!");
+        if(!photo || !pay) return showToast("📸 ফটো আপলোড কৰা!");
         const r1 = new FileReader(), r2 = new FileReader();
         r1.onload = e1 => { r2.onload = e2 => {
-            db.ref('students/' + ph).set({ name: n, ph, ps, utr, cls: document.getElementById('s-class').value, school: document.getElementById('s-school').value, vill: document.getElementById('s-vill').value, po: document.getElementById('s-po').value, dist: document.getElementById('s-dist').value, state: document.getElementById('s-state').value, pin: document.getElementById('s-pin').value, studentPhoto: e1.target.result, payShot: e2.target.result, active: false }).then(() => { showToast("পঞ্জীয়ন সফল!"); showScreen('login-screen'); });
+            db.ref('students/' + ph).set({ name: n, ph, ps, utr, cls: document.getElementById('s-class').value, school: document.getElementById('s-school').value, vill: document.getElementById('s-vill').value, po: document.getElementById('s-po').value, dist: document.getElementById('s-dist').value, state: document.getElementById('s-state').value, pin: document.getElementById('s-pin').value, studentPhoto: e1.target.result, payShot: e2.target.result, active: false }).then(() => { 
+                showToast("✅ পঞ্জীয়ন সফল! অনুমোদনৰ বাবে অপেক্ষা কৰক।"); showScreen('login-screen'); 
+            });
         }; r2.readAsDataURL(pay); }; r1.readAsDataURL(photo);
     }
 
@@ -378,37 +410,70 @@
         const ph = document.getElementById('l-phone').value, ps = document.getElementById('l-pass').value; 
         db.ref('students/' + ph).once('value', s => { 
             const u = s.val(); if(u && u.ps === ps) { localStorage.setItem('ks_student_id', ph); loginAuto(ph); } 
-            else showToast("ভুল আইডি বা পাছৱৰ্ড!"); 
+            else showToast("❌ ভুল আইডি বা পাছৱৰ্ড!"); 
         }); 
     }
 
     function logout() { localStorage.removeItem('ks_student_id'); location.reload(); }
     function triggerAdmin() { clicks++; if(clicks>=5) { showScreen('admin-login-screen'); clicks=0; } setTimeout(()=>clicks=0, 2000); }
-    function verifyAdminPIN() { if(document.getElementById('adm-pass-login').value === activeAdminPIN) showScreen('admin-panel'); else showToast("❌ ভুল পিন দিছে!"); }
-    function loadInboxCount(ph) { db.ref(`messages/${ph}`).on('value', s => document.getElementById('msg-count').innerText = s.exists() ? Object.keys(s.val()).length : 0); }
+    
+    function verifyAdminPIN() { 
+        if(document.getElementById('adm-pass-login').value === activeAdminPIN) showScreen('admin-panel'); 
+        else showToast("❌ ভুল পিন দিছে!"); 
+    }
 
     function updateFeesInDB() {
-        const cls = document.getElementById('fee-cls').value;
-        const sub = document.getElementById('fee-sub').value;
-        const amt = document.getElementById('fee-amount').value;
-        if(!cls || !sub || !amt) return showToast("সকলো তথ্য ভৰোৱা!");
+        const cls = document.getElementById('fee-cls').value, sub = document.getElementById('fee-sub').value, amt = document.getElementById('fee-amount').value;
+        if(!cls || !sub || !amt) return showToast("⚠️ সকলো তথ্য ভৰোৱা!");
         db.ref(`admin/fees/${cls}/${sub}`).set(amt).then(() => {
-            showToast(`✅ Class ${cls} - ${sub} ৰ মাচুল ₹${amt} আপডেট হ'ল।`);
+            showToast(`✅ Class ${cls} - ${sub} ৰ মাচুল ₹${amt} লৈ আপডেট হ'ল।`);
             document.getElementById('fee-amount').value = "";
         });
     }
 
-    function showFeesTable() {
-        const cls = document.getElementById('s-class').value;
-        if(!cls) return showToast("শ্ৰেণী বাচনি কৰা!");
-        let table = `<div class='bg-white p-6 rounded-3xl w-80 shadow-2xl'><h3 class='font-black mb-4 text-center'>Class ${cls} Fees</h3><table class='w-full text-xs'>`;
-        subjects.forEach(s => {
-            const p = (window.feesData && window.feesData[cls] && window.feesData[cls][s.name]) ? window.feesData[cls][s.name] : '0';
-            table += `<tr><td class='p-2 border'>${s.name}</td><td class='p-2 border font-bold text-orange-600'>₹${p}</td></tr>`;
+    function loadInboxCount(ph) { db.ref(`messages/${ph}`).on('value', s => document.getElementById('msg-count').innerText = s.exists() ? Object.keys(s.val()).length : 0); }
+
+    function showInbox() {
+        const ph = localStorage.getItem('ks_student_id');
+        db.ref(`messages/${ph}`).once('value', s => {
+            const existing = document.getElementById('inbox-modal'); if(existing) existing.remove();
+            let list = `<div id="inbox-modal" class="fixed inset-0 bg-white z-[200] p-6 flex flex-col"><h2 class="font-black text-xl mb-4 border-b pb-2 uppercase">My Inbox</h2><div class="flex-1 overflow-auto">`;
+            if(!s.exists()) list += "<p class='text-gray-400 font-bold mt-10 text-center'>একো নাই।</p>"; 
+            else s.forEach(m => list += `<div class="bg-indigo-50 p-4 rounded-xl mb-4 border-l-4 border-indigo-600 shadow-sm relative"><p class="text-[9px] text-gray-500 mb-1">${m.val().time || ""}</p><p class="text-sm font-bold text-indigo-900 pr-8">${m.val().text}</p><button onclick="deleteMessage('${ph}', '${m.key}')" class="absolute top-2 right-2 text-red-500 font-bold p-2">✕</button></div>`);
+            list += `</div><button onclick="this.parentElement.remove()" class="btn-3d mt-4 shadow-xl">Close</button></div>`;
+            const d = document.createElement('div'); d.innerHTML = list; document.body.appendChild(d.firstChild);
         });
-        table += `</table><button onclick='this.parentElement.parentElement.remove()' class='btn-3d mt-4 py-2 text-xs'>CLOSE</button></div>`;
-        const div = document.createElement('div'); div.className = 'fixed inset-0 bg-black/70 z-[300] flex items-center justify-center p-4';
-        div.innerHTML = table; document.body.appendChild(div);
+    }
+
+    function deleteMessage(ph, key) { if(confirm("Delete message?")) { db.ref(`messages/${ph}/${key}`).remove().then(() => showInbox()); } }
+
+    function showIDCard() { 
+        const ph = localStorage.getItem('ks_student_id'); 
+        db.ref('students/' + ph).once('value', s => { 
+            const u = s.val(); 
+            let html = `<div class="fixed inset-0 bg-black/80 z-[200] flex items-center justify-center p-4"><div class="bg-white w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl text-center p-6"><img src="${u.studentPhoto}" class="w-24 h-24 mx-auto rounded-full border-4 border-indigo-100 object-cover mb-4"><h3 class="text-xl font-bold text-indigo-900 tracking-tighter">${u.name}</h3><p class="text-indigo-600 font-bold uppercase text-[10px]">Class ${u.cls}</p><button onclick="this.closest('.fixed').remove()" class="w-full bg-gray-100 p-2 font-bold text-gray-500 uppercase text-[9px] mt-6 tracking-widest">Close</button></div></div>`; 
+            const div = document.createElement('div'); div.innerHTML = html; document.body.appendChild(div.firstElementChild); 
+        }); 
+    }
+
+    function showFeesTable() { 
+        const cls = document.getElementById('s-class').value; 
+        if(!cls) return showToast("⚠️ শ্ৰেণী বাচনি কৰা!"); 
+        let table = `<div class='bg-white p-6 rounded-3xl w-80 shadow-2xl'><h3 class='font-black mb-4 border-b pb-2 text-sm uppercase text-center text-indigo-900'>Class ${cls} Fees</h3><table class='w-full text-xs'>`; 
+        subjects.forEach(s => { 
+            const p = (window.feesData && window.feesData[cls] && window.feesData[cls][s.name]) ? window.feesData[cls][s.name] : '0'; 
+            table += `<tr><td class='p-2 border uppercase font-bold text-gray-400'>${s.name}</td><td class='p-2 border font-bold text-orange-600'>₹${p}</td></tr>`; 
+        }); 
+        table += `</table><button onclick='this.parentElement.parentElement.remove()' class='btn-3d mt-4 py-2 text-xs shadow-md'>CLOSE</button></div>`; 
+        const div = document.createElement('div'); div.className = 'fixed inset-0 bg-black/70 z-[300] flex items-center justify-center p-4'; div.innerHTML = table; document.body.appendChild(div); 
+    }
+
+    function manageContent() { 
+        const ph = document.getElementById('c-ph').value, sub = document.getElementById('c-sub').value, area = document.getElementById('manage-area'); 
+        db.ref(`content/${ph}/${sub}`).once('value', s => { 
+            area.innerHTML = ""; const d = s.val(); if(!d) return; 
+            for(let ty in d) for(let k in d[ty]) area.innerHTML += `<div class="flex justify-between p-2 bg-gray-100 mb-1 text-[9px] rounded font-bold uppercase shadow-sm"><span>${d[ty][k].title}</span><button onclick="db.ref('content/${ph}/${sub}/${ty}/${k}').remove().then(()=>manageContent())" class="text-red-600 font-bold uppercase">Del</button></div>`; 
+        }); 
     }
 </script>
 </body>
