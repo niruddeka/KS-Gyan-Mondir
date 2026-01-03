@@ -19,7 +19,6 @@
         .subject-card { background: white; border-radius: 20px; padding: 15px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 2px solid white; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 110px; cursor: pointer; }
         .dash-icon { background: white; padding: 20px; border-radius: 20px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: flex; flex-direction: column; align-items: center; cursor: pointer; }
         
-        /* --- Toast Design Added --- */
         #custom-toast {
             visibility: hidden; min-width: 250px; background-color: #333; color: #fff;
             text-align: center; border-radius: 10px; padding: 16px; position: fixed;
@@ -48,7 +47,7 @@
         <input id="s-pass" placeholder="পাছৱৰ্ড বনোৱা *" class="input-box">
         <select id="s-class" class="input-box font-bold"><option value="">শ্ৰেণী বাচনি কৰা *</option><script>for(let i=3; i<=12; i++) document.write(`<option value="${i}">Class ${i}</option>`);</script></select>
         <button onclick="showFeesTable()" class="w-full bg-orange-500 text-white py-2 rounded-xl font-bold text-[10px] mb-4 uppercase">মাচুল চাওক</button>
-        <select id="s-school" class="input-box font-bold"><option value="">বিদ্যালয় বাচনি কৰা *</option><option value="শংকৰদেৱ শিশু নিকেতন">শংকৰদেৱ শিশু নিকেতন</option><option value="চৰকাৰী বিদ্যালয়">চৰকাৰী বিদ্যালয়</option><option value="জাতীয় বিদ্যালয়">জাতীয় বিদ্যালয়</option><option value="english">ইংৰাজী মাধ্যম(Eng Medium)</option></select>
+        <select id="s-school" class="input-box font-bold"><option value="">বিদ্যালয় বাচনি কৰা *</option><option value="শংকৰদেৱ শিশু নিকেতন">শংকৰদেৱ শিশু নিকেতন</option><option value="চৰকাৰী বিদ্যালয়">চৰকাৰী বিদ্যালয়</option><option value="জাতীয় বিদ্যালয়">জাতীয় বিদ্যালয়</option></select>
         <div class="grid grid-cols-2 gap-2">
             <input id="s-vill" placeholder="গাঁও *" class="input-box text-xs"><input id="s-po" placeholder="ডাকঘৰ *" class="input-box text-xs">
             <input id="s-dist" placeholder="জিলা *" class="input-box text-xs"><input id="s-state" placeholder="ৰাজ্য *" class="input-box text-xs" value="অসম">
@@ -56,13 +55,7 @@
         </div>
         <p class="text-[10px] font-bold text-gray-400 mt-2 uppercase">তোমাৰ ফটো আপলোড কৰা *</p>
         <input type="file" id="s-photo" class="text-[10px] w-full mb-4">
-        <div class="bg-indigo-900 rounded-3xl p-5 text-center text-white shadow-xl mb-4">
-            <p id="upi-txt" class="text-[10px] font-bold mb-2 uppercase">UPI ID: Loading...</p>
-            <img id="qr-img-display" src="" class="w-32 h-32 mx-auto hidden rounded-xl mb-4 border-2 border-white">
-            <input id="s-utr" placeholder="UTR নম্বৰ লিখা *" class="input-box text-black text-center font-bold">
-            <p class="text-[9px] font-bold opacity-70 uppercase">পেমেন্ট স্ক্ৰীনশ্বট দিয়া *</p>
-            <input type="file" id="s-pay-shot" class="text-[10px] w-full bg-white/10 p-1 rounded-lg">
-        </div>
+        
         <button onclick="register()" class="btn-3d w-full shadow-2xl">পঞ্জীয়ন কৰক</button>
         <p onclick="showScreen('login-screen')" class="text-center mt-6 text-indigo-700 font-bold cursor-pointer underline text-sm">Login কৰক</p>
     </div>
@@ -91,6 +84,19 @@
             <div onclick="askDoubt()" class="dash-icon">❓<div class="text-[8px] font-bold mt-1 uppercase">Doubt</div></div>
             <div onclick="showToast('সোনকালে আহিব!')" class="dash-icon">📝<div class="text-[8px] font-bold mt-1 uppercase">Quiz</div></div>
         </div>
+
+        <div class="glass-card p-5 mb-6 border-b-4 border-green-500 bg-green-50/30">
+            <h3 class="text-center font-bold text-indigo-900 text-xs mb-3 uppercase tracking-tighter">মাচুল জমা কৰা (Payment)</h3>
+            <div class="bg-indigo-900 rounded-3xl p-5 text-center text-white shadow-xl">
+                <p id="upi-txt" class="text-[10px] font-bold mb-2 uppercase">UPI ID: Loading...</p>
+                <img id="qr-img-display" src="" class="w-32 h-32 mx-auto hidden rounded-xl mb-4 border-2 border-white">
+                <input id="s-utr" placeholder="UTR নম্বৰ লিখা *" class="input-box text-black text-center font-bold mb-2">
+                <p class="text-[9px] font-bold opacity-70 uppercase mb-2">পেমেন্ট স্ক্ৰীনশ্বট দিয়া *</p>
+                <input type="file" id="s-pay-shot" class="text-[10px] w-full bg-white/10 p-1 rounded-lg mb-4">
+                <button onclick="submitPayment()" class="w-full bg-green-600 py-2 rounded-xl font-bold text-xs uppercase shadow-lg">পেমেন্ট জমা দিয়া</button>
+            </div>
+        </div>
+
         <div class="bg-white p-4 rounded-2xl border-l-8 border-red-600 mb-6 shadow-md text-xs font-bold text-indigo-900"><p id="notif-text">Loading Notification...</p></div>
         <div id="subject-grid" class="grid grid-cols-3 gap-3"></div>
         <a id="wa-link" href="#" target="_blank" class="block mt-8 bg-green-500 text-white p-4 rounded-2xl text-center font-black shadow-xl uppercase text-xs">WhatsApp Help</a>
@@ -215,7 +221,6 @@
         if(id === 'admin-panel') { fetchStudentsAdmin(); fetchAdminDoubts(); }
     }
 
-    // --- Student Logic (FIXED Grid Display) ---
     function loginAuto(ph) { 
         showScreen('home-screen'); 
         db.ref('students/' + ph).on('value', s => { 
@@ -279,7 +284,28 @@
     function stopVideo() { document.getElementById('course-video-wrapper').innerHTML = "ভিডিঅ' বাচনি কৰা..."; document.getElementById('current-video-title').innerText = "Class Title"; document.getElementById('pdf-download-btn').classList.add('hidden'); }
     function stopVideoAndBack() { stopVideo(); showScreen('home-screen'); }
 
-    // --- Admin Functions ---
+    // --- New Payment Submission Function for Dashboard ---
+    function submitPayment() {
+        const ph = localStorage.getItem('ks_student_id');
+        const utr = document.getElementById('s-utr').value;
+        const payShot = document.getElementById('s-pay-shot').files[0];
+
+        if(!utr || !payShot) return showToast("⚠️ UTR নম্বৰ আৰু স্ক্ৰীনশ্বট দিয়াটো জৰুৰী!");
+
+        const reader = new FileReader();
+        reader.onload = e => {
+            db.ref('students/' + ph).update({
+                utr: utr,
+                payShot: e.target.result
+            }).then(() => {
+                showToast("✅ পেমেন্ট তথ্য আপডেট কৰা হ'ল। এডমিনে চেক কৰিব।");
+                document.getElementById('s-utr').value = "";
+                document.getElementById('s-pay-shot').value = "";
+            });
+        };
+        reader.readAsDataURL(payShot);
+    }
+
     function saveAdminSettings() { 
         const upi = document.getElementById('adm-upi').value, wa = document.getElementById('adm-wa').value, notif = document.getElementById('adm-notif').value;
         const logo = document.getElementById('adm-logo-file').files[0], qr = document.getElementById('adm-qr-file').files[0];
@@ -353,38 +379,49 @@
     }
 
     function register() {
-        const ph = document.getElementById('s-phone').value, n = document.getElementById('s-name').value, ps = document.getElementById('s-pass').value, utr = document.getElementById('s-utr').value;
-        if(!ph || !n || !ps || !utr) return showToast("সকলো তথ্য পূৰণ কৰা!");
-        const photo = document.getElementById('s-photo').files[0], pay = document.getElementById('s-pay-shot').files[0];
-        if(!photo || !pay) return showToast("ফটো আপলোড কৰা!");
-        const r1 = new FileReader(), r2 = new FileReader();
-        r1.onload = e1 => { r2.onload = e2 => {
-            db.ref('students/' + ph).set({ name: n, ph, ps, utr, cls: document.getElementById('s-class').value, school: document.getElementById('s-school').value, vill: document.getElementById('s-vill').value, po: document.getElementById('s-po').value, dist: document.getElementById('s-dist').value, state: document.getElementById('s-state').value, pin: document.getElementById('s-pin').value, studentPhoto: e1.target.result, payShot: e2.target.result, active: false }).then(() => { showToast("পঞ্জীয়ন সফল! অনুমোদনৰ বাবে অপেক্ষা কৰক।"); showScreen('login-screen'); });
-        }; r2.readAsDataURL(pay); }; r1.readAsDataURL(photo);
+        const ph = document.getElementById('s-phone').value, n = document.getElementById('s-name').value, ps = document.getElementById('s-pass').value;
+        if(!ph || !n || !ps) return showToast("সকলো তথ্য পূৰণ কৰা!");
+        const photo = document.getElementById('s-photo').files[0];
+        if(!photo) return showToast("ফটো আপলোড কৰা!");
+        
+        const r1 = new FileReader();
+        r1.onload = e1 => {
+            db.ref('students/' + ph).set({ 
+                name: n, ph, ps, utr: "", 
+                cls: document.getElementById('s-class').value, 
+                school: document.getElementById('s-school').value, 
+                vill: document.getElementById('s-vill').value, 
+                po: document.getElementById('s-po').value, 
+                dist: document.getElementById('s-dist').value, 
+                state: document.getElementById('s-state').value, 
+                pin: document.getElementById('s-pin').value, 
+                studentPhoto: e1.target.result, 
+                payShot: "", 
+                active: false 
+            }).then(() => { 
+                showToast("পঞ্জীয়ন সফল! এতিয়া লগইন কৰি মাচুল জমা দিয়ক।"); 
+                showScreen('login-screen'); 
+            });
+        };
+        r1.readAsDataURL(photo);
     }
+
     function doLogin() { const ph = document.getElementById('l-phone').value, ps = document.getElementById('l-pass').value; db.ref('students/' + ph).once('value', s => { const u = s.val(); if(u && u.ps === ps) { localStorage.setItem('ks_student_id', ph); loginAuto(ph); } else showToast("Wrong ID or Password!"); }); }
     function logout() { localStorage.removeItem('ks_student_id'); location.reload(); }
     function triggerAdmin() { clicks++; if(clicks>=5) { showScreen('admin-login-screen'); clicks=0; } setTimeout(()=>clicks=0, 2000); }
     
     function verifyAdminPIN() {
-    const entered = document.getElementById('adm-pass-login').value;
-    
-    // কেৱল Firebase-ৰ পৰা অহা পিনটোৰ সৈতেহে তুলনা কৰিব
-    // লগতে নিশ্চিত কৰিব যে পিনটো খালী (null) হৈ থকা নাই
-    if (entered === activeAdminPIN && activeAdminPIN !== null && activeAdminPIN !== "") {
-        showScreen('admin-panel');
-        document.getElementById('adm-pass-login').value = ""; // লগ-ইনৰ পিছত ইনপুট বক্সটো খালী কৰি দিব
-    } else {
-        // তোমাৰ আগৰ showToast বা alert যিকোনো এটা ব্যৱহাৰ কৰিব পাৰা
-        if(typeof showToast === "function") {
-            showToast("❌ ভুল পিন দিছে!");
+        const entered = document.getElementById('adm-pass-login').value;
+        if (entered === activeAdminPIN && activeAdminPIN !== null && activeAdminPIN !== "") {
+            showScreen('admin-panel');
+            document.getElementById('adm-pass-login').value = "";
         } else {
             showToast("❌ ভুল পিন দিছে!");
         }
     }
-}
 
     function loadInboxCount(ph) { db.ref(`messages/${ph}`).on('value', s => document.getElementById('msg-count').innerText = s.exists() ? Object.keys(s.val()).length : 0); }
+    
     function showInbox() {
         const ph = localStorage.getItem('ks_student_id');
         db.ref(`messages/${ph}`).once('value', s => {
@@ -395,10 +432,22 @@
             const d = document.createElement('div'); d.innerHTML = list; document.body.appendChild(d.firstChild);
         });
     }
+
     function deleteMessage(ph, key) { if(confirm("Delete message?")) { db.ref(`messages/${ph}/${key}`).remove().then(() => showInbox()); } }
-    function showIDCard() { const ph = localStorage.getItem('ks_student_id'); db.ref('students/' + ph).once('value', s => { const u = s.val(); let html = `<div class="fixed inset-0 bg-black/80 z-[200] flex items-center justify-center p-4"><div class="bg-white w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl text-center p-6"><img src="${u.studentPhoto}" class="w-24 h-24 mx-auto rounded-full border-4 border-indigo-100 object-cover mb-4"><h3 class="text-xl font-bold text-indigo-900 tracking-tighter">${u.name}</h3><p class="text-indigo-600 font-bold uppercase text-[10px]">Class ${u.cls}</p><button onclick="this.closest('.fixed').remove()" class="w-full bg-gray-100 p-2 font-bold text-gray-500 uppercase text-[9px] mt-6 tracking-widest">Close</button></div></div>`; const div = document.createElement('div'); div.innerHTML = html; document.body.appendChild(div.firstElementChild); }); }
+    
+    function showIDCard() { 
+        const ph = localStorage.getItem('ks_student_id'); 
+        db.ref('students/' + ph).once('value', s => { 
+            const u = s.val(); 
+            let html = `<div class="fixed inset-0 bg-black/80 z-[200] flex items-center justify-center p-4"><div class="bg-white w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl text-center p-6"><img src="${u.studentPhoto}" class="w-24 h-24 mx-auto rounded-full border-4 border-indigo-100 object-cover mb-4"><h3 class="text-xl font-bold text-indigo-900 tracking-tighter">${u.name}</h3><p class="text-indigo-600 font-bold uppercase text-[10px]">Class ${u.cls}</p><button onclick="this.closest('.fixed').remove()" class="w-full bg-gray-100 p-2 font-bold text-gray-500 uppercase text-[9px] mt-6 tracking-widest">Close</button></div></div>`; 
+            const div = document.createElement('div'); div.innerHTML = html; document.body.appendChild(div.firstElementChild); 
+        }); 
+    }
+
     function showFeesTable() { const cls = document.getElementById('s-class').value; if(!cls) return showToast("শ্ৰেণী বাচনি কৰা!"); let table = `<div class='bg-white p-6 rounded-3xl w-80 shadow-2xl'><h3 class='font-black mb-4 border-b pb-2 text-sm uppercase text-center text-indigo-900'>Class ${cls} Fees</h3><table class='w-full text-xs'>`; subjects.forEach(s => { const p = (window.feesData && window.feesData[cls] && window.feesData[cls][s.name]) ? window.feesData[cls][s.name] : '0'; table += `<tr><td class='p-2 border uppercase font-bold text-gray-400'>${s.name}</td><td class='p-2 border font-bold text-orange-600'>₹${p}</td></tr>`; }); table += `</table><button onclick='this.parentElement.parentElement.remove()' class='btn-3d mt-4 py-2 text-xs shadow-md'>CLOSE</button></div>`; const div = document.createElement('div'); div.className = 'fixed inset-0 bg-black/70 z-[300] flex items-center justify-center p-4'; div.innerHTML = table; document.body.appendChild(div); }
+    
     function manageContent() { const ph = document.getElementById('c-ph').value, sub = document.getElementById('c-sub').value, area = document.getElementById('manage-area'); db.ref(`content/${ph}/${sub}`).once('value', s => { area.innerHTML = ""; const d = s.val(); if(!d) return; for(let ty in d) for(let k in d[ty]) area.innerHTML += `<div class="flex justify-between p-2 bg-gray-100 mb-1 text-[9px] rounded font-bold uppercase shadow-sm"><span>${d[ty][k].title}</span><button onclick="db.ref('content/${ph}/${sub}/${ty}/${k}').remove().then(()=>manageContent())" class="text-red-600 font-bold uppercase">Del</button></div>`; }); }
+    
     function updateFeesInDB() {
         const cls = document.getElementById('fee-cls').value;
         const sub = document.getElementById('fee-sub').value;
@@ -410,7 +459,6 @@
         }).catch(e => showToast("Error: " + e.message));
     }
 
-    /* --- showToast Function Added --- */
     function showToast(message) {
         var x = document.getElementById("custom-toast");
         x.innerHTML = message;
@@ -420,5 +468,3 @@
 </script>
 </body>
 </html>
-
-
