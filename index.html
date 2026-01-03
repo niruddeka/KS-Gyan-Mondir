@@ -93,7 +93,7 @@
                 <input id="s-utr" placeholder="UTR নম্বৰ লিখা *" class="input-box text-black text-center font-bold mb-2">
                 <p class="text-[9px] font-bold opacity-70 uppercase mb-2">পেমেন্ট স্ক্ৰীনশ্বট দিয়া *</p>
                 <input type="file" id="s-pay-shot" class="text-[10px] w-full bg-white/10 p-1 rounded-lg mb-4">
-                <button onclick="submitPayment()" class="w-full bg-green-600 py-2 rounded-xl font-bold text-xs uppercase shadow-lg">পেমেন্ট জমা দিয়া</button>
+                <button onclick="submitPayment()" class="w-full bg-green-600 py-2 rounded-xl font-bold text-xs uppercase shadow-lg">পেমেন্ট জমা দিয়া</button>
             </div>
         </div>
 
@@ -212,10 +212,32 @@
         db.ref('admin/fees').on('value', s => { window.feesData = s.val() || {}; });
         const cSub = document.getElementById('c-sub');
         subjects.forEach(s => { if(cSub) cSub.innerHTML += `<option value="${s.name}">${s.name}</option>`; });
+        
+        // --- NEW: Back Button Support (History State) ---
+        window.addEventListener('popstate', function(event) {
+            if(event.state && event.state.id) {
+                // Manually hide all and show the state ID
+                document.querySelectorAll('main').forEach(s => s.classList.add('hidden'));
+                document.getElementById(event.state.id).classList.remove('hidden');
+                
+                // Special handling for video stop
+                if(event.state.id !== 'course-view') stopVideo();
+                
+                // Handle logout button visibility
+                if(['home-screen', 'admin-panel', 'course-view'].includes(event.state.id)) 
+                    document.getElementById('logout-btn').classList.remove('hidden');
+                else 
+                    document.getElementById('logout-btn').classList.add('hidden');
+            }
+        });
     };
 
     function showScreen(id) {
-        document.querySelectorAll('main').forEach(s => s.classList.add('hidden')); document.getElementById(id).classList.remove('hidden');
+        // --- NEW: Push History State ---
+        history.pushState({id: id}, null, null);
+
+        document.querySelectorAll('main').forEach(s => s.classList.add('hidden')); 
+        document.getElementById(id).classList.remove('hidden');
         if(['home-screen', 'admin-panel', 'course-view'].includes(id)) document.getElementById('logout-btn').classList.remove('hidden');
         else document.getElementById('logout-btn').classList.add('hidden');
         if(id === 'admin-panel') { fetchStudentsAdmin(); fetchAdminDoubts(); }
@@ -278,19 +300,27 @@
         let vid = url.split("v=")[1] || url.split("/").pop();
         document.getElementById('course-video-wrapper').innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube-nocookie.com/embed/${vid}?autoplay=1&rel=0" frameborder="0" allowfullscreen></iframe>`;
         const btn = document.getElementById('pdf-download-btn');
-        if(pdf && pdf !== "undefined") { btn.classList.remove('hidden'); btn.onclick = () => window.open(pdf); } else btn.classList.add('hidden');
+        if(pdf && pdf !== "undefined") { 
+            btn.classList.remove('hidden'); 
+            btn.onclick = () => window.location.href = pdf; // View Only Fix
+        } else {
+            btn.classList.add('hidden');
+        }
     }
 
     function stopVideo() { document.getElementById('course-video-wrapper').innerHTML = "ভিডিঅ' বাচনি কৰা..."; document.getElementById('current-video-title').innerText = "Class Title"; document.getElementById('pdf-download-btn').classList.add('hidden'); }
-    function stopVideoAndBack() { stopVideo(); showScreen('home-screen'); }
+    
+    function stopVideoAndBack() { 
+        stopVideo(); 
+        history.back(); // Use Browser Back
+    }
 
-    // --- New Payment Submission Function for Dashboard ---
     function submitPayment() {
         const ph = localStorage.getItem('ks_student_id');
         const utr = document.getElementById('s-utr').value;
         const payShot = document.getElementById('s-pay-shot').files[0];
 
-        if(!utr || !payShot) return showToast("⚠️ UTR নম্বৰ আৰু স্ক্ৰীনশ্বট দিয়াটো জৰুৰী!");
+        if(!utr || !payShot) return showToast("⚠️ UTR নম্বৰ আৰু স্ক্ৰীনশ্বট দিয়াটো জৰুৰী!");
 
         const reader = new FileReader();
         reader.onload = e => {
@@ -399,7 +429,7 @@
                 payShot: "", 
                 active: false 
             }).then(() => { 
-                showToast("পঞ্জীয়ন সফল! এতিয়া লগইন কৰি মাচুল জমা দিয়ক।"); 
+                showToast("পঞ্জীয়ন সফল! এতিয়া লগইন কৰি মাচুল জমা দিয়ক।"); 
                 showScreen('login-screen'); 
             });
         };
@@ -468,4 +498,3 @@
 </script>
 </body>
 </html>
-
