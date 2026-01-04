@@ -67,8 +67,11 @@
         <h2 class="font-black mb-10 text-2xl text-indigo-900 uppercase">Student Login</h2>
         <input id="l-phone" placeholder="মোবাইল আইডি" class="input-box text-center font-bold">
         <input id="l-pass" type="password" placeholder="পাছৱৰ্ড" class="input-box text-center">
-        <button onclick="doLogin()" class="btn-3d shadow-xl">Dashboard</button>
-        <p onclick="showScreen('reg-screen')" class="mt-10 text-xs font-bold text-indigo-600 cursor-pointer underline">নতুন পঞ্জীয়ন কৰিবলৈ ইয়াত টিপক</p>
+        <button onclick="doLogin()" class="btn-3d shadow-xl mb-4">Dashboard</button>
+        
+        <p onclick="forgotPass()" class="text-xs font-black text-red-500 cursor-pointer uppercase tracking-widest mb-6 border-b inline-block border-red-200 mt-2">পাছৱৰ্ড পাহৰিলা নেকি?</p>
+
+        <p onclick="showScreen('reg-screen')" class="mt-4 text-xs font-bold text-indigo-600 cursor-pointer underline">নতুন পঞ্জীয়ন কৰিবলৈ ইয়াত টিপক</p>
     </div>
 </main>
 
@@ -197,7 +200,8 @@
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     
-    let currentUPI = "", activeAdminPIN = "", clicks = 0;
+    // ইয়াত adminWA যোগ কৰা হৈছে (CHANGED)
+    let currentUPI = "", activeAdminPIN = "", adminWA = "", clicks = 0;
     const subjects = [ { name: "অসমীয়া", icon: "📚" }, { name: "ইংৰাজী", icon: "🅰️" }, { name: "গণিত", icon: "🧮" }, { name: "বিজ্ঞান", icon: "🔬" }, { name: "সমাজ বিজ্ঞান", icon: "🌍" }, { name: "হিন্দী", icon: "🕉️" }, { name: "সংস্কৃত", icon: "✡️" }, { name: "ঐচ্ছিক গণিত", icon: "📐" }, { name: "নীতিশিক্ষা", icon: "🪷" }, { name: "সকলো বিষয়", icon: "🎒" } ];
 
     window.onload = function() {
@@ -205,12 +209,18 @@
         if(user) loginAuto(user); else showScreen('reg-screen');
         
         db.ref('admin/config').on('value', s => {
-            const d = s.val() || {}; currentUPI = d.upi || ""; if(d.adminPin) activeAdminPIN = d.adminPin;
+            const d = s.val() || {}; 
+            currentUPI = d.upi || ""; 
+            if(d.adminPin) activeAdminPIN = d.adminPin;
+            
+            // --- এই লাইনটো নতুনকৈ যোগ কৰক (CHANGED) ---
+            if(d.wa) { adminWA = d.wa; document.getElementById('wa-link').href = "https://wa.me/" + d.wa; }
+            // ---------------------------------
+
             if(d.appLogo) document.getElementById('main-logo').src = d.appLogo;
             document.getElementById('upi-txt').innerText = "UPI ID: " + currentUPI;
             if(d.qr) { document.getElementById('qr-img-display').src = d.qr; document.getElementById('qr-img-display').classList.remove('hidden'); }
             if(d.notif) document.getElementById('notif-text').innerText = d.notif;
-            if(d.wa) document.getElementById('wa-link').href = "https://wa.me/" + d.wa;
         });
         db.ref('admin/fees').on('value', s => { window.feesData = s.val() || {}; });
         const cSub = document.getElementById('c-sub');
@@ -513,7 +523,25 @@
         }
         return 'EXIT';
     }
+
+    // --- NEW: FORGOT PASSWORD FUNCTION (ADDED) ---
+    function forgotPass() {
+        const ph = document.getElementById('l-phone').value;
+        if(!ph) {
+            showToast("⚠️ অনুগ্ৰহ কৰি তোমাৰ 'মোবাইল আইডি' টো লিখা!");
+            return;
+        }
+        
+        if(!adminWA) {
+            showToast("⚠️ এডমিনৰ নম্বৰ পোৱা নাই! চিধাকৈ যোগাযোগ কৰা।");
+            return;
+        }
+
+        const msg = `নমস্কাৰ ছাৰ, মই মোৰ KS Gyan Mondir একাউণ্টৰ পাছৱৰ্ড পাহৰিলো। মোৰ মোবাইল আইডি হ'ল: ${ph}। অনুগ্ৰহ কৰি সহায় কৰক।`;
+        
+        // WhatsApp খুলি দিব
+        window.location.href = `https://wa.me/${adminWA}?text=${encodeURIComponent(msg)}`;
+    }
 </script>
 </body>
 </html>
-
