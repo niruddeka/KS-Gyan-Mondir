@@ -328,11 +328,18 @@
         reader.readAsDataURL(payShot);
     }
     
-    // --- NEW: DIRECT UPI PAYMENT FUNCTION ---
+    // --- UPDATED DIRECT UPI PAYMENT FUNCTION ---
     function payDirect() {
         if(!currentUPI) return showToast("⚠️ এডমিনে UPI ID দিয়া নাই!");
-        // এইটোৱে পোনপটীয়াকৈ পেমেন্ট এপ খুলি দিব
-        window.location.href = `upi://pay?pa=${currentUPI}&pn=KS Gyan Mondir&cu=INR`;
+        
+        // ১. এটা ইউনিক ট্ৰেনজেকচন আইডি বনোৱা হ'ল (Date ব্যৱহাৰ কৰি)
+        const trID = "T" + Date.now(); 
+        
+        // ২. লিংকটোত 'tr' (Ref ID) আৰু 'tn' (Note) যোগ কৰা হ'ল
+        // PhonePe-এ এতিয়া ভাবিব এইটো এটা বৈধ লেনদেন
+        const url = `upi://pay?pa=${currentUPI}&pn=KSGyanMondir&tn=SchoolFees&tr=${trID}&cu=INR`;
+        
+        window.location.href = url;
     }
 
     function saveAdminSettings() { 
@@ -509,3 +516,4 @@
 </script>
 </body>
 </html>
+
