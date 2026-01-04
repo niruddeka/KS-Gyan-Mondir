@@ -87,7 +87,7 @@
         <div class="grid grid-cols-4 gap-3 mb-6">
             <div onclick="showIDCard()" class="dash-icon">🆔<div class="text-[8px] font-bold mt-1 uppercase">ID Card</div></div>
             <div onclick="showInbox()" class="dash-icon relative">📩<div class="text-[8px] font-bold mt-1 uppercase">Inbox</div><div id="msg-count" class="absolute -top-1 -right-1 bg-red-600 text-white text-[8px] rounded-full w-4 h-4 flex items-center justify-center font-bold">0</div></div>
-            <div onclick="askDoubt()" class="dash-icon">❓<div class="text-[8px] font-bold mt-1 uppercase">Doubt</div></div>
+            <div onclick="openDoubtModal()" class="dash-icon">❓<div class="text-[8px] font-bold mt-1 uppercase">Doubt</div></div>
             <div onclick="showToast('সোনকালে আহিব!')" class="dash-icon">📝<div class="text-[8px] font-bold mt-1 uppercase">Quiz</div></div>
         </div>
 
@@ -202,6 +202,17 @@
     </div>
 </main>
 
+<div id="doubt-modal" class="hidden fixed inset-0 bg-black/80 z-[200] flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-sm rounded-3xl p-6 text-center shadow-2xl">
+        <h3 class="font-black text-indigo-900 text-lg mb-4 uppercase tracking-tighter">Ask a Doubt</h3>
+        <textarea id="doubt-input" class="input-box h-32" placeholder="তোমাৰ প্ৰশ্নটো ইয়াত লিখা..."></textarea>
+        <div class="flex gap-2">
+            <button onclick="closeDoubtModal()" class="bg-red-500 text-white py-2 rounded-xl flex-1 font-bold uppercase text-xs">Cancel</button>
+            <button onclick="submitDoubt()" class="bg-indigo-600 text-white py-2 rounded-xl flex-1 font-bold uppercase text-xs shadow-lg">Send Doubt</button>
+        </div>
+    </div>
+</div>
+
 <script>
     const firebaseConfig = { databaseURL: "https://ks-gyan-mondir-default-rtdb.firebaseio.com/" };
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
@@ -293,15 +304,29 @@
         });
     }
 
-    function askDoubt() {
+    // --- NEW: CUSTOM DOUBT MODAL FUNCTIONS ---
+    function openDoubtModal() {
+        document.getElementById('doubt-modal').classList.remove('hidden');
+    }
+    
+    function closeDoubtModal() {
+        document.getElementById('doubt-modal').classList.add('hidden');
+        document.getElementById('doubt-input').value = "";
+    }
+
+    function submitDoubt() {
         const ph = localStorage.getItem('ks_student_id');
-        const q = prompt("তোমাৰ প্ৰশ্নটো ইয়াত লিখা:");
+        const q = document.getElementById('doubt-input').value;
         if(q && q.trim() !== "") {
             db.ref(`doubts`).push({ ph: ph, question: q, time: new Date().toLocaleString() }).then(() => {
-                showToast("প্ৰশ্নটো এডমিনলৈ পঠোৱা হৈছে!");
+                showToast("✅ প্ৰশ্নটো এডমিনলৈ পঠোৱা হ'ল!");
+                closeDoubtModal();
             }).catch(e => showToast("Error: " + e.message));
+        } else {
+            showToast("⚠️ কিবা এটা লিখা!");
         }
     }
+    // ------------------------------------------
 
     function playVideo(t, url, pdf) {
         document.getElementById('current-video-title').innerText = t;
