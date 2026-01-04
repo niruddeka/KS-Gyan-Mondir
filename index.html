@@ -88,7 +88,7 @@
             <div onclick="showIDCard()" class="dash-icon">🆔<div class="text-[8px] font-bold mt-1 uppercase">ID Card</div></div>
             <div onclick="showInbox()" class="dash-icon relative">📩<div class="text-[8px] font-bold mt-1 uppercase">Inbox</div><div id="msg-count" class="absolute -top-1 -right-1 bg-red-600 text-white text-[8px] rounded-full w-4 h-4 flex items-center justify-center font-bold">0</div></div>
             <div onclick="openDoubtModal()" class="dash-icon">❓<div class="text-[8px] font-bold mt-1 uppercase">Doubt</div></div>
-            <div onclick="showToast('সোনকালে আহিব!')" class="dash-icon">📝<div class="text-[8px] font-bold mt-1 uppercase">Quiz</div></div>
+            <div onclick="showScreen('quiz-list-screen')" class="dash-icon">📝<div class="text-[8px] font-bold mt-1 uppercase">Quiz</div></div>
         </div>
 
         <div class="glass-card p-5 mb-6 border-b-4 border-green-500 bg-green-50/30">
@@ -116,6 +116,22 @@
     </div>
 </main>
 
+<main id="quiz-list-screen" class="container mx-auto p-4 hidden">
+    <div class="flex justify-between items-center mb-6">
+        <button onclick="showScreen('home-screen')" class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs font-bold">⬅️ Back</button>
+        <h2 class="font-black text-indigo-900 text-lg uppercase">All Quizzes</h2>
+    </div>
+    <div id="student-quiz-list" class="space-y-4"></div>
+</main>
+
+<main id="quiz-play-screen" class="container mx-auto p-4 hidden">
+    <div class="flex justify-between items-center mb-4">
+        <button onclick="showScreen('quiz-list-screen')" class="bg-red-500 text-white px-3 py-1 rounded text-[10px] font-bold">Cancel Quiz</button>
+        <h2 id="play-quiz-title" class="font-bold text-indigo-900 text-sm">Quiz Title</h2>
+    </div>
+    <div id="quiz-questions-area" class="pb-20"></div>
+</main>
+
 <main id="course-view" class="container mx-auto p-4 hidden">
     <div class="flex justify-between items-center mb-4">
         <button onclick="stopVideoAndBack()" class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs font-bold">⬅️ পাছলৈ</button>
@@ -139,24 +155,32 @@
         <span class="font-black text-xs uppercase tracking-widest">Admin Dashboard</span>
         <button onclick="logout()" class="bg-white text-indigo-900 px-3 py-1 rounded-lg text-[10px] font-black uppercase">Exit</button>
     </div>
-<div class="glass-card p-5 mb-8 border-l-8 border-orange-500 shadow-lg">
-    <h3 class="text-[10px] font-black uppercase mb-4 text-orange-700 tracking-widest italic">Update Student Fees</h3>
-    <div class="grid grid-cols-2 gap-3 mb-4">
-        <select id="fee-cls" class="input-box text-xs font-bold">
-            <option value="">শ্ৰেণী বাচনি কৰা</option>
-            <script>for(let i=3; i<=12; i++) document.write(`<option value="${i}">Class ${i}</option>`);</script>
-        </select>
-        <select id="fee-sub" class="input-box text-xs font-bold">
-            <option value="">বিষয় বাচনি কৰা</option>
-            <script>
-                const subs = ["অসমীয়া", "ইংৰাজী", "গণিত", "বিজ্ঞান", "সমাজ বিজ্ঞান", "হিন্দী", "সংস্কৃত", "ঐচ্ছিক গণিত", "নীতিশিক্ষা", "সকলো বিষয়"];
-                subs.forEach(s => document.write(`<option value="${s}">${s}</option>`));
-            </script>
-        </select>
+
+    <div class="glass-card p-5 mb-8 border-l-8 border-purple-600 shadow-lg">
+        <h3 class="text-[10px] font-black uppercase mb-4 text-purple-700 tracking-widest">Manage Quizzes</h3>
+        <input id="new-quiz-title" placeholder="Quiz Title (e.g. Class 10 Science Test)" class="input-box text-xs">
+        <button onclick="createQuiz()" class="bg-purple-600 text-white w-full py-3 rounded-xl text-xs font-black uppercase shadow-md mb-6">Create New Quiz</button>
+        <div id="admin-quiz-list" class="space-y-3"></div>
     </div>
-    <input id="fee-amount" placeholder="মাচুলৰ পৰিমাণ (যেনে: 500)" class="input-box text-xs text-center font-bold">
-    <button onclick="updateFeesInDB()" class="bg-orange-600 text-white w-full py-3 rounded-xl text-xs font-black uppercase shadow-md">Update Fees Now</button>
-</div> 
+
+    <div class="glass-card p-5 mb-8 border-l-8 border-orange-500 shadow-lg">
+        <h3 class="text-[10px] font-black uppercase mb-4 text-orange-700 tracking-widest italic">Update Student Fees</h3>
+        <div class="grid grid-cols-2 gap-3 mb-4">
+            <select id="fee-cls" class="input-box text-xs font-bold">
+                <option value="">শ্ৰেণী বাচনি কৰা</option>
+                <script>for(let i=3; i<=12; i++) document.write(`<option value="${i}">Class ${i}</option>`);</script>
+            </select>
+            <select id="fee-sub" class="input-box text-xs font-bold">
+                <option value="">বিষয় বাচনি কৰা</option>
+                <script>
+                    const subs = ["অসমীয়া", "ইংৰাজী", "গণিত", "বিজ্ঞান", "সমাজ বিজ্ঞান", "হিন্দী", "সংস্কৃত", "ঐচ্ছিক গণিত", "নীতিশিক্ষা", "সকলো বিষয়"];
+                    subs.forEach(s => document.write(`<option value="${s}">${s}</option>`));
+                </script>
+            </select>
+        </div>
+        <input id="fee-amount" placeholder="মাচুলৰ পৰিমাণ (যেনে: 500)" class="input-box text-xs text-center font-bold">
+        <button onclick="updateFeesInDB()" class="bg-orange-600 text-white w-full py-3 rounded-xl text-xs font-black uppercase shadow-md">Update Fees Now</button>
+    </div> 
     <div class="glass-card p-5 mb-8 border-l-8 border-yellow-500 shadow-lg">
         <h3 class="text-[10px] font-black uppercase mb-4 text-yellow-700 tracking-widest">App Branding (Logo & QR)</h3>
         <div class="grid grid-cols-2 gap-4 text-[9px] font-bold text-gray-500 mb-4">
@@ -213,12 +237,42 @@
     </div>
 </div>
 
+<div id="add-q-modal" class="hidden fixed inset-0 bg-black/90 z-[300] flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl overflow-y-auto max-h-[90vh]">
+        <h3 class="font-black text-indigo-900 text-sm mb-4 uppercase">Add Question</h3>
+        <input id="q-text" placeholder="প্ৰশ্নটো লিখা..." class="input-box text-xs font-bold">
+        <input id="op-a" placeholder="Option A" class="input-box text-xs">
+        <input id="op-b" placeholder="Option B" class="input-box text-xs">
+        <input id="op-c" placeholder="Option C" class="input-box text-xs">
+        <input id="op-d" placeholder="Option D" class="input-box text-xs">
+        <p class="text-[10px] font-bold text-gray-500 mb-1">Correct Answer:</p>
+        <select id="q-correct" class="input-box font-bold"><option value="a">Option A</option><option value="b">Option B</option><option value="c">Option C</option><option value="d">Option D</option></select>
+        <div class="flex gap-2">
+            <button onclick="document.getElementById('add-q-modal').classList.add('hidden')" class="bg-gray-400 text-white py-3 rounded-xl flex-1 font-black text-xs">CLOSE</button>
+            <button onclick="saveQuestion()" class="bg-green-600 text-white py-3 rounded-xl flex-1 font-black text-xs shadow-md">SAVE QUESTION</button>
+        </div>
+    </div>
+</div>
+
+<div id="result-modal" class="hidden fixed inset-0 bg-black/90 z-[300] flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl overflow-hidden flex flex-col h-[80vh]">
+        <div class="flex justify-between items-center mb-4 border-b pb-2">
+            <h3 class="font-black text-indigo-900 text-sm uppercase">Quiz Results</h3>
+            <button onclick="document.getElementById('result-modal').classList.add('hidden')" class="text-red-600 font-bold text-xs">✕ CLOSE</button>
+        </div>
+        <div id="result-list-area" class="flex-1 overflow-auto space-y-2"></div>
+    </div>
+</div>
+
 <script>
     const firebaseConfig = { databaseURL: "https://ks-gyan-mondir-default-rtdb.firebaseio.com/" };
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     
     let currentUPI = "", activeAdminPIN = "", adminWA = "", clicks = 0;
+    // Current working variables
+    let currentQuizId = null; 
+
     const subjects = [ { name: "অসমীয়া", icon: "📚" }, { name: "ইংৰাজী", icon: "🅰️" }, { name: "গণিত", icon: "🧮" }, { name: "বিজ্ঞান", icon: "🔬" }, { name: "সমাজ বিজ্ঞান", icon: "🌍" }, { name: "হিন্দী", icon: "🕉️" }, { name: "সংস্কৃত", icon: "✡️" }, { name: "ঐচ্ছিক গণিত", icon: "📐" }, { name: "নীতিশিক্ষা", icon: "🪷" }, { name: "সকলো বিষয়", icon: "🎒" } ];
 
     window.onload = function() {
@@ -259,7 +313,8 @@
         document.getElementById(id).classList.remove('hidden');
         if(['home-screen', 'admin-panel', 'course-view'].includes(id)) document.getElementById('logout-btn').classList.remove('hidden');
         else document.getElementById('logout-btn').classList.add('hidden');
-        if(id === 'admin-panel') { fetchStudentsAdmin(); fetchAdminDoubts(); }
+        if(id === 'admin-panel') { fetchStudentsAdmin(); fetchAdminDoubts(); fetchAdminQuizzes(); }
+        if(id === 'quiz-list-screen') fetchQuizzesStudent();
     }
 
     function loginAuto(ph) { 
@@ -304,7 +359,192 @@
         });
     }
 
-    // --- NEW: CUSTOM DOUBT MODAL FUNCTIONS ---
+    // --- QUIZ SYSTEM FUNCTIONS ---
+    
+    // 1. Admin: Create Quiz
+    function createQuiz() {
+        const title = document.getElementById('new-quiz-title').value;
+        if(!title) return showToast("Quiz Title is required!");
+        db.ref('quizzes').push({ title: title, active: true }).then(() => {
+            document.getElementById('new-quiz-title').value = "";
+            showToast("Quiz Created!");
+        });
+    }
+
+    // 2. Admin: Fetch Quizzes
+    function fetchAdminQuizzes() {
+        db.ref('quizzes').on('value', s => {
+            const area = document.getElementById('admin-quiz-list'); area.innerHTML = "";
+            if(!s.exists()) return;
+            s.forEach(q => {
+                const quiz = q.val();
+                area.innerHTML += `
+                <div class="bg-white p-4 rounded-xl shadow-sm border mb-2">
+                    <h4 class="font-black text-indigo-900 text-xs mb-2 uppercase">${quiz.title}</h4>
+                    <div class="flex gap-2">
+                        <button onclick="openAddQuestionModal('${q.key}')" class="bg-indigo-600 text-white px-2 py-1 rounded text-[9px] font-bold">ADD Q</button>
+                        <button onclick="viewQuizResults('${q.key}')" class="bg-teal-600 text-white px-2 py-1 rounded text-[9px] font-bold">RESULTS</button>
+                        <button onclick="if(confirm('Delete Quiz?')) db.ref('quizzes/${q.key}').remove()" class="bg-red-500 text-white px-2 py-1 rounded text-[9px] font-bold">DEL</button>
+                    </div>
+                </div>`;
+            });
+        });
+    }
+
+    // 3. Admin: Add Question
+    function openAddQuestionModal(key) {
+        currentQuizId = key;
+        document.getElementById('add-q-modal').classList.remove('hidden');
+        document.getElementById('q-text').value = "";
+        document.getElementById('op-a').value = "";
+        document.getElementById('op-b').value = "";
+        document.getElementById('op-c').value = "";
+        document.getElementById('op-d').value = "";
+    }
+
+    function saveQuestion() {
+        const q = {
+            q: document.getElementById('q-text').value,
+            a: document.getElementById('op-a').value,
+            b: document.getElementById('op-b').value,
+            c: document.getElementById('op-c').value,
+            d: document.getElementById('op-d').value,
+            correct: document.getElementById('q-correct').value
+        };
+        if(!q.q || !q.a || !q.b) return showToast("Question & options required!");
+        db.ref(`quizzes/${currentQuizId}/questions`).push(q).then(() => {
+            showToast("Question Added!");
+            document.getElementById('add-q-modal').classList.add('hidden');
+        });
+    }
+
+    // 4. Admin: View Results
+    function viewQuizResults(key) {
+        document.getElementById('result-modal').classList.remove('hidden');
+        const area = document.getElementById('result-list-area');
+        area.innerHTML = "<p class='text-center text-gray-400'>Loading...</p>";
+        
+        db.ref(`quiz_results/${key}`).once('value', s => {
+            area.innerHTML = "";
+            if(!s.exists()) { area.innerHTML = "<p class='text-center font-bold'>No results yet.</p>"; return; }
+            s.forEach(r => {
+                const val = r.val();
+                // Showing Score AND Percentage
+                const scoreText = val.score + " / " + val.total;
+                const percentText = val.percent;
+                
+                area.innerHTML += `
+                <div class="bg-gray-50 p-3 rounded-xl border flex justify-between items-center">
+                    <div>
+                        <p class="font-black text-xs text-indigo-900">${val.studentName}</p>
+                        <p class="text-[9px] text-gray-500">${new Date(val.time).toLocaleDateString()}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-black text-indigo-600 text-sm">${scoreText}</p>
+                        <p class="text-[9px] font-bold bg-yellow-200 px-1 rounded inline-block">${percentText}</p>
+                    </div>
+                </div>`;
+            });
+        });
+    }
+
+    // 5. Student: List Quizzes
+    function fetchQuizzesStudent() {
+        db.ref('quizzes').on('value', s => {
+            const area = document.getElementById('student-quiz-list'); area.innerHTML = "";
+            if(!s.exists()) { area.innerHTML = "<p class='text-center mt-10'>No Quizzes Available.</p>"; return; }
+            s.forEach(q => {
+                const val = q.val();
+                if(val.active) {
+                    area.innerHTML += `
+                    <div onclick="startQuiz('${q.key}', '${val.title}')" class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-indigo-500 cursor-pointer active:scale-95 transition">
+                        <h3 class="font-black text-indigo-900 uppercase text-sm">${val.title}</h3>
+                        <p class="text-[10px] text-gray-500 font-bold mt-1">Tap to Start Exam</p>
+                    </div>`;
+                }
+            });
+        });
+    }
+
+    // 6. Student: Play Quiz
+    let currentQuestions = [];
+    function startQuiz(key, title) {
+        currentQuizId = key;
+        showScreen('quiz-play-screen');
+        document.getElementById('play-quiz-title').innerText = title;
+        const area = document.getElementById('quiz-questions-area');
+        area.innerHTML = "<p class='text-center mt-10'>Loading Questions...</p>";
+        
+        db.ref(`quizzes/${key}/questions`).once('value', s => {
+            area.innerHTML = "";
+            if(!s.exists()) { area.innerHTML = "<p class='text-center mt-10'>No questions in this quiz.</p>"; return; }
+            
+            currentQuestions = [];
+            let idx = 1;
+            s.forEach(q => {
+                const qData = q.val();
+                qData.key = q.key;
+                currentQuestions.push(qData);
+                
+                area.innerHTML += `
+                <div class="bg-white p-5 rounded-2xl shadow-sm mb-4 border">
+                    <p class="font-bold text-sm text-gray-800 mb-3"><span class="text-indigo-600">Q${idx}.</span> ${qData.q}</p>
+                    <div class="space-y-2">
+                        <label class="block bg-gray-50 p-3 rounded-xl border flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="q-${idx}" value="a"> <span class="text-xs font-bold text-gray-600">${qData.a}</span>
+                        </label>
+                        <label class="block bg-gray-50 p-3 rounded-xl border flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="q-${idx}" value="b"> <span class="text-xs font-bold text-gray-600">${qData.b}</span>
+                        </label>
+                        <label class="block bg-gray-50 p-3 rounded-xl border flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="q-${idx}" value="c"> <span class="text-xs font-bold text-gray-600">${qData.c}</span>
+                        </label>
+                        <label class="block bg-gray-50 p-3 rounded-xl border flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="q-${idx}" value="d"> <span class="text-xs font-bold text-gray-600">${qData.d}</span>
+                        </label>
+                    </div>
+                </div>`;
+                idx++;
+            });
+            area.innerHTML += `<button onclick="submitQuizAns()" class="w-full bg-green-600 text-white py-4 rounded-xl font-black uppercase shadow-xl text-sm">SUBMIT EXAM</button>`;
+        });
+    }
+
+    function submitQuizAns() {
+        if(confirm("Submit Quiz?")) {
+            let score = 0;
+            let total = currentQuestions.length;
+            
+            currentQuestions.forEach((q, i) => {
+                const idx = i + 1;
+                const radios = document.getElementsByName(`q-${idx}`);
+                let selected = null;
+                for(let r of radios) if(r.checked) selected = r.value;
+                if(selected === q.correct) score++;
+            });
+
+            const ph = localStorage.getItem('ks_student_id');
+            const percent = Math.round((score / total) * 100) + "%";
+            
+            // Save Result
+            db.ref(`students/${ph}/name`).once('value', s => {
+                const name = s.val() || "Student";
+                db.ref(`quiz_results/${currentQuizId}/${ph}`).set({
+                    studentName: name,
+                    score: score,
+                    total: total,
+                    percent: percent,
+                    time: Date.now()
+                }).then(() => {
+                    alert(`Exam Finished!\nYour Score: ${score} / ${total}\nPercentage: ${percent}`);
+                    showScreen('quiz-list-screen');
+                });
+            });
+        }
+    }
+
+    // --- OTHER FUNCTIONS ---
+
     function openDoubtModal() {
         document.getElementById('doubt-modal').classList.remove('hidden');
     }
@@ -326,7 +566,6 @@
             showToast("⚠️ কিবা এটা লিখা!");
         }
     }
-    // ------------------------------------------
 
     function playVideo(t, url, pdf) {
         document.getElementById('current-video-title').innerText = t;
