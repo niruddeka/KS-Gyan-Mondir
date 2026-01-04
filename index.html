@@ -269,6 +269,21 @@
     </div>
 </div>
 
+<div id="quiz-score-modal" class="hidden fixed inset-0 bg-black/95 z-[500] flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-sm rounded-3xl p-8 text-center shadow-2xl border-4 border-indigo-600 animate-bounce">
+        <h2 class="text-2xl font-black text-indigo-900 uppercase mb-2">🎉 Exam Submitted!</h2>
+        <p class="text-gray-500 text-xs font-bold mb-6">তোমাৰ ৰিজাল্ট তলত দিয়া হ'ল</p>
+        
+        <div class="bg-indigo-50 p-6 rounded-2xl mb-6">
+            <p class="text-xs font-bold text-gray-500 uppercase">Your Score</p>
+            <h1 id="score-display" class="text-4xl font-black text-indigo-600 my-2">0 / 0</h1>
+            <p id="percent-display" class="text-sm font-bold bg-yellow-400 inline-block px-3 py-1 rounded-full text-black">0%</p>
+        </div>
+        
+        <button onclick="closeScoreModal()" class="w-full bg-green-600 text-white py-4 rounded-xl font-black uppercase shadow-lg text-sm">OK, GO BACK</button>
+    </div>
+</div>
+
 <script>
     const firebaseConfig = { databaseURL: "https://ks-gyan-mondir-default-rtdb.firebaseio.com/" };
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
@@ -363,18 +378,15 @@
         });
     }
 
-    // --- UPDATED QUIZ SYSTEM (WITH CLASS TARGETING) ---
-    
-    // 1. Admin: Create Quiz with Target Class
     function createQuiz() {
         const title = document.getElementById('new-quiz-title').value;
-        const targetClass = document.getElementById('new-quiz-class').value; // Get Selected Class
+        const targetClass = document.getElementById('new-quiz-class').value; 
         
         if(!title) return showToast("Quiz Title is required!");
         
         db.ref('quizzes').push({ 
             title: title, 
-            targetClass: targetClass, // Save Target Class
+            targetClass: targetClass, 
             active: true 
         }).then(() => {
             document.getElementById('new-quiz-title').value = "";
@@ -382,14 +394,12 @@
         });
     }
 
-    // 2. Admin: Fetch Quizzes
     function fetchAdminQuizzes() {
         db.ref('quizzes').on('value', s => {
             const area = document.getElementById('admin-quiz-list'); area.innerHTML = "";
             if(!s.exists()) return;
             s.forEach(q => {
                 const quiz = q.val();
-                // Show Target Class in Admin List
                 const classLabel = (quiz.targetClass === 'All') ? "All Classes" : "Class " + quiz.targetClass;
                 
                 area.innerHTML += `
@@ -406,7 +416,6 @@
         });
     }
 
-    // 3. Admin: Add Question (Same as before)
     function openAddQuestionModal(key) {
         currentQuizId = key;
         document.getElementById('add-q-modal').classList.remove('hidden');
@@ -433,7 +442,6 @@
         });
     }
 
-    // 4. Admin: View Results (Same as before)
     function viewQuizResults(key) {
         document.getElementById('result-modal').classList.remove('hidden');
         const area = document.getElementById('result-list-area');
@@ -461,14 +469,11 @@
         });
     }
 
-    // 5. Student: List Quizzes (UPDATED WITH FILTERING)
     function fetchQuizzesStudent() {
         const ph = localStorage.getItem('ks_student_id');
-        
-        // First get student's class
         db.ref('students/' + ph).once('value', st => {
             const studentData = st.val();
-            const studentClass = studentData.cls; // e.g., "10"
+            const studentClass = studentData.cls; 
             
             db.ref('quizzes').on('value', s => {
                 const area = document.getElementById('student-quiz-list'); area.innerHTML = "";
@@ -477,7 +482,6 @@
                 let found = false;
                 s.forEach(q => {
                     const val = q.val();
-                    // FILTER LOGIC: Show if Active AND (Target is 'All' OR Target matches Student Class)
                     if(val.active && (val.targetClass === 'All' || val.targetClass == studentClass)) {
                         found = true;
                         area.innerHTML += `
@@ -493,7 +497,6 @@
         });
     }
 
-    // 6. Student: Play Quiz (Same as before)
     let currentQuestions = [];
     function startQuiz(key, title) {
         currentQuizId = key;
@@ -538,36 +541,49 @@
     }
 
     function submitQuizAns() {
-        if(confirm("Submit Quiz?")) {
-            let score = 0;
-            let total = currentQuestions.length;
-            
-            currentQuestions.forEach((q, i) => {
-                const idx = i + 1;
-                const radios = document.getElementsByName(`q-${idx}`);
-                let selected = null;
-                for(let r of radios) if(r.checked) selected = r.value;
-                if(selected === q.correct) score++;
-            });
+        if(!confirm("Are you sure you want to submit?")) return;
+        
+        let score = 0;
+        let total = currentQuestions.length;
+        
+        currentQuestions.forEach((q, i) => {
+            const idx = i + 1;
+            const radios = document.getElementsByName(`q-${idx}`);
+            let selected = null;
+            for(let r of radios) if(r.checked) selected = r.value;
+            if(selected === q.correct) score++;
+        });
 
-            const ph = localStorage.getItem('ks_student_id');
-            const percent = Math.round((score / total) * 100) + "%";
+        const ph = localStorage.getItem('ks_student_id');
+        const percent = Math.round((score / total) * 100) + "%";
+        
+        showToast("Processing Result...");
+        
+        // FIXED DATABASE SAVING LOGIC
+        db.ref('students/' + ph).once('value', s => {
+            const studentData = s.val() || {};
+            const name = studentData.name || "Student";
             
-            // Save Result
-            db.ref(`students/${ph}/name`).once('value', s => {
-                const name = s.val() || "Student";
-                db.ref(`quiz_results/${currentQuizId}/${ph}`).set({
-                    studentName: name,
-                    score: score,
-                    total: total,
-                    percent: percent,
-                    time: Date.now()
-                }).then(() => {
-                    alert(`Exam Finished!\nYour Score: ${score} / ${total}\nPercentage: ${percent}`);
-                    showScreen('quiz-list-screen');
-                });
+            db.ref(`quiz_results/${currentQuizId}/${ph}`).set({
+                studentName: name,
+                score: score,
+                total: total,
+                percent: percent,
+                time: Date.now()
+            }).then(() => {
+                // SHOW NEW POPUP
+                document.getElementById('quiz-score-modal').classList.remove('hidden');
+                document.getElementById('score-display').innerText = score + " / " + total;
+                document.getElementById('percent-display').innerText = percent;
+            }).catch(e => {
+                showToast("Error saving result: " + e.message);
             });
-        }
+        });
+    }
+
+    function closeScoreModal() {
+        document.getElementById('quiz-score-modal').classList.add('hidden');
+        showScreen('quiz-list-screen');
     }
 
     function openDoubtModal() {
