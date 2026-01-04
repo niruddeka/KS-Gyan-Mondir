@@ -393,15 +393,27 @@
         const rTxt = document.getElementById('reply-' + doubtKey).value; if(rTxt) db.ref(`messages/${ph}`).push({ text: "উত্তৰ: " + rTxt, time: new Date().toLocaleString() }).then(() => { document.getElementById('reply-' + doubtKey).value = ""; db.ref(`doubts/${doubtKey}`).remove(); showToast("Replied!"); });
     }
 
-    function handleApprove(ph, name, status) {
-        db.ref('students/' + ph).update({ active: status }).then(() => {
-            if(status === true) {
-                const msg = `প্ৰিয় ${name}, KS Gyan Mondir লৈ তোমাক স্বাগতম। তুমি আমাৰ লগত জড়িত হোৱাটো আমাৰ বাবে আনন্দৰ কথা। তোমাৰ লক্ষ্য পূৰণৰ বাবে আমি সদায় তোমাক সহায় কৰিম। তোমাৰ উজ্জ্বল ভৱিষ্যতৰ বাবে শুভেচ্ছা থাকিল।`;
-                db.ref(`messages/${ph}`).push({ text: msg, time: new Date().toLocaleString() });
-                showToast("অনুমোদন কৰা হ'ল আৰু বাৰ্তা প্ৰেৰণ কৰা হ'ল!");
-            }
-        });
-    }
+    // এইটো আগৰ handleApprove ফাংচনটোৰ সলনি দিয়ক
+function handleApprove(ph, name, status) {
+    db.ref('students/' + ph).update({ active: status }).then(() => {
+        if(status === true) {
+            // ১. এপৰ ভিতৰত ইনবক্স মেচেজ পঠোৱা (আগৰ দৰেই)
+            const msg = `প্ৰিয় ${name}, KS Gyan Mondir লৈ তোমাক স্বাগতম। তুমি এতিয়া লগইন কৰিব পাৰিবা।`;
+            db.ref(`messages/${ph}`).push({ text: msg, time: new Date().toLocaleString() });
+            
+            // ২. [নতুন] এডমিনৰ হোৱাটছএপ খুলি ছাত্ৰজনলৈ মেচেজ পঠিয়াব
+            // মন কৰিব: ফোন নম্বৰৰ আগত 91 যোগ কৰা হৈছে
+            const waMsg = `নমস্কাৰ ${name}, তোমাৰ KS Gyan Mondir একাউণ্টটো Approve কৰা হ'ল। তুমি এতিয়া লগইন কৰিব পাৰিবা।`;
+            
+            // এইটোৱে WhatsApp খুলি দিব
+            window.location.href = `https://wa.me/91${ph}?text=${encodeURIComponent(waMsg)}`;
+
+            showToast("অনুমোদন কৰা হ'ল! WhatsApp ত মেচেজ পঠিয়াওক।");
+        } else {
+             showToast("ছাত্ৰজনক Lock কৰা হ'ল!");
+        }
+    });
+}
 
     function sendDirectMsg(ph) {
         const txt = document.getElementById('direct-msg-' + ph).value; if(txt) db.ref(`messages/${ph}`).push({ text: "ADMIN: " + txt, time: new Date().toLocaleString() }).then(() => { document.getElementById('direct-msg-' + ph).value = ""; showToast("Message sent!"); });
@@ -516,5 +528,6 @@
 </script>
 </body>
 </html>
+
 
 
