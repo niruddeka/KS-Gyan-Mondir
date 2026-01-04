@@ -2,14 +2,14 @@
 <html lang="as">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>KS GYAN MONDIR</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        body { font-family: 'Hind Siliguri', sans-serif; background: #f1f5f9; margin: 0; padding-bottom: 60px; overscroll-behavior-y: contain; }
+        body { font-family: 'Hind Siliguri', sans-serif; background: #f1f5f9; margin: 0; padding-bottom: 60px; overscroll-behavior-y: contain; user-select: none; -webkit-tap-highlight-color: transparent; }
         .hidden { display: none !important; }
         .glass-card { background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
         .input-box { width: 100%; padding: 14px; border: 2.5px solid #cbd5e1; border-radius: 12px; outline: none; margin-bottom: 12px; font-size: 14px; }
@@ -32,10 +32,14 @@
         #custom-toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
         @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+        
+        /* Modal Transition */
+        .modal-overlay { transition: opacity 0.2s ease; }
     </style>
 </head>
 <body>
-<div id="custom-toast"></div> <header class="shadow-xl flex items-center justify-between sticky top-0 z-50">
+<div id="custom-toast"></div> 
+<header class="shadow-xl flex items-center justify-between sticky top-0 z-50">
     <div class="flex items-center gap-4">
         <img id="main-logo" src="https://via.placeholder.com/100" class="w-10 h-10 rounded-full border-2 border-white bg-white object-cover">
         <h1 class="text-lg font-black tracking-tighter text-white uppercase">KS GYAN MONDIR</h1>
@@ -117,7 +121,7 @@
 
 <main id="quiz-list-screen" class="container mx-auto p-4 hidden">
     <div class="flex justify-between items-center mb-6">
-        <button onclick="history.back()" class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs font-bold">⬅️ Back</button>
+        <button onclick="closeModalDirect()" class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs font-bold">⬅️ Back</button>
         <h2 class="font-black text-indigo-900 text-lg uppercase">All Quizzes</h2>
     </div>
     <div id="student-quiz-list" class="space-y-4"></div>
@@ -125,7 +129,7 @@
 
 <main id="quiz-play-screen" class="container mx-auto p-4 hidden">
     <div class="flex justify-between items-center mb-4">
-        <button onclick="history.back()" class="bg-red-500 text-white px-3 py-1 rounded text-[10px] font-bold">Cancel Quiz</button>
+        <button onclick="closeModalDirect()" class="bg-red-500 text-white px-3 py-1 rounded text-[10px] font-bold">Cancel Quiz</button>
         <h2 id="play-quiz-title" class="font-bold text-indigo-900 text-sm">Quiz Title</h2>
     </div>
     <div id="quiz-questions-area" class="pb-20"></div>
@@ -236,7 +240,7 @@
         <h3 class="font-black text-indigo-900 text-lg mb-4 uppercase tracking-tighter">Ask a Doubt</h3>
         <textarea id="doubt-input" class="input-box h-32" placeholder="তোমাৰ প্ৰশ্নটো ইয়াত লিখা..."></textarea>
         <div class="flex gap-2">
-            <button onclick="history.back()" class="bg-red-500 text-white py-2 rounded-xl flex-1 font-bold uppercase text-xs">Cancel</button>
+            <button onclick="closeModalDirect()" class="bg-red-500 text-white py-2 rounded-xl flex-1 font-bold uppercase text-xs">Cancel</button>
             <button onclick="submitDoubt()" class="bg-indigo-600 text-white py-2 rounded-xl flex-1 font-bold uppercase text-xs shadow-lg">Send Doubt</button>
         </div>
     </div>
@@ -249,7 +253,7 @@
 <div id="inbox-modal" class="modal-overlay hidden fixed inset-0 bg-white z-[200] p-6 flex flex-col">
     <h2 class="font-black text-xl mb-4 border-b pb-2 uppercase tracking-tighter">My Inbox</h2>
     <div id="inbox-list" class="flex-1 overflow-auto"></div>
-    <button onclick="history.back()" class="btn-3d mt-4 shadow-xl">Close</button>
+    <button onclick="closeModalDirect()" class="btn-3d mt-4 shadow-xl">Close</button>
 </div>
 
 <div id="add-q-modal" class="modal-overlay hidden fixed inset-0 bg-black/90 z-[300] flex items-center justify-center p-4">
@@ -284,7 +288,7 @@
         <h3 class="font-black text-indigo-900 text-lg mb-2 uppercase">Submit Exam?</h3>
         <p class="text-gray-500 text-xs font-bold mb-6">Are you sure you want to finish?</p>
         <div class="flex gap-2">
-            <button onclick="history.back()" class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-xl font-black uppercase text-xs">No, Wait</button>
+            <button onclick="closeModalDirect()" class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-xl font-black uppercase text-xs">No, Wait</button>
             <button onclick="finalSubmit()" class="flex-1 bg-green-600 text-white py-3 rounded-xl font-black uppercase text-xs shadow-lg">Yes, Submit</button>
         </div>
     </div>
@@ -299,7 +303,7 @@
             <h1 id="score-display" class="text-4xl font-black text-indigo-600 my-2">0 / 0</h1>
             <p id="percent-display" class="text-sm font-bold bg-yellow-400 inline-block px-3 py-1 rounded-full text-black">0%</p>
         </div>
-        <button onclick="closeScoreModal()" class="w-full bg-green-600 text-white py-4 rounded-xl font-black uppercase shadow-lg text-sm">OK, GO BACK</button>
+        <button onclick="closeModalDirect()" class="w-full bg-green-600 text-white py-4 rounded-xl font-black uppercase shadow-lg text-sm">OK, GO BACK</button>
     </div>
 </div>
 
@@ -332,44 +336,60 @@
         const cSub = document.getElementById('c-sub');
         subjects.forEach(s => { if(cSub) cSub.innerHTML += `<option value="${s.name}">${s.name}</option>`; });
         
-        // --- 100% FIXED BACK BUTTON LOGIC ---
-        window.onpopstate = function(event) {
-            // ১. প্ৰথমে চাওক কোনো বক্স (Modal) খোলা আছে নেকি?
-            const modals = document.querySelectorAll('.modal-overlay');
-            let modalWasOpen = false;
-            modals.forEach(m => {
-                if (!m.classList.contains('hidden')) {
-                    m.classList.add('hidden'); // বক্সটো বন্ধ কৰক
-                    modalWasOpen = true; // মবাইলক জনাওক যে আমি এটা বক্স বন্ধ কৰিলো
+        // --- 100% RELIABLE HASH-BASED BACK BUTTON LOGIC ---
+        // When Back button is pressed (or URL Hash changes)
+        window.addEventListener('hashchange', function() {
+            const currentHash = window.location.hash;
+            
+            // If the hash is EMPTY (meaning user pressed back from a modal), CLOSE ALL MODALS
+            if (!currentHash || currentHash === "#") {
+                document.querySelectorAll('.modal-overlay').forEach(m => m.classList.add('hidden'));
+                document.getElementById('quiz-list-screen').classList.add('hidden'); // Special case for Quiz List
+                document.getElementById('quiz-play-screen').classList.add('hidden'); // Special case for Quiz Play
+                
+                // Ensure Home or Admin is visible if everything else is closed
+                const activeMain = document.querySelector('main:not(.hidden)');
+                if (!activeMain || activeMain.id === 'quiz-list-screen' || activeMain.id === 'quiz-play-screen') {
+                    document.getElementById('home-screen').classList.remove('hidden');
                 }
-            });
-
-            // ২. যদি বক্স বন্ধ কৰিলো, তেন্তে ইয়াতেই ৰৈ যাওক। স্ক্ৰীন সলনি নকৰিব।
-            if (modalWasOpen) {
-                return; 
+            } else {
+                // Handle opening specific screens via hash (Optional but robust)
+                if (currentHash === "#quizlist") {
+                    document.getElementById('home-screen').classList.add('hidden');
+                    document.getElementById('quiz-list-screen').classList.remove('hidden');
+                }
             }
-
-            // ৩. যদি কোনো বক্স খোলা নাছিল, তেতিয়াহে স্ক্ৰীন সলনি কৰক।
-            if(event.state && event.state.id) {
-                document.querySelectorAll('main').forEach(s => s.classList.add('hidden'));
-                document.getElementById(event.state.id).classList.remove('hidden');
-                if(event.state.id !== 'course-view') stopVideo();
-                if(['home-screen', 'admin-panel', 'course-view'].includes(event.state.id)) 
-                    document.getElementById('logout-btn').classList.remove('hidden');
-                else 
-                    document.getElementById('logout-btn').classList.add('hidden');
-            }
-        };
+        });
     };
 
+    // Use this to Open Modals and PUSH a new History Entry (so Back works)
+    function openModalWithHash(id, hashName) {
+        window.location.hash = hashName; // This adds to history stack
+        document.getElementById(id).classList.remove('hidden');
+    }
+
+    // Use this to Close Modals (Triggering Back)
+    function closeModalDirect() {
+        history.back(); // This triggers 'hashchange' which closes the modal
+    }
+
+    // --- REPLACED: showScreen now uses simple logic ---
     function showScreen(id) {
-        history.pushState({id: id}, null, "#" + id);
+        // Clear hash to prevent conflicts
+        if(window.location.hash) {
+            history.replaceState(null, null, ' ');
+        }
+        
         document.querySelectorAll('main').forEach(s => s.classList.add('hidden')); 
         document.getElementById(id).classList.remove('hidden');
         if(['home-screen', 'admin-panel', 'course-view'].includes(id)) document.getElementById('logout-btn').classList.remove('hidden');
         else document.getElementById('logout-btn').classList.add('hidden');
         if(id === 'admin-panel') { fetchStudentsAdmin(); fetchAdminDoubts(); fetchAdminQuizzes(); }
-        if(id === 'quiz-list-screen') fetchQuizzesStudent();
+        
+        if(id === 'quiz-list-screen') {
+            window.location.hash = "quizlist"; // Add to history
+            fetchQuizzesStudent();
+        }
     }
 
     function loginAuto(ph) { 
@@ -399,7 +419,16 @@
 
     function openSubject(sub) {
         stopVideo();
-        const ph = localStorage.getItem('ks_student_id'); document.getElementById('current-subject-name').innerText = sub; showScreen('course-view');
+        const ph = localStorage.getItem('ks_student_id'); document.getElementById('current-subject-name').innerText = sub; 
+        
+        // Manual screen switch for Subject View (Keep it simple)
+        document.querySelectorAll('main').forEach(s => s.classList.add('hidden'));
+        document.getElementById('course-view').classList.remove('hidden');
+        document.getElementById('logout-btn').classList.remove('hidden');
+        
+        // Add hash so back button works for course view too
+        window.location.hash = "course";
+
         const listArea = document.getElementById('course-content-list');
         listArea.innerHTML = "<p class='text-center mt-5 text-gray-400'>Loading...</p>";
         db.ref(`content/${ph}/${sub}`).once('value', s => {
@@ -536,7 +565,12 @@
     let currentQuestions = [];
     function startQuiz(key, title) {
         currentQuizId = key;
-        showScreen('quiz-play-screen');
+        
+        // Manually show Quiz Play Screen
+        document.getElementById('quiz-list-screen').classList.add('hidden');
+        document.getElementById('quiz-play-screen').classList.remove('hidden');
+        window.location.hash = "quizplay"; // Add to history
+
         document.getElementById('play-quiz-title').innerText = title;
         const area = document.getElementById('quiz-questions-area');
         area.innerHTML = "<p class='text-center mt-10'>Loading Questions...</p>";
@@ -576,17 +610,13 @@
         });
     }
 
-    // --- REPLACED DEFAULT CONFIRM WITH CUSTOM MODAL + HISTORY PUSH ---
     function submitQuizAns() {
-        // Push state so back button closes this modal
-        history.pushState({modal: true}, null, "#confirm");
+        // Just show the modal
         document.getElementById('confirm-submit-modal').classList.remove('hidden');
     }
 
     function finalSubmit() {
-        // Hide Confirm modal (we handle history below)
         document.getElementById('confirm-submit-modal').classList.add('hidden');
-        history.back(); // Remove confirm state from history
         
         let score = 0;
         let total = currentQuestions.length;
@@ -615,8 +645,6 @@
                 percent: percent,
                 time: Date.now()
             }).then(() => {
-                // Show Score Modal with History State
-                history.pushState({modal: true}, null, "#score");
                 document.getElementById('quiz-score-modal').classList.remove('hidden');
                 document.getElementById('score-display').innerText = score + " / " + total;
                 document.getElementById('percent-display').innerText = percent;
@@ -627,27 +655,22 @@
     }
 
     function closeScoreModal() {
-        history.back(); // This triggers popstate to hide modal
-        showScreen('quiz-list-screen');
+        document.getElementById('quiz-score-modal').classList.add('hidden');
+        closeModalDirect(); // Go back to Quiz List (History back)
     }
 
-    // --- UPDATED: DOUBT, ID CARD, INBOX WITH HISTORY SUPPORT ---
+    // --- UPDATED: DOUBT, ID CARD, INBOX WITH HASH ---
     function openDoubtModal() {
-        history.pushState({modal: true}, null, "#doubt");
-        document.getElementById('doubt-modal').classList.remove('hidden');
+        openModalWithHash('doubt-modal', 'doubt');
     }
     
-    function closeDoubtModal() {
-        history.back(); // This triggers popstate to hide modal
-    }
-
     function submitDoubt() {
         const ph = localStorage.getItem('ks_student_id');
         const q = document.getElementById('doubt-input').value;
         if(q && q.trim() !== "") {
             db.ref(`doubts`).push({ ph: ph, question: q, time: new Date().toLocaleString() }).then(() => {
                 showToast("✅ প্ৰশ্নটো এডমিনলৈ পঠোৱা হ'ল!");
-                history.back(); // Close modal
+                closeModalDirect(); 
                 document.getElementById('doubt-input').value = "";
             }).catch(e => showToast("Error: " + e.message));
         } else {
@@ -663,22 +686,19 @@
             if(!s.exists()) listArea.innerHTML = "<p class='text-gray-400 font-bold mt-10 text-center uppercase tracking-widest'>একো নাই।</p>"; 
             else s.forEach(m => listArea.innerHTML += `<div class="bg-indigo-50 p-4 rounded-xl mb-4 border-l-4 border-indigo-600 shadow-sm relative"><p class="text-[9px] text-gray-500 mb-1">${m.val().time || ""}</p><p class="text-sm font-bold text-indigo-900 pr-8">${m.val().text}</p><button onclick="deleteMessage('${ph}', '${m.key}')" class="absolute top-2 right-2 text-red-500 font-bold p-2">✕</button></div>`);
             
-            history.pushState({modal: true}, null, "#inbox");
-            document.getElementById('inbox-modal').classList.remove('hidden');
+            openModalWithHash('inbox-modal', 'inbox');
         });
     }
 
-    function deleteMessage(ph, key) { if(confirm("Delete message?")) { db.ref(`messages/${ph}/${key}`).remove().then(() => { history.back(); showInbox(); }); } } // Refresh inbox logic
+    function deleteMessage(ph, key) { if(confirm("Delete message?")) { db.ref(`messages/${ph}/${key}`).remove().then(() => { closeModalDirect(); showInbox(); }); } } 
     
     function showIDCard() { 
         const ph = localStorage.getItem('ks_student_id'); 
         db.ref('students/' + ph).once('value', s => { 
             const u = s.val(); 
-            const html = `<img src="${u.studentPhoto}" class="w-24 h-24 mx-auto rounded-full border-4 border-indigo-100 object-cover mb-4"><h3 class="text-xl font-bold text-indigo-900 tracking-tighter">${u.name}</h3><p class="text-indigo-600 font-bold uppercase text-[10px]">Class ${u.cls}</p><button onclick="history.back()" class="w-full bg-gray-100 p-2 font-bold text-gray-500 uppercase text-[9px] mt-6 tracking-widest">Close</button>`; 
+            const html = `<img src="${u.studentPhoto}" class="w-24 h-24 mx-auto rounded-full border-4 border-indigo-100 object-cover mb-4"><h3 class="text-xl font-bold text-indigo-900 tracking-tighter">${u.name}</h3><p class="text-indigo-600 font-bold uppercase text-[10px]">Class ${u.cls}</p><button onclick="closeModalDirect()" class="w-full bg-gray-100 p-2 font-bold text-gray-500 uppercase text-[9px] mt-6 tracking-widest">Close</button>`; 
             document.getElementById('id-card-content').innerHTML = html;
-            
-            history.pushState({modal: true}, null, "#id-card");
-            document.getElementById('id-card-modal').classList.remove('hidden');
+            openModalWithHash('id-card-modal', 'idcard');
         }); 
     }
 
