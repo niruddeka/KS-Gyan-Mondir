@@ -494,7 +494,27 @@
         x.className = "show";
         setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
     }
+    function showToast(message) {
+        var x = document.getElementById("custom-toast");
+        x.innerHTML = message;
+        x.className = "show";
+        setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
+    }
+
+    // --- এইখিনিতে মই দিয়া নতুন ফাংচনটো পেষ্ট কৰিব --- 
+
+    function getAndroidState() {
+        if (!document.getElementById('course-view').classList.contains('hidden')) {
+            return 'VIDEO';
+        }
+        return 'EXIT';
+    }
+
 </script>
 </body>
 </html>
+</script>
+</body>
+</html>
+
 
