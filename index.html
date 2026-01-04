@@ -33,8 +33,8 @@
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
         @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
         
-        /* Modal Transition */
-        .modal-overlay { transition: opacity 0.2s ease; }
+        /* Modal Overlay Style */
+        .modal-overlay { z-index: 9999; }
     </style>
 </head>
 <body>
@@ -121,7 +121,7 @@
 
 <main id="quiz-list-screen" class="container mx-auto p-4 hidden">
     <div class="flex justify-between items-center mb-6">
-        <button onclick="closeModalDirect()" class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs font-bold">⬅️ Back</button>
+        <button onclick="history.back()" class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs font-bold">⬅️ Back</button>
         <h2 class="font-black text-indigo-900 text-lg uppercase">All Quizzes</h2>
     </div>
     <div id="student-quiz-list" class="space-y-4"></div>
@@ -129,7 +129,7 @@
 
 <main id="quiz-play-screen" class="container mx-auto p-4 hidden">
     <div class="flex justify-between items-center mb-4">
-        <button onclick="closeModalDirect()" class="bg-red-500 text-white px-3 py-1 rounded text-[10px] font-bold">Cancel Quiz</button>
+        <button onclick="history.back()" class="bg-red-500 text-white px-3 py-1 rounded text-[10px] font-bold">Cancel Quiz</button>
         <h2 id="play-quiz-title" class="font-bold text-indigo-900 text-sm">Quiz Title</h2>
     </div>
     <div id="quiz-questions-area" class="pb-20"></div>
@@ -240,7 +240,7 @@
         <h3 class="font-black text-indigo-900 text-lg mb-4 uppercase tracking-tighter">Ask a Doubt</h3>
         <textarea id="doubt-input" class="input-box h-32" placeholder="তোমাৰ প্ৰশ্নটো ইয়াত লিখা..."></textarea>
         <div class="flex gap-2">
-            <button onclick="closeModalDirect()" class="bg-red-500 text-white py-2 rounded-xl flex-1 font-bold uppercase text-xs">Cancel</button>
+            <button onclick="history.back()" class="bg-red-500 text-white py-2 rounded-xl flex-1 font-bold uppercase text-xs">Cancel</button>
             <button onclick="submitDoubt()" class="bg-indigo-600 text-white py-2 rounded-xl flex-1 font-bold uppercase text-xs shadow-lg">Send Doubt</button>
         </div>
     </div>
@@ -253,7 +253,7 @@
 <div id="inbox-modal" class="modal-overlay hidden fixed inset-0 bg-white z-[200] p-6 flex flex-col">
     <h2 class="font-black text-xl mb-4 border-b pb-2 uppercase tracking-tighter">My Inbox</h2>
     <div id="inbox-list" class="flex-1 overflow-auto"></div>
-    <button onclick="closeModalDirect()" class="btn-3d mt-4 shadow-xl">Close</button>
+    <button onclick="history.back()" class="btn-3d mt-4 shadow-xl">Close</button>
 </div>
 
 <div id="add-q-modal" class="modal-overlay hidden fixed inset-0 bg-black/90 z-[300] flex items-center justify-center p-4">
@@ -288,7 +288,7 @@
         <h3 class="font-black text-indigo-900 text-lg mb-2 uppercase">Submit Exam?</h3>
         <p class="text-gray-500 text-xs font-bold mb-6">Are you sure you want to finish?</p>
         <div class="flex gap-2">
-            <button onclick="closeModalDirect()" class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-xl font-black uppercase text-xs">No, Wait</button>
+            <button onclick="history.back()" class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-xl font-black uppercase text-xs">No, Wait</button>
             <button onclick="finalSubmit()" class="flex-1 bg-green-600 text-white py-3 rounded-xl font-black uppercase text-xs shadow-lg">Yes, Submit</button>
         </div>
     </div>
@@ -303,7 +303,7 @@
             <h1 id="score-display" class="text-4xl font-black text-indigo-600 my-2">0 / 0</h1>
             <p id="percent-display" class="text-sm font-bold bg-yellow-400 inline-block px-3 py-1 rounded-full text-black">0%</p>
         </div>
-        <button onclick="closeModalDirect()" class="w-full bg-green-600 text-white py-4 rounded-xl font-black uppercase shadow-lg text-sm">OK, GO BACK</button>
+        <button onclick="closeScoreModal()" class="w-full bg-green-600 text-white py-4 rounded-xl font-black uppercase shadow-lg text-sm">OK, GO BACK</button>
     </div>
 </div>
 
@@ -336,64 +336,72 @@
         const cSub = document.getElementById('c-sub');
         subjects.forEach(s => { if(cSub) cSub.innerHTML += `<option value="${s.name}">${s.name}</option>`; });
         
-        // --- 100% RELIABLE HASH-BASED BACK BUTTON LOGIC ---
-        // When Back button is pressed (or URL Hash changes)
-        window.addEventListener('hashchange', function() {
-            const currentHash = window.location.hash;
-            
-            // If the hash is EMPTY (meaning user pressed back from a modal), CLOSE ALL MODALS
-            if (!currentHash || currentHash === "#") {
-                document.querySelectorAll('.modal-overlay').forEach(m => m.classList.add('hidden'));
-                document.getElementById('quiz-list-screen').classList.add('hidden'); // Special case for Quiz List
-                document.getElementById('quiz-play-screen').classList.add('hidden'); // Special case for Quiz Play
-                
-                // Ensure Home or Admin is visible if everything else is closed
-                const activeMain = document.querySelector('main:not(.hidden)');
-                if (!activeMain || activeMain.id === 'quiz-list-screen' || activeMain.id === 'quiz-play-screen') {
+        // --- 100% RELIABLE BACK BUTTON LOGIC ---
+        // This is the "Master Logic" that controls back button behavior
+        window.onpopstate = function(event) {
+            // 1. Check if any modal is open. If yes, CLOSE IT and do nothing else.
+            const modals = document.querySelectorAll('.modal-overlay:not(.hidden)');
+            if (modals.length > 0) {
+                modals.forEach(m => m.classList.add('hidden'));
+                return; // Stop here! Don't change screens.
+            }
+
+            // 2. If no modal was open, handle screen changes.
+            if(event.state && event.state.id) {
+                // If the history state says "go to X screen", do it.
+                if (event.state.id === 'home-screen') {
+                    // Special case: If back to home, show home
+                    document.querySelectorAll('main').forEach(s => s.classList.add('hidden'));
                     document.getElementById('home-screen').classList.remove('hidden');
+                    document.getElementById('logout-btn').classList.remove('hidden');
+                } else {
+                    // Go to other screens
+                    document.querySelectorAll('main').forEach(s => s.classList.add('hidden'));
+                    document.getElementById(event.state.id).classList.remove('hidden');
+                    if(event.state.id !== 'course-view') stopVideo();
                 }
             } else {
-                // Handle opening specific screens via hash (Optional but robust)
-                if (currentHash === "#quizlist") {
-                    document.getElementById('home-screen').classList.add('hidden');
-                    document.getElementById('quiz-list-screen').classList.remove('hidden');
-                }
+                // Fallback: If history is empty/unknown, show Home Screen
+                document.querySelectorAll('main').forEach(s => s.classList.add('hidden'));
+                document.getElementById('home-screen').classList.remove('hidden');
+                document.getElementById('logout-btn').classList.remove('hidden');
             }
-        });
+        };
     };
 
-    // Use this to Open Modals and PUSH a new History Entry (so Back works)
-    function openModalWithHash(id, hashName) {
-        window.location.hash = hashName; // This adds to history stack
-        document.getElementById(id).classList.remove('hidden');
+    // --- HELPER TO OPEN MODALS & PUSH STATE ---
+    function openModalWithState(modalId) {
+        document.getElementById(modalId).classList.remove('hidden');
+        // Push a "fake" state so the Back button has something to pop
+        history.pushState({modal: true}, null, ""); 
     }
 
-    // Use this to Close Modals (Triggering Back)
-    function closeModalDirect() {
-        history.back(); // This triggers 'hashchange' which closes the modal
-    }
-
-    // --- REPLACED: showScreen now uses simple logic ---
+    // --- SCREEN NAVIGATION ---
     function showScreen(id) {
-        // Clear hash to prevent conflicts
-        if(window.location.hash) {
-            history.replaceState(null, null, ' ');
+        // Only push state if we are NOT going to home (Home is default)
+        if (id !== 'home-screen') {
+            history.pushState({id: id}, null, "");
+        } else {
+            // If going home, replace state to keep history clean
+            history.replaceState({id: 'home-screen'}, null, "");
         }
         
         document.querySelectorAll('main').forEach(s => s.classList.add('hidden')); 
         document.getElementById(id).classList.remove('hidden');
+        
         if(['home-screen', 'admin-panel', 'course-view'].includes(id)) document.getElementById('logout-btn').classList.remove('hidden');
         else document.getElementById('logout-btn').classList.add('hidden');
-        if(id === 'admin-panel') { fetchStudentsAdmin(); fetchAdminDoubts(); fetchAdminQuizzes(); }
         
-        if(id === 'quiz-list-screen') {
-            window.location.hash = "quizlist"; // Add to history
-            fetchQuizzesStudent();
-        }
+        if(id === 'admin-panel') { fetchStudentsAdmin(); fetchAdminDoubts(); fetchAdminQuizzes(); }
+        if(id === 'quiz-list-screen') fetchQuizzesStudent();
     }
 
     function loginAuto(ph) { 
-        showScreen('home-screen'); 
+        // Set initial state as Home
+        history.replaceState({id: 'home-screen'}, null, "");
+        document.getElementById('home-screen').classList.remove('hidden');
+        document.getElementById('logout-btn').classList.remove('hidden');
+        
         db.ref('students/' + ph).on('value', s => { 
             const u = s.val(); 
             if(!u || !u.active) { 
@@ -419,16 +427,7 @@
 
     function openSubject(sub) {
         stopVideo();
-        const ph = localStorage.getItem('ks_student_id'); document.getElementById('current-subject-name').innerText = sub; 
-        
-        // Manual screen switch for Subject View (Keep it simple)
-        document.querySelectorAll('main').forEach(s => s.classList.add('hidden'));
-        document.getElementById('course-view').classList.remove('hidden');
-        document.getElementById('logout-btn').classList.remove('hidden');
-        
-        // Add hash so back button works for course view too
-        window.location.hash = "course";
-
+        const ph = localStorage.getItem('ks_student_id'); document.getElementById('current-subject-name').innerText = sub; showScreen('course-view');
         const listArea = document.getElementById('course-content-list');
         listArea.innerHTML = "<p class='text-center mt-5 text-gray-400'>Loading...</p>";
         db.ref(`content/${ph}/${sub}`).once('value', s => {
@@ -565,12 +564,7 @@
     let currentQuestions = [];
     function startQuiz(key, title) {
         currentQuizId = key;
-        
-        // Manually show Quiz Play Screen
-        document.getElementById('quiz-list-screen').classList.add('hidden');
-        document.getElementById('quiz-play-screen').classList.remove('hidden');
-        window.location.hash = "quizplay"; // Add to history
-
+        showScreen('quiz-play-screen');
         document.getElementById('play-quiz-title').innerText = title;
         const area = document.getElementById('quiz-questions-area');
         area.innerHTML = "<p class='text-center mt-10'>Loading Questions...</p>";
@@ -611,12 +605,12 @@
     }
 
     function submitQuizAns() {
-        // Just show the modal
-        document.getElementById('confirm-submit-modal').classList.remove('hidden');
+        openModalWithState('confirm-submit-modal');
     }
 
     function finalSubmit() {
-        document.getElementById('confirm-submit-modal').classList.add('hidden');
+        // Close confirm modal manually first (triggers history back)
+        history.back(); 
         
         let score = 0;
         let total = currentQuestions.length;
@@ -645,9 +639,10 @@
                 percent: percent,
                 time: Date.now()
             }).then(() => {
-                document.getElementById('quiz-score-modal').classList.remove('hidden');
+                // Open Score Modal with new state
                 document.getElementById('score-display').innerText = score + " / " + total;
                 document.getElementById('percent-display').innerText = percent;
+                openModalWithState('quiz-score-modal');
             }).catch(e => {
                 showToast("Error saving result: " + e.message);
             });
@@ -655,13 +650,13 @@
     }
 
     function closeScoreModal() {
-        document.getElementById('quiz-score-modal').classList.add('hidden');
-        closeModalDirect(); // Go back to Quiz List (History back)
+        // Go back 2 steps: 1 for Modal, 1 for Quiz List
+        history.go(-2); 
     }
 
-    // --- UPDATED: DOUBT, ID CARD, INBOX WITH HASH ---
+    // --- UPDATED FUNCTIONS USING openModalWithState ---
     function openDoubtModal() {
-        openModalWithHash('doubt-modal', 'doubt');
+        openModalWithState('doubt-modal');
     }
     
     function submitDoubt() {
@@ -670,7 +665,7 @@
         if(q && q.trim() !== "") {
             db.ref(`doubts`).push({ ph: ph, question: q, time: new Date().toLocaleString() }).then(() => {
                 showToast("✅ প্ৰশ্নটো এডমিনলৈ পঠোৱা হ'ল!");
-                closeModalDirect(); 
+                history.back(); // Close Modal
                 document.getElementById('doubt-input').value = "";
             }).catch(e => showToast("Error: " + e.message));
         } else {
@@ -686,19 +681,19 @@
             if(!s.exists()) listArea.innerHTML = "<p class='text-gray-400 font-bold mt-10 text-center uppercase tracking-widest'>একো নাই।</p>"; 
             else s.forEach(m => listArea.innerHTML += `<div class="bg-indigo-50 p-4 rounded-xl mb-4 border-l-4 border-indigo-600 shadow-sm relative"><p class="text-[9px] text-gray-500 mb-1">${m.val().time || ""}</p><p class="text-sm font-bold text-indigo-900 pr-8">${m.val().text}</p><button onclick="deleteMessage('${ph}', '${m.key}')" class="absolute top-2 right-2 text-red-500 font-bold p-2">✕</button></div>`);
             
-            openModalWithHash('inbox-modal', 'inbox');
+            openModalWithState('inbox-modal');
         });
     }
 
-    function deleteMessage(ph, key) { if(confirm("Delete message?")) { db.ref(`messages/${ph}/${key}`).remove().then(() => { closeModalDirect(); showInbox(); }); } } 
+    function deleteMessage(ph, key) { if(confirm("Delete message?")) { db.ref(`messages/${ph}/${key}`).remove().then(() => { history.back(); showInbox(); }); } } 
     
     function showIDCard() { 
         const ph = localStorage.getItem('ks_student_id'); 
         db.ref('students/' + ph).once('value', s => { 
             const u = s.val(); 
-            const html = `<img src="${u.studentPhoto}" class="w-24 h-24 mx-auto rounded-full border-4 border-indigo-100 object-cover mb-4"><h3 class="text-xl font-bold text-indigo-900 tracking-tighter">${u.name}</h3><p class="text-indigo-600 font-bold uppercase text-[10px]">Class ${u.cls}</p><button onclick="closeModalDirect()" class="w-full bg-gray-100 p-2 font-bold text-gray-500 uppercase text-[9px] mt-6 tracking-widest">Close</button>`; 
+            const html = `<img src="${u.studentPhoto}" class="w-24 h-24 mx-auto rounded-full border-4 border-indigo-100 object-cover mb-4"><h3 class="text-xl font-bold text-indigo-900 tracking-tighter">${u.name}</h3><p class="text-indigo-600 font-bold uppercase text-[10px]">Class ${u.cls}</p><button onclick="history.back()" class="w-full bg-gray-100 p-2 font-bold text-gray-500 uppercase text-[9px] mt-6 tracking-widest">Close</button>`; 
             document.getElementById('id-card-content').innerHTML = html;
-            openModalWithHash('id-card-modal', 'idcard');
+            openModalWithState('id-card-modal');
         }); 
     }
 
