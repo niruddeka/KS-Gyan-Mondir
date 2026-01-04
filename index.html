@@ -234,8 +234,7 @@
 
     function showScreen(id) {
         // --- NEW: Push History State ---
-        history.pushState({id: id}, null, null);
-
+        history.pushState({id: id}, null, "#" + id);
         document.querySelectorAll('main').forEach(s => s.classList.add('hidden')); 
         document.getElementById(id).classList.remove('hidden');
         if(['home-screen', 'admin-panel', 'course-view'].includes(id)) document.getElementById('logout-btn').classList.remove('hidden');
@@ -498,3 +497,4 @@
 </script>
 </body>
 </html>
+
