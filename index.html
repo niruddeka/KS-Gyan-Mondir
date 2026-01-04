@@ -19,7 +19,6 @@
         .subject-card { background: white; border-radius: 20px; padding: 15px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 2px solid white; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 110px; cursor: pointer; }
         .dash-icon { background: white; padding: 20px; border-radius: 20px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: flex; flex-direction: column; align-items: center; cursor: pointer; }
         
-        /* Scrolling Animation Styles */
         .marquee-wrapper { overflow: hidden; white-space: nowrap; position: relative; width: 100%; }
         .animate-marquee { display: inline-block; padding-left: 100%; animation: scroll-left 15s linear infinite; }
         @keyframes scroll-left { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
@@ -158,7 +157,13 @@
 
     <div class="glass-card p-5 mb-8 border-l-8 border-purple-600 shadow-lg">
         <h3 class="text-[10px] font-black uppercase mb-4 text-purple-700 tracking-widest">Manage Quizzes</h3>
-        <input id="new-quiz-title" placeholder="Quiz Title (e.g. Class 10 Science Test)" class="input-box text-xs">
+        <input id="new-quiz-title" placeholder="Quiz Title (e.g. Science Test)" class="input-box text-xs">
+        
+        <select id="new-quiz-class" class="input-box text-xs font-bold bg-purple-50">
+            <option value="All">All Classes (For GK etc.)</option>
+            <script>for(let i=3; i<=12; i++) document.write(`<option value="${i}">Class ${i}</option>`);</script>
+        </select>
+        
         <button onclick="createQuiz()" class="bg-purple-600 text-white w-full py-3 rounded-xl text-xs font-black uppercase shadow-md mb-6">Create New Quiz</button>
         <div id="admin-quiz-list" class="space-y-3"></div>
     </div>
@@ -270,7 +275,6 @@
     const db = firebase.database();
     
     let currentUPI = "", activeAdminPIN = "", adminWA = "", clicks = 0;
-    // Current working variables
     let currentQuizId = null; 
 
     const subjects = [ { name: "অসমীয়া", icon: "📚" }, { name: "ইংৰাজী", icon: "🅰️" }, { name: "গণিত", icon: "🧮" }, { name: "বিজ্ঞান", icon: "🔬" }, { name: "সমাজ বিজ্ঞান", icon: "🌍" }, { name: "হিন্দী", icon: "🕉️" }, { name: "সংস্কৃত", icon: "✡️" }, { name: "ঐচ্ছিক গণিত", icon: "📐" }, { name: "নীতিশিক্ষা", icon: "🪷" }, { name: "সকলো বিষয়", icon: "🎒" } ];
@@ -359,13 +363,20 @@
         });
     }
 
-    // --- QUIZ SYSTEM FUNCTIONS ---
+    // --- UPDATED QUIZ SYSTEM (WITH CLASS TARGETING) ---
     
-    // 1. Admin: Create Quiz
+    // 1. Admin: Create Quiz with Target Class
     function createQuiz() {
         const title = document.getElementById('new-quiz-title').value;
+        const targetClass = document.getElementById('new-quiz-class').value; // Get Selected Class
+        
         if(!title) return showToast("Quiz Title is required!");
-        db.ref('quizzes').push({ title: title, active: true }).then(() => {
+        
+        db.ref('quizzes').push({ 
+            title: title, 
+            targetClass: targetClass, // Save Target Class
+            active: true 
+        }).then(() => {
             document.getElementById('new-quiz-title').value = "";
             showToast("Quiz Created!");
         });
@@ -378,9 +389,13 @@
             if(!s.exists()) return;
             s.forEach(q => {
                 const quiz = q.val();
+                // Show Target Class in Admin List
+                const classLabel = (quiz.targetClass === 'All') ? "All Classes" : "Class " + quiz.targetClass;
+                
                 area.innerHTML += `
                 <div class="bg-white p-4 rounded-xl shadow-sm border mb-2">
-                    <h4 class="font-black text-indigo-900 text-xs mb-2 uppercase">${quiz.title}</h4>
+                    <h4 class="font-black text-indigo-900 text-xs mb-1 uppercase">${quiz.title}</h4>
+                    <p class="text-[9px] font-bold text-gray-500 mb-2 bg-gray-100 inline-block px-1 rounded">Target: ${classLabel}</p>
                     <div class="flex gap-2">
                         <button onclick="openAddQuestionModal('${q.key}')" class="bg-indigo-600 text-white px-2 py-1 rounded text-[9px] font-bold">ADD Q</button>
                         <button onclick="viewQuizResults('${q.key}')" class="bg-teal-600 text-white px-2 py-1 rounded text-[9px] font-bold">RESULTS</button>
@@ -391,7 +406,7 @@
         });
     }
 
-    // 3. Admin: Add Question
+    // 3. Admin: Add Question (Same as before)
     function openAddQuestionModal(key) {
         currentQuizId = key;
         document.getElementById('add-q-modal').classList.remove('hidden');
@@ -418,7 +433,7 @@
         });
     }
 
-    // 4. Admin: View Results
+    // 4. Admin: View Results (Same as before)
     function viewQuizResults(key) {
         document.getElementById('result-modal').classList.remove('hidden');
         const area = document.getElementById('result-list-area');
@@ -429,10 +444,8 @@
             if(!s.exists()) { area.innerHTML = "<p class='text-center font-bold'>No results yet.</p>"; return; }
             s.forEach(r => {
                 const val = r.val();
-                // Showing Score AND Percentage
                 const scoreText = val.score + " / " + val.total;
                 const percentText = val.percent;
-                
                 area.innerHTML += `
                 <div class="bg-gray-50 p-3 rounded-xl border flex justify-between items-center">
                     <div>
@@ -448,25 +461,39 @@
         });
     }
 
-    // 5. Student: List Quizzes
+    // 5. Student: List Quizzes (UPDATED WITH FILTERING)
     function fetchQuizzesStudent() {
-        db.ref('quizzes').on('value', s => {
-            const area = document.getElementById('student-quiz-list'); area.innerHTML = "";
-            if(!s.exists()) { area.innerHTML = "<p class='text-center mt-10'>No Quizzes Available.</p>"; return; }
-            s.forEach(q => {
-                const val = q.val();
-                if(val.active) {
-                    area.innerHTML += `
-                    <div onclick="startQuiz('${q.key}', '${val.title}')" class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-indigo-500 cursor-pointer active:scale-95 transition">
-                        <h3 class="font-black text-indigo-900 uppercase text-sm">${val.title}</h3>
-                        <p class="text-[10px] text-gray-500 font-bold mt-1">Tap to Start Exam</p>
-                    </div>`;
-                }
+        const ph = localStorage.getItem('ks_student_id');
+        
+        // First get student's class
+        db.ref('students/' + ph).once('value', st => {
+            const studentData = st.val();
+            const studentClass = studentData.cls; // e.g., "10"
+            
+            db.ref('quizzes').on('value', s => {
+                const area = document.getElementById('student-quiz-list'); area.innerHTML = "";
+                if(!s.exists()) { area.innerHTML = "<p class='text-center mt-10'>No Quizzes Available.</p>"; return; }
+                
+                let found = false;
+                s.forEach(q => {
+                    const val = q.val();
+                    // FILTER LOGIC: Show if Active AND (Target is 'All' OR Target matches Student Class)
+                    if(val.active && (val.targetClass === 'All' || val.targetClass == studentClass)) {
+                        found = true;
+                        area.innerHTML += `
+                        <div onclick="startQuiz('${q.key}', '${val.title}')" class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-indigo-500 cursor-pointer active:scale-95 transition">
+                            <h3 class="font-black text-indigo-900 uppercase text-sm">${val.title}</h3>
+                            <p class="text-[10px] text-gray-500 font-bold mt-1">Tap to Start Exam</p>
+                        </div>`;
+                    }
+                });
+                
+                if(!found) area.innerHTML = "<p class='text-center mt-10 text-gray-500 font-bold'>No quizzes for your class yet.</p>";
             });
         });
     }
 
-    // 6. Student: Play Quiz
+    // 6. Student: Play Quiz (Same as before)
     let currentQuestions = [];
     function startQuiz(key, title) {
         currentQuizId = key;
@@ -542,8 +569,6 @@
             });
         }
     }
-
-    // --- OTHER FUNCTIONS ---
 
     function openDoubtModal() {
         document.getElementById('doubt-modal').classList.remove('hidden');
