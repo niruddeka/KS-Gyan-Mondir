@@ -9,7 +9,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        body { font-family: 'Hind Siliguri', sans-serif; background: #f1f5f9; margin: 0; padding-bottom: 60px; }
+        body { font-family: 'Hind Siliguri', sans-serif; background: #f1f5f9; margin: 0; padding-bottom: 60px; overscroll-behavior-y: contain; }
         .hidden { display: none !important; }
         .glass-card { background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
         .input-box { width: 100%; padding: 14px; border: 2.5px solid #cbd5e1; border-radius: 12px; outline: none; margin-bottom: 12px; font-size: 14px; }
@@ -158,10 +158,12 @@
     <div class="glass-card p-5 mb-8 border-l-8 border-purple-600 shadow-lg">
         <h3 class="text-[10px] font-black uppercase mb-4 text-purple-700 tracking-widest">Manage Quizzes</h3>
         <input id="new-quiz-title" placeholder="Quiz Title (e.g. Science Test)" class="input-box text-xs">
+        
         <select id="new-quiz-class" class="input-box text-xs font-bold bg-purple-50">
             <option value="All">All Classes (For GK etc.)</option>
             <script>for(let i=3; i<=12; i++) document.write(`<option value="${i}">Class ${i}</option>`);</script>
         </select>
+        
         <button onclick="createQuiz()" class="bg-purple-600 text-white w-full py-3 rounded-xl text-xs font-black uppercase shadow-md mb-6">Create New Quiz</button>
         <div id="admin-quiz-list" class="space-y-3"></div>
     </div>
@@ -330,23 +332,24 @@
         const cSub = document.getElementById('c-sub');
         subjects.forEach(s => { if(cSub) cSub.innerHTML += `<option value="${s.name}">${s.name}</option>`; });
         
-        // --- FIXED BACK BUTTON LOGIC ---
-        // This listens for the back button and closes modals FIRST
-        window.addEventListener('popstate', function(event) {
-            // 1. Close ALL Modals instantly when back is pressed
+        // --- 100% FIXED BACK BUTTON LOGIC ---
+        window.onpopstate = function(event) {
+            // ১. প্ৰথমে চাওক কোনো বক্স (Modal) খোলা আছে নেকি?
             const modals = document.querySelectorAll('.modal-overlay');
-            let modalClosed = false;
+            let modalWasOpen = false;
             modals.forEach(m => {
                 if (!m.classList.contains('hidden')) {
-                    m.classList.add('hidden');
-                    modalClosed = true;
+                    m.classList.add('hidden'); // বক্সটো বন্ধ কৰক
+                    modalWasOpen = true; // মবাইলক জনাওক যে আমি এটা বক্স বন্ধ কৰিলো
                 }
             });
 
-            // If a modal was closed, stop here (don't change screen)
-            if (modalClosed) return; 
+            // ২. যদি বক্স বন্ধ কৰিলো, তেন্তে ইয়াতেই ৰৈ যাওক। স্ক্ৰীন সলনি নকৰিব।
+            if (modalWasOpen) {
+                return; 
+            }
 
-            // 2. Otherwise, handle Screen Navigation
+            // ৩. যদি কোনো বক্স খোলা নাছিল, তেতিয়াহে স্ক্ৰীন সলনি কৰক।
             if(event.state && event.state.id) {
                 document.querySelectorAll('main').forEach(s => s.classList.add('hidden'));
                 document.getElementById(event.state.id).classList.remove('hidden');
@@ -356,7 +359,7 @@
                 else 
                     document.getElementById('logout-btn').classList.add('hidden');
             }
-        });
+        };
     };
 
     function showScreen(id) {
