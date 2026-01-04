@@ -6,8 +6,10 @@
     <title>KS GYAN MONDIR</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+    
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
     <style>
         body { font-family: 'Hind Siliguri', sans-serif; background: #f1f5f9; margin: 0; padding-bottom: 60px; overscroll-behavior-y: contain; user-select: none; -webkit-tap-highlight-color: transparent; }
         .hidden { display: none !important; }
@@ -36,7 +38,9 @@
     </style>
 </head>
 <body>
+
 <div id="custom-toast"></div> 
+
 <header class="shadow-xl flex items-center justify-between sticky top-0 z-50">
     <div class="flex items-center gap-4">
         <img id="main-logo" src="https://via.placeholder.com/100" class="w-10 h-10 rounded-full border-2 border-white bg-white object-cover">
@@ -52,7 +56,7 @@
         <input id="s-phone" placeholder="মোবাইল আইডি (Phone) *" class="input-box">
         <input id="s-pass" placeholder="পাছৱৰ্ড বনোৱা *" class="input-box">
         <select id="s-class" class="input-box font-bold"><option value="">শ্ৰেণী বাচনি কৰা *</option><script>for(let i=3; i<=12; i++) document.write(`<option value="${i}">Class ${i}</option>`);</script></select>
-        <button onclick="showFeesTable()" class="w-full bg-orange-500 text-white py-2 rounded-xl font-bold text-[10px] mb-4 uppercase">মাচুল চাওক (Fee Chart)</button>
+        <button onclick="showFeesTable()" class="w-full bg-orange-500 text-white py-2 rounded-xl font-bold text-[10px] mb-4 uppercase">মাচুল চাওক</button>
         <select id="s-school" class="input-box font-bold"><option value="">বিদ্যালয় বাচনি কৰা *</option><option value="শংকৰদেৱ শিশু নিকেতন">শংকৰদেৱ শিশু নিকেতন</option><option value="চৰকাৰী বিদ্যালয়">চৰকাৰী বিদ্যালয়</option><option value="জাতীয় বিদ্যালয়">জাতীয় বিদ্যালয়</option></select>
         <div class="grid grid-cols-2 gap-2">
             <input id="s-vill" placeholder="গাঁও *" class="input-box text-xs"><input id="s-po" placeholder="ডাকঘৰ *" class="input-box text-xs">
@@ -176,7 +180,7 @@
     </div>
 
     <div class="glass-card p-5 mb-8 border-l-8 border-pink-500 shadow-lg">
-        <h3 class="text-[10px] font-black uppercase mb-4 text-pink-700 tracking-widest">📢 Broadcast Message (To All)</h3>
+        <h3 class="text-[10px] font-black uppercase mb-4 text-pink-700 tracking-widest">📢 Broadcast Message</h3>
         <textarea id="broadcast-msg" class="input-box h-20 text-xs" placeholder="মেচেজটো ইয়াত লিখা..."></textarea>
         <div class="flex gap-2">
             <select id="broadcast-target" class="input-box text-xs font-bold mb-0">
@@ -188,7 +192,7 @@
     </div>
 
     <div class="glass-card p-5 mb-8 border-l-8 border-blue-500 shadow-lg sticky top-0 z-40 bg-white/90 backdrop-blur">
-        <h3 class="text-[10px] font-black uppercase mb-2 text-blue-700 tracking-widest">🔍 Search & Filter Students</h3>
+        <h3 class="text-[10px] font-black uppercase mb-2 text-blue-700 tracking-widest">🔍 Search & Filter</h3>
         <div class="grid grid-cols-2 gap-2 mb-2">
             <input id="search-box" onkeyup="filterStudents()" placeholder="Name or Phone..." class="input-box text-xs mb-0">
             <select id="filter-class" onchange="filterStudents()" class="input-box text-xs font-bold mb-0">
@@ -200,7 +204,7 @@
         
         <div id="bulk-action-area" class="hidden grid grid-cols-2 gap-2">
             <button onclick="bulkLockDueStudents()" class="bg-red-700 text-white py-3 rounded-xl text-[9px] font-black uppercase shadow-lg border-2 border-red-900 animate-pulse">🔒 LOCK ALL</button>
-            <button onclick="bulkUnlockDueStudents()" class="bg-green-600 text-white py-3 rounded-xl text-[9px] font-black uppercase shadow-lg border-2 border-green-800">🔓 UNLOCK ALL (Undo)</button>
+            <button onclick="bulkUnlockDueStudents()" class="bg-green-600 text-white py-3 rounded-xl text-[9px] font-black uppercase shadow-lg border-2 border-green-800">🔓 UNLOCK ALL</button>
         </div>
     </div>
 
@@ -262,7 +266,7 @@
             <button onclick="uploadContent('video')" class="bg-red-600 text-white py-3 rounded-xl text-[10px] font-black">Video</button>
             <button onclick="uploadContent('pdf')" class="bg-teal-600 text-white py-3 rounded-xl text-[10px] font-black">PDF</button>
         </div>
-        <button onclick="manageContent()" class="w-full mt-4 bg-gray-800 text-white py-2 rounded-xl text-[9px] font-black">Manage (View/Delete)</button>
+        <button onclick="manageContent()" class="w-full mt-4 bg-gray-800 text-white py-2 rounded-xl text-[9px] font-black">Manage Content</button>
         <div id="manage-area" class="mt-4"></div>
     </div>
 </main>
@@ -375,17 +379,11 @@
             if(d.notif) document.getElementById('notif-text').innerText = d.notif;
         });
         db.ref('admin/fees').on('value', s => { window.feesData = s.val() || {}; });
-        
-        // --- FETCH TOTAL REVENUE ---
-        db.ref('admin/revenue').on('value', s => {
-            const total = s.val() || 0;
-            document.getElementById('stat-revenue').innerText = "₹" + total;
-        });
+        db.ref('admin/revenue').on('value', s => { document.getElementById('stat-revenue').innerText = "₹" + (s.val() || 0); });
 
         const cSub = document.getElementById('c-sub');
-        subjects.forEach(s => { if(cSub) cSub.innerHTML += `<option value="${s.name}">${s.name}</option>`; });
+        if(cSub) subjects.forEach(s => { cSub.innerHTML += `<option value="${s.name}">${s.name}</option>`; });
         
-        // --- 100% FIXED BACK BUTTON LOGIC ---
         window.onpopstate = function(event) {
             const modals = document.querySelectorAll('.modal-overlay');
             let modalWasOpen = false;
@@ -409,11 +407,6 @@
         };
     };
 
-    function openModalWithState(modalId) {
-        document.getElementById(modalId).classList.remove('hidden');
-        history.pushState({modal: true}, null, ""); 
-    }
-
     function showScreen(id) {
         if (id !== 'home-screen') {
             history.pushState({id: id}, null, "");
@@ -429,84 +422,79 @@
         if(id === 'quiz-list-screen') fetchQuizzesStudent();
     }
 
-    // --- POWER ADMIN FEATURES ---
-    
+    function doLogin() { 
+        const ph = document.getElementById('l-phone').value;
+        const ps = document.getElementById('l-pass').value;
+        if(!ph || !ps) return showToast("Enter ID and Password");
+        
+        db.ref('students/' + ph).once('value', s => { 
+            const u = s.val(); 
+            if(u && u.ps === ps) { 
+                localStorage.setItem('ks_student_id', ph); 
+                loginAuto(ph); 
+            } else {
+                showToast("Wrong ID or Password!");
+            }
+        }); 
+    }
+
+    function verifyAdminPIN() {
+        const entered = document.getElementById('adm-pass-login').value;
+        if (entered === activeAdminPIN && activeAdminPIN) {
+            showScreen('admin-panel');
+            document.getElementById('adm-pass-login').value = "";
+        } else {
+            showToast("❌ Wrong PIN!");
+        }
+    }
+
+    function loginAuto(ph) { 
+        history.replaceState({id: 'home-screen'}, null, "");
+        document.getElementById('home-screen').classList.remove('hidden');
+        document.getElementById('logout-btn').classList.remove('hidden');
+        db.ref('students/' + ph).on('value', s => { 
+            const u = s.val(); 
+            if(!u || !u.active) { 
+                document.getElementById('lock-msg').classList.remove('hidden'); 
+                document.getElementById('main-content').classList.add('hidden'); 
+            } else { 
+                document.getElementById('lock-msg').classList.add('hidden'); 
+                document.getElementById('main-content').classList.remove('hidden'); 
+                renderGrid();
+                loadInboxCount(ph); 
+                
+                const statusDiv = document.getElementById('stu-fee-stat');
+                if (u.lastPaymentDate) {
+                    const daysPassed = Math.floor((Date.now() - u.lastPaymentDate) / (1000 * 60 * 60 * 24));
+                    const daysLeft = 30 - daysPassed;
+                    if (daysLeft > 0) {
+                        statusDiv.innerHTML = `<span class="text-green-600">✅ Validity: ${daysLeft} Days Left</span>`;
+                    } else {
+                        statusDiv.innerHTML = `<span class="text-red-600 animate-pulse">🔴 Validity Expired! Pay Now</span>`;
+                    }
+                } else {
+                    statusDiv.innerHTML = `<span class="text-orange-500">⚠️ New Account - Pay Fees</span>`;
+                }
+            } 
+        }); 
+    }
+
+    function renderGrid() { 
+        const area = document.getElementById('subject-grid'); 
+        if(!area) return;
+        area.innerHTML = ""; 
+        subjects.forEach(s => { 
+            area.innerHTML += `<div onclick="openSubject('${s.name}')" class="subject-card"><div class="text-3xl mb-2">${s.icon}</div><div class="font-bold text-xs uppercase">${s.name}</div></div>`; 
+        }); 
+    }
+
     function fetchStudentsAdmin() {
         db.ref('students').on('value', s => {
             allStudentsCache = [];
             s.forEach(d => allStudentsCache.push(d.val()));
-            updateStatistics(); // Update Live Stats
+            updateStatistics();
             filterStudents();
         });
-    }
-
-    function updateStatistics() {
-        const total = allStudentsCache.length;
-        document.getElementById('stat-total').innerText = total;
-        
-        const classCounts = {};
-        allStudentsCache.forEach(u => {
-            classCounts[u.cls] = (classCounts[u.cls] || 0) + 1;
-        });
-
-        const grid = document.getElementById('stat-class-grid');
-        grid.innerHTML = "";
-        for(let i=3; i<=12; i++) {
-            const count = classCounts[i] || 0;
-            grid.innerHTML += `<div class="bg-gray-100 p-2 rounded text-center text-[10px] font-bold">Cls ${i}<br><span class="text-indigo-600 text-xs">${count}</span></div>`;
-        }
-    }
-
-    function toggleDueFilter() {
-        showDueOnly = !showDueOnly;
-        const btn = document.getElementById('btn-due-filter');
-        const bulkArea = document.getElementById('bulk-action-area');
-        
-        if(showDueOnly) {
-            btn.classList.remove('bg-gray-200', 'text-gray-700');
-            btn.classList.add('bg-red-600', 'text-white');
-            btn.innerText = "Showing: FEES DUE ONLY (Tap to Reset)";
-            bulkArea.classList.remove('hidden'); 
-        } else {
-            btn.classList.add('bg-gray-200', 'text-gray-700');
-            btn.classList.remove('bg-red-600', 'text-white');
-            btn.innerText = "Show Fees Due Only";
-            bulkArea.classList.add('hidden'); 
-        }
-        filterStudents();
-    }
-
-    function bulkLockDueStudents() {
-        let duePhones = [];
-        allStudentsCache.forEach(u => {
-            let isDue = false;
-            if (u.lastPaymentDate) {
-                const days = Math.floor((Date.now() - u.lastPaymentDate) / (1000 * 60 * 60 * 24));
-                if (days > 30) isDue = true;
-            } else { isDue = true; }
-            if(isDue && u.active) duePhones.push(u.ph);
-        });
-
-        if(duePhones.length === 0) return showToast("No active students with fees due!");
-
-        if(confirm(`⚠️ WARNING: Are you sure you want to LOCK ${duePhones.length} students?`)) {
-            let updates = {};
-            duePhones.forEach(ph => { updates[`students/${ph}/active`] = false; });
-            db.ref().update(updates).then(() => { showToast(`✅ Locked ${duePhones.length} Students!`); });
-        }
-    }
-
-    function bulkUnlockDueStudents() {
-        if(confirm(`⚠️ Are you sure you want to UNLOCK everyone currently shown in this list?`)) {
-            let updates = {};
-            const filterClass = document.getElementById('filter-class').value;
-            allStudentsCache.forEach(u => {
-                if(filterClass === "All" || u.cls == filterClass) {
-                    updates[`students/${u.ph}/active`] = true;
-                }
-            });
-            db.ref().update(updates).then(() => { showToast(`✅ Unlocked Selected Students!`); });
-        }
     }
 
     function filterStudents() {
@@ -567,88 +555,30 @@
         if(area.innerHTML === "") area.innerHTML = "<p class='text-center text-gray-400'>No students found.</p>";
     }
 
-    function sendBroadcast() {
-        const msg = document.getElementById('broadcast-msg').value;
-        const target = document.getElementById('broadcast-target').value;
-        
-        if(!msg) return showToast("Message cannot be empty!");
-        if(!confirm(`Send this message to ${target}?`)) return;
-
-        let count = 0;
-        allStudentsCache.forEach(u => {
-            if(target === "All" || u.cls == target) {
-                db.ref(`messages/${u.ph}`).push({ text: "📢 NOTICE: " + msg, time: new Date().toLocaleString() });
-                count++;
-            }
-        });
-        
-        showToast(`Sent to ${count} students!`);
-        document.getElementById('broadcast-msg').value = "";
-    }
-
-    // --- UPDATED CONFIRM FEE (AUTO UNLOCK + MONEY TRACKER) ---
     function confirmFee(ph) {
         let amount = prompt("Enter Amount Received (₹):", "");
         if(amount && !isNaN(amount)) {
-            // 1. Update Student
-            db.ref('students/' + ph).update({ 
-                lastPaymentDate: Date.now(),
-                active: true 
-            });
-
-            // 2. Update Total Revenue
+            db.ref('students/' + ph).update({ lastPaymentDate: Date.now(), active: true });
             db.ref('admin/revenue').once('value', s => {
                 let current = parseInt(s.val() || 0);
-                let newTotal = current + parseInt(amount);
-                db.ref('admin/revenue').set(newTotal);
+                db.ref('admin/revenue').set(current + parseInt(amount));
             });
-
-            showToast("Payment Confirmed & Revenue Updated!");
+            showToast("Payment Confirmed!");
         } else if (amount !== null) {
             showToast("Invalid Amount!");
         }
     }
 
-    // --- STANDARD FUNCTIONS ---
-    function loginAuto(ph) { 
-        history.replaceState({id: 'home-screen'}, null, "");
-        document.getElementById('home-screen').classList.remove('hidden');
-        document.getElementById('logout-btn').classList.remove('hidden');
-        db.ref('students/' + ph).on('value', s => { 
-            const u = s.val(); 
-            if(!u || !u.active) { 
-                document.getElementById('lock-msg').classList.remove('hidden'); 
-                document.getElementById('main-content').classList.add('hidden'); 
-            } else { 
-                document.getElementById('lock-msg').classList.add('hidden'); 
-                document.getElementById('main-content').classList.remove('hidden'); 
-                renderGrid();
-                loadInboxCount(ph); 
-                
-                // STUDENT FEE STATUS DISPLAY
-                const statusDiv = document.getElementById('stu-fee-stat');
-                if (u.lastPaymentDate) {
-                    const daysPassed = Math.floor((Date.now() - u.lastPaymentDate) / (1000 * 60 * 60 * 24));
-                    const daysLeft = 30 - daysPassed;
-                    if (daysLeft > 0) {
-                        statusDiv.innerHTML = `<span class="text-green-600">✅ Validity: ${daysLeft} Days Left</span>`;
-                    } else {
-                        statusDiv.innerHTML = `<span class="text-red-600 animate-pulse">🔴 Validity Expired! Pay Now</span>`;
-                    }
-                } else {
-                    statusDiv.innerHTML = `<span class="text-orange-500">⚠️ New Account - Pay Fees</span>`;
-                }
-            } 
-        }); 
-    }
-
-    function renderGrid() { 
-        const area = document.getElementById('subject-grid'); 
-        if(!area) return;
-        area.innerHTML = ""; 
-        subjects.forEach(s => { 
-            area.innerHTML += `<div onclick="openSubject('${s.name}')" class="subject-card"><div class="text-3xl mb-2">${s.icon}</div><div class="font-bold text-xs uppercase">${s.name}</div></div>`; 
-        }); 
+    function updateStatistics() {
+        document.getElementById('stat-total').innerText = allStudentsCache.length;
+        const classCounts = {};
+        allStudentsCache.forEach(u => { classCounts[u.cls] = (classCounts[u.cls] || 0) + 1; });
+        const grid = document.getElementById('stat-class-grid');
+        grid.innerHTML = "";
+        for(let i=3; i<=12; i++) {
+            const count = classCounts[i] || 0;
+            grid.innerHTML += `<div class="bg-gray-100 p-2 rounded text-center text-[10px] font-bold">Cls ${i}<br><span class="text-indigo-600 text-xs">${count}</span></div>`;
+        }
     }
 
     function openSubject(sub) {
@@ -668,25 +598,9 @@
         });
     }
 
-    function createQuiz() {
-        const title = document.getElementById('new-quiz-title').value;
-        const targetClass = document.getElementById('new-quiz-class').value; 
-        if(!title) return showToast("Quiz Title is required!");
-        db.ref('quizzes').push({ title: title, targetClass: targetClass, active: true }).then(() => {
-            document.getElementById('new-quiz-title').value = ""; showToast("Quiz Created!");
-        });
-    }
-
-    function fetchAdminQuizzes() {
-        db.ref('quizzes').on('value', s => {
-            const area = document.getElementById('admin-quiz-list'); area.innerHTML = "";
-            if(!s.exists()) return;
-            s.forEach(q => {
-                const quiz = q.val();
-                const classLabel = (quiz.targetClass === 'All') ? "All Classes" : "Class " + quiz.targetClass;
-                area.innerHTML += `<div class="bg-white p-4 rounded-xl shadow-sm border mb-2"><h4 class="font-black text-indigo-900 text-xs mb-1 uppercase">${quiz.title}</h4><p class="text-[9px] font-bold text-gray-500 mb-2 bg-gray-100 inline-block px-1 rounded">Target: ${classLabel}</p><div class="flex gap-2"><button onclick="openAddQuestionModal('${q.key}')" class="bg-indigo-600 text-white px-2 py-1 rounded text-[9px] font-bold">ADD Q</button><button onclick="viewQuizResults('${q.key}')" class="bg-teal-600 text-white px-2 py-1 rounded text-[9px] font-bold">RESULTS</button><button onclick="if(confirm('Delete Quiz?')) db.ref('quizzes/${q.key}').remove()" class="bg-red-500 text-white px-2 py-1 rounded text-[9px] font-bold">DEL</button></div></div>`;
-            });
-        });
+    function openModalWithState(modalId) {
+        document.getElementById(modalId).classList.remove('hidden');
+        history.pushState({modal: true}, null, ""); 
     }
 
     function openAddQuestionModal(key) { currentQuizId = key; document.getElementById('add-q-modal').classList.remove('hidden'); }
@@ -696,33 +610,16 @@
         db.ref(`quizzes/${currentQuizId}/questions`).push(q).then(() => { showToast("Question Added!"); document.getElementById('add-q-modal').classList.add('hidden'); });
     }
 
-    function viewQuizResults(key) {
-        document.getElementById('result-modal').classList.remove('hidden');
-        const area = document.getElementById('result-list-area');
-        area.innerHTML = "<p class='text-center text-gray-400'>Loading...</p>";
-        db.ref(`quiz_results/${key}`).once('value', s => {
-            area.innerHTML = ""; if(!s.exists()) { area.innerHTML = "<p class='text-center font-bold'>No results.</p>"; return; }
-            s.forEach(r => { const val = r.val(); area.innerHTML += `<div class="bg-gray-50 p-3 rounded-xl border flex justify-between items-center"><div><p class="font-black text-xs text-indigo-900">${val.studentName}</p><p class="text-[9px] text-gray-500">${new Date(val.time).toLocaleDateString()}</p></div><div class="text-right"><p class="font-black text-indigo-600 text-sm">${val.score} / ${val.total}</p><p class="text-[9px] font-bold bg-yellow-200 px-1 rounded inline-block">${val.percent}</p></div></div>`; });
+    function createQuiz() {
+        const title = document.getElementById('new-quiz-title').value;
+        const targetClass = document.getElementById('new-quiz-class').value; 
+        if(!title) return showToast("Quiz Title is required!");
+        db.ref('quizzes').push({ title: title, targetClass: targetClass, active: true }).then(() => {
+            document.getElementById('new-quiz-title').value = ""; showToast("Quiz Created!");
         });
     }
 
-    function fetchQuizzesStudent() {
-        const ph = localStorage.getItem('ks_student_id');
-        db.ref('students/' + ph).once('value', st => {
-            const studentData = st.val();
-            db.ref('quizzes').on('value', s => {
-                const area = document.getElementById('student-quiz-list'); area.innerHTML = "";
-                if(!s.exists()) { area.innerHTML = "<p class='text-center mt-10'>No Quizzes.</p>"; return; }
-                s.forEach(q => {
-                    const val = q.val();
-                    if(val.active && (val.targetClass === 'All' || val.targetClass == studentData.cls)) {
-                        area.innerHTML += `<div onclick="startQuiz('${q.key}', '${val.title}')" class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-indigo-500 cursor-pointer active:scale-95 transition"><h3 class="font-black text-indigo-900 uppercase text-sm">${val.title}</h3><p class="text-[10px] text-gray-500 font-bold mt-1">Tap to Start Exam</p></div>`;
-                    }
-                });
-            });
-        });
-    }
-
+    let currentQuestions = [];
     function startQuiz(key, title) {
         currentQuizId = key;
         showScreen('quiz-play-screen');
@@ -741,7 +638,7 @@
 
     function submitQuizAns() { openModalWithState('confirm-submit-modal'); }
     function finalSubmit() {
-        history.back(); // close modal
+        history.back();
         let score = 0, total = currentQuestions.length;
         currentQuestions.forEach((q, i) => { const idx = i + 1; const radios = document.getElementsByName(`q-${idx}`); for(let r of radios) if(r.checked && r.value === q.correct) score++; });
         const ph = localStorage.getItem('ks_student_id'); const percent = Math.round((score / total) * 100) + "%";
@@ -757,63 +654,31 @@
 
     function openDoubtModal() { openModalWithState('doubt-modal'); }
     function submitDoubt() { const q = document.getElementById('doubt-input').value; if(q) db.ref('doubts').push({ ph: localStorage.getItem('ks_student_id'), question: q }).then(() => { showToast("Sent!"); history.back(); }); }
-    
     function showInbox() { const ph = localStorage.getItem('ks_student_id'); db.ref(`messages/${ph}`).once('value', s => { const area = document.getElementById('inbox-list'); area.innerHTML = ""; if(!s.exists()) area.innerHTML = "Empty"; else s.forEach(m => area.innerHTML += `<div class="bg-indigo-50 p-4 mb-4 border-l-4 border-indigo-600 relative"><p>${m.val().text}</p></div>`); openModalWithState('inbox-modal'); }); }
-    
     function showIDCard() { const ph = localStorage.getItem('ks_student_id'); db.ref('students/' + ph).once('value', s => { const u = s.val(); document.getElementById('id-card-content').innerHTML = `<img src="${u.studentPhoto}" class="w-24 h-24 mx-auto rounded-full"><h3 class="text-xl font-bold">${u.name}</h3><p>Class ${u.cls}</p><button onclick="history.back()" class="w-full bg-gray-100 p-2 mt-4">Close</button>`; openModalWithState('id-card-modal'); }); }
-
-    // --- RE-ADDED MISSING 'showFeesTable' FUNCTION ---
-    function showFeesTable() { const cls = document.getElementById('s-class').value; if(!cls) return showToast("শ্ৰেণী বাচনি কৰা!"); let table = `<div class='bg-white p-6 rounded-3xl w-80 shadow-2xl'><h3 class='font-black mb-4 border-b pb-2 text-sm uppercase text-center text-indigo-900'>Class ${cls} Fees</h3><table class='w-full text-xs'>`; subjects.forEach(s => { const p = (window.feesData && window.feesData[cls] && window.feesData[cls][s.name]) ? window.feesData[cls][s.name] : '0'; table += `<tr><td class='p-2 border uppercase font-bold text-gray-400'>${s.name}</td><td class='p-2 border font-bold text-orange-600'>₹${p}</td></tr>`; }); table += `</table><button onclick='this.parentElement.parentElement.remove()' class='btn-3d mt-4 py-2 text-xs shadow-md'>CLOSE</button></div>`; const div = document.createElement('div'); div.className = 'fixed inset-0 bg-black/70 z-[300] flex items-center justify-center p-4'; div.innerHTML = table; document.body.appendChild(div); }
-
-    function playVideo(t, url, pdf) {
-        document.getElementById('current-video-title').innerText = t;
-        let vid = url.split("v=")[1] || url.split("/").pop();
-        document.getElementById('course-video-wrapper').innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube-nocookie.com/embed/${vid}?autoplay=1&rel=0" frameborder="0" allowfullscreen></iframe>`;
-        const btn = document.getElementById('pdf-download-btn');
-        if(pdf && pdf !== "undefined") { btn.classList.remove('hidden'); btn.onclick = () => window.location.href = pdf; } else btn.classList.add('hidden');
-    }
+    function playVideo(t, url, pdf) { document.getElementById('current-video-title').innerText = t; let vid = url.split("v=")[1] || url.split("/").pop(); document.getElementById('course-video-wrapper').innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube-nocookie.com/embed/${vid}?autoplay=1&rel=0" frameborder="0" allowfullscreen></iframe>`; const btn = document.getElementById('pdf-download-btn'); if(pdf && pdf !== "undefined") { btn.classList.remove('hidden'); btn.onclick = () => window.location.href = pdf; } else btn.classList.add('hidden'); }
     function stopVideo() { document.getElementById('course-video-wrapper').innerHTML = ""; document.getElementById('pdf-download-btn').classList.add('hidden'); }
     function stopVideoAndBack() { stopVideo(); history.back(); }
-
-    function submitPayment() {
-        const ph = localStorage.getItem('ks_student_id'), utr = document.getElementById('s-utr').value, file = document.getElementById('s-pay-shot').files[0];
-        if(!utr || !file) return showToast("Required!");
-        const reader = new FileReader(); reader.onload = e => db.ref('students/' + ph).update({ utr, payShot: e.target.result }).then(() => { showToast("Submitted!"); }); reader.readAsDataURL(file);
-    }
-    function payDirect() { window.location.href = `upi://pay?pa=${currentUPI}&pn=KSGyanMondir&tn=SchoolFees&cu=INR`; }
-    
-    function saveAdminSettings() { 
-        const upi = document.getElementById('adm-upi').value, wa = document.getElementById('adm-wa').value, notif = document.getElementById('adm-notif').value;
-        const logo = document.getElementById('adm-logo-file').files[0], qr = document.getElementById('adm-qr-file').files[0];
-        const updateDB = (l, q) => { let obj = { upi, wa, notif }; if(l) obj.appLogo = l; if(q) obj.qr = q; db.ref('admin/config').update(obj).then(() => showToast("Saved!")); };
-        if(logo || qr) {
-            if(logo) { let r=new FileReader(); r.onload=e=>updateDB(e.target.result, null); r.readAsDataURL(logo); }
-            if(qr) { let r=new FileReader(); r.onload=e=>updateDB(null, e.target.result); r.readAsDataURL(qr); }
-        } else updateDB();
-    }
-
-    function uploadContent(type) {
-        const ph = document.getElementById('c-ph').value, sub = document.getElementById('c-sub').value, t = document.getElementById('c-title').value;
-        if(!ph || !t) return showToast("Missing fields!");
-        if(type==='video') db.ref(`content/${ph}/${sub}/videos`).push({title:t, link:document.getElementById('c-link').value}).then(()=>showToast("Success!"));
-        else { const file = document.getElementById('c-pdf-file').files[0]; const r = new FileReader(); r.onload = e => db.ref(`content/${ph}/${sub}/pdfs`).push({title:t, fileData: e.target.result}).then(()=>showToast("Success!")); r.readAsDataURL(file); }
-    }
-    // --- UPDATED MANAGE CONTENT WITH DELETE ---
-    function manageContent() { 
-        const ph = document.getElementById('c-ph').value, sub = document.getElementById('c-sub').value, area = document.getElementById('manage-area'); 
-        db.ref(`content/${ph}/${sub}`).once('value', s => { 
-            area.innerHTML = ""; 
-            const d = s.val(); 
-            if(!d) { area.innerHTML = "No Content"; return; }
-            for(let ty in d) for(let k in d[ty]) 
-                area.innerHTML += `<div class="flex justify-between p-2 bg-gray-100 mb-1 text-[9px] rounded font-bold uppercase shadow-sm"><span>${d[ty][k].title}</span><button onclick="db.ref('content/${ph}/${sub}/${ty}/${k}').remove().then(()=>manageContent())" class="text-red-600 font-bold uppercase">Del</button></div>`; 
-        }); 
-    }
+    function showFeesTable() { const cls = document.getElementById('s-class').value; if(!cls) return showToast("শ্ৰেণী বাচনি কৰা!"); let table = `<div class='bg-white p-6 rounded-3xl w-80 shadow-2xl'><h3 class='font-black mb-4 border-b pb-2 text-sm uppercase text-center text-indigo-900'>Class ${cls} Fees</h3><table class='w-full text-xs'>`; subjects.forEach(s => { const p = (window.feesData && window.feesData[cls] && window.feesData[cls][s.name]) ? window.feesData[cls][s.name] : '0'; table += `<tr><td class='p-2 border uppercase font-bold text-gray-400'>${s.name}</td><td class='p-2 border font-bold text-orange-600'>₹${p}</td></tr>`; }); table += `</table><button onclick='this.parentElement.parentElement.remove()' class='btn-3d mt-4 py-2 text-xs shadow-md'>CLOSE</button></div>`; const div = document.createElement('div'); div.className = 'fixed inset-0 bg-black/70 z-[300] flex items-center justify-center p-4'; div.innerHTML = table; document.body.appendChild(div); }
+    function manageContent() { const ph = document.getElementById('c-ph').value, sub = document.getElementById('c-sub').value; db.ref(`content/${ph}/${sub}`).once('value', s => { const d = s.val(); const area = document.getElementById('manage-area'); area.innerHTML = ""; if(!d) { area.innerHTML = "No Content"; return; } for(let ty in d) for(let k in d[ty]) area.innerHTML += `<div class="flex justify-between p-2 bg-gray-100 mb-1 text-[9px] rounded font-bold uppercase shadow-sm"><span>${d[ty][k].title}</span><button onclick="db.ref('content/${ph}/${sub}/${ty}/${k}').remove().then(()=>manageContent())" class="text-red-600 font-bold uppercase">Del</button></div>`; }); }
     function updateFeesInDB() { db.ref(`admin/fees/${document.getElementById('fee-cls').value}/${document.getElementById('fee-sub').value}`).set(document.getElementById('fee-amount').value).then(()=>showToast("Updated")); }
+    function toggleDueFilter() { showDueOnly = !showDueOnly; const btn = document.getElementById('btn-due-filter'); const bulkArea = document.getElementById('bulk-action-area'); if(showDueOnly) { btn.classList.add('bg-red-600', 'text-white'); btn.innerText = "Showing: FEES DUE ONLY"; bulkArea.classList.remove('hidden'); } else { btn.classList.remove('bg-red-600', 'text-white'); btn.classList.add('bg-gray-200'); btn.innerText = "Show Fees Due Only"; bulkArea.classList.add('hidden'); } filterStudents(); }
+    function bulkLockDueStudents() { if(confirm("Lock All Due Students?")) { let updates = {}; allStudentsCache.forEach(u => { if(!u.lastPaymentDate || (Date.now() - u.lastPaymentDate)/(1000*60*60*24) > 30) updates[`students/${u.ph}/active`] = false; }); db.ref().update(updates).then(() => showToast("Locked!")); } }
+    function bulkUnlockDueStudents() { if(confirm("Unlock All in List?")) { let updates = {}; allStudentsCache.forEach(u => updates[`students/${u.ph}/active`] = true); db.ref().update(updates).then(() => showToast("Unlocked!")); } }
     function showToast(m) { var x = document.getElementById("custom-toast"); x.innerHTML = m; x.className = "show"; setTimeout(() => x.className = x.className.replace("show", ""), 3000); }
-    function verifyAdminPIN() { if(document.getElementById('adm-pass-login').value === activeAdminPIN) showScreen('admin-panel'); else showToast("Wrong PIN"); }
     function sendDirectMsg(ph) { const t = document.getElementById('direct-msg-'+ph).value; if(t) db.ref(`messages/${ph}`).push({text:"ADMIN: "+t}).then(()=>showToast("Sent")); }
     function forgotPass() { window.location.href = `https://wa.me/${adminWA}?text=Forgot Pass ${document.getElementById('l-phone').value}`; }
+    function logout() { localStorage.removeItem('ks_student_id'); location.reload(); }
+    function triggerAdmin() { clicks++; if(clicks>=5) { showScreen('admin-login-screen'); clicks=0; } setTimeout(()=>clicks=0, 2000); }
+    function loadInboxCount(ph) { db.ref(`messages/${ph}`).on('value', s => document.getElementById('msg-count').innerText = s.exists() ? Object.keys(s.val()).length : 0); }
+    function submitPayment() { const ph = localStorage.getItem('ks_student_id'), utr = document.getElementById('s-utr').value, file = document.getElementById('s-pay-shot').files[0]; if(!utr || !file) return showToast("Required!"); const reader = new FileReader(); reader.onload = e => db.ref('students/' + ph).update({ utr, payShot: e.target.result }).then(() => { showToast("Submitted!"); }); reader.readAsDataURL(file); }
+    function payDirect() { window.location.href = `upi://pay?pa=${currentUPI}&pn=KSGyanMondir&tn=SchoolFees&cu=INR`; }
+    function saveAdminSettings() { const upi = document.getElementById('adm-upi').value, wa = document.getElementById('adm-wa').value, notif = document.getElementById('adm-notif').value; const logo = document.getElementById('adm-logo-file').files[0], qr = document.getElementById('adm-qr-file').files[0]; const updateDB = (l, q) => { let obj = { upi, wa, notif }; if(l) obj.appLogo = l; if(q) obj.qr = q; db.ref('admin/config').update(obj).then(() => showToast("Saved!")); }; if(logo || qr) { if(logo) { let r=new FileReader(); r.onload=e=>updateDB(e.target.result, null); r.readAsDataURL(logo); } if(qr) { let r=new FileReader(); r.onload=e=>updateDB(null, e.target.result); r.readAsDataURL(qr); } } else updateDB(); }
+    function uploadContent(type) { const ph = document.getElementById('c-ph').value, sub = document.getElementById('c-sub').value, t = document.getElementById('c-title').value; if(!ph || !t) return showToast("Missing fields!"); if(type==='video') db.ref(`content/${ph}/${sub}/videos`).push({title:t, link:document.getElementById('c-link').value}).then(()=>showToast("Success!")); else { const file = document.getElementById('c-pdf-file').files[0]; const r = new FileReader(); r.onload = e => db.ref(`content/${ph}/${sub}/pdfs`).push({title:t, fileData: e.target.result}).then(()=>showToast("Success!")); r.readAsDataURL(file); } }
+    function fetchAdminDoubts() { db.ref('doubts').on('value', s => { const area = document.getElementById('admin-doubts-area'); area.innerHTML = ""; s.forEach(d => area.innerHTML += `<div class="bg-white p-4 border rounded-2xl mb-4 text-xs shadow-sm border-l-4 border-yellow-500"><p class="text-blue-600 font-bold mb-1 uppercase">Student ID: ${d.val().ph}</p><p class="font-bold text-gray-800 bg-gray-50 p-2 rounded-lg mb-3">${d.val().question}</p><div class="flex gap-2"><input id="reply-${d.key}" placeholder="Type reply..." class="input-box text-[10px] mb-0 flex-1 py-2 shadow-inner"><button onclick="replyDoubt('${d.val().ph}', '${d.key}')" class="bg-green-600 text-white px-4 rounded-xl text-[10px] font-bold shadow-md uppercase">Reply</button><button onclick="db.ref('doubts/${d.key}').remove()" class="bg-red-500 text-white px-3 rounded-xl text-[10px] font-bold shadow-md">X</button></div></div>`); }); }
+    function replyDoubt(ph, doubtKey) { const rTxt = document.getElementById('reply-' + doubtKey).value; if(rTxt) db.ref(`messages/${ph}`).push({ text: "উত্তৰ: " + rTxt, time: new Date().toLocaleString() }).then(() => { document.getElementById('reply-' + doubtKey).value = ""; db.ref(`doubts/${doubtKey}`).remove(); showToast("Replied!"); }); }
+    function handleApprove(ph, name, status) { db.ref('students/' + ph).update({ active: status }).then(() => { if(status === true) { const msg = `প্ৰিয় ${name}, KS Gyan Mondir লৈ তোমাক স্বাগতম। তুমি এতিয়া লগইন কৰিব পাৰিবা।`; db.ref(`messages/${ph}`).push({ text: msg, time: new Date().toLocaleString() }); window.location.href = `https://wa.me/91${ph}?text=${encodeURIComponent(msg)}`; showToast("Approved!"); } else { showToast("User Locked!"); } }); }
+    function register() { const ph = document.getElementById('s-phone').value, n = document.getElementById('s-name').value, ps = document.getElementById('s-pass').value; if(!ph || !n || !ps) return showToast("Fill all fields!"); const photo = document.getElementById('s-photo').files[0]; if(!photo) return showToast("Upload Photo!"); const r1 = new FileReader(); r1.onload = e1 => { db.ref('students/' + ph).set({ name: n, ph, ps, utr: "", cls: document.getElementById('s-class').value, school: document.getElementById('s-school').value, vill: document.getElementById('s-vill').value, po: document.getElementById('s-po').value, dist: document.getElementById('s-dist').value, state: document.getElementById('s-state').value, pin: document.getElementById('s-pin').value, studentPhoto: e1.target.result, payShot: "", active: false }).then(() => { showToast("Registration Successful!"); showScreen('login-screen'); }); }; r1.readAsDataURL(photo); }
 </script>
 </body>
 </html>
