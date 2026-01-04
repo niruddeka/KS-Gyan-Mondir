@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KS GYAN MONDIR | Pro Ultimate Fix</title>
+    <title>KS GYAN MONDIR | Final Payment Fix</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -88,12 +88,15 @@
         <div class="glass-card p-5 mb-6 border-b-4 border-green-500 bg-green-50/30">
             <h3 class="text-center font-bold text-indigo-900 text-xs mb-3 uppercase tracking-tighter">মাচুল জমা কৰা (Payment)</h3>
             <div class="bg-indigo-900 rounded-3xl p-5 text-center text-white shadow-xl">
-                <p id="upi-txt" class="text-[10px] font-bold mb-2 uppercase">UPI ID: Loading...</p>
+                <p id="upi-txt" class="text-[10px] font-bold mb-4 uppercase">UPI ID: Loading...</p>
+                
+                <button onclick="payDirect()" class="bg-white text-indigo-900 w-full py-3 rounded-xl font-black text-xs uppercase mb-4 shadow-lg animate-bounce border-2 border-green-400">💸 Pay Now (GPay/PhonePe)</button>
+                
                 <img id="qr-img-display" src="" class="w-32 h-32 mx-auto hidden rounded-xl mb-4 border-2 border-white">
                 <input id="s-utr" placeholder="UTR নম্বৰ লিখা *" class="input-box text-black text-center font-bold mb-2">
                 <p class="text-[9px] font-bold opacity-70 uppercase mb-2">পেমেন্ট স্ক্ৰীনশ্বট দিয়া *</p>
                 <input type="file" id="s-pay-shot" class="text-[10px] w-full bg-white/10 p-1 rounded-lg mb-4">
-                <button onclick="submitPayment()" class="w-full bg-green-600 py-2 rounded-xl font-bold text-xs uppercase shadow-lg">পেমেন্ট জমা দিয়া</button>
+                <button onclick="submitPayment()" class="w-full bg-green-600 py-2 rounded-xl font-bold text-xs uppercase shadow-lg">পেমেন্ট জমা দিয়া (Submit)</button>
             </div>
         </div>
 
@@ -213,17 +216,11 @@
         const cSub = document.getElementById('c-sub');
         subjects.forEach(s => { if(cSub) cSub.innerHTML += `<option value="${s.name}">${s.name}</option>`; });
         
-        // --- NEW: Back Button Support (History State) ---
         window.addEventListener('popstate', function(event) {
             if(event.state && event.state.id) {
-                // Manually hide all and show the state ID
                 document.querySelectorAll('main').forEach(s => s.classList.add('hidden'));
                 document.getElementById(event.state.id).classList.remove('hidden');
-                
-                // Special handling for video stop
                 if(event.state.id !== 'course-view') stopVideo();
-                
-                // Handle logout button visibility
                 if(['home-screen', 'admin-panel', 'course-view'].includes(event.state.id)) 
                     document.getElementById('logout-btn').classList.remove('hidden');
                 else 
@@ -233,7 +230,6 @@
     };
 
     function showScreen(id) {
-        // --- NEW: Push History State ---
         history.pushState({id: id}, null, "#" + id);
         document.querySelectorAll('main').forEach(s => s.classList.add('hidden')); 
         document.getElementById(id).classList.remove('hidden');
@@ -301,7 +297,7 @@
         const btn = document.getElementById('pdf-download-btn');
         if(pdf && pdf !== "undefined") { 
             btn.classList.remove('hidden'); 
-            btn.onclick = () => window.location.href = pdf; // View Only Fix
+            btn.onclick = () => window.location.href = pdf; 
         } else {
             btn.classList.add('hidden');
         }
@@ -309,10 +305,7 @@
 
     function stopVideo() { document.getElementById('course-video-wrapper').innerHTML = "ভিডিঅ' বাচনি কৰা..."; document.getElementById('current-video-title').innerText = "Class Title"; document.getElementById('pdf-download-btn').classList.add('hidden'); }
     
-    function stopVideoAndBack() { 
-        stopVideo(); 
-        history.back(); // Use Browser Back
-    }
+    function stopVideoAndBack() { stopVideo(); history.back(); }
 
     function submitPayment() {
         const ph = localStorage.getItem('ks_student_id');
@@ -333,6 +326,13 @@
             });
         };
         reader.readAsDataURL(payShot);
+    }
+    
+    // --- NEW: DIRECT UPI PAYMENT FUNCTION ---
+    function payDirect() {
+        if(!currentUPI) return showToast("⚠️ এডমিনে UPI ID দিয়া নাই!");
+        // এইটোৱে পোনপটীয়াকৈ পেমেন্ট এপ খুলি দিব
+        window.location.href = `upi://pay?pa=${currentUPI}&pn=KS Gyan Mondir&cu=INR`;
     }
 
     function saveAdminSettings() { 
@@ -393,27 +393,19 @@
         const rTxt = document.getElementById('reply-' + doubtKey).value; if(rTxt) db.ref(`messages/${ph}`).push({ text: "উত্তৰ: " + rTxt, time: new Date().toLocaleString() }).then(() => { document.getElementById('reply-' + doubtKey).value = ""; db.ref(`doubts/${doubtKey}`).remove(); showToast("Replied!"); });
     }
 
-    // এইটো আগৰ handleApprove ফাংচনটোৰ সলনি দিয়ক
-function handleApprove(ph, name, status) {
-    db.ref('students/' + ph).update({ active: status }).then(() => {
-        if(status === true) {
-            // ১. এপৰ ভিতৰত ইনবক্স মেচেজ পঠোৱা (আগৰ দৰেই)
-            const msg = `প্ৰিয় ${name}, KS Gyan Mondir লৈ তোমাক স্বাগতম। তুমি এতিয়া লগইন কৰিব পাৰিবা।`;
-            db.ref(`messages/${ph}`).push({ text: msg, time: new Date().toLocaleString() });
-            
-            // ২. [নতুন] এডমিনৰ হোৱাটছএপ খুলি ছাত্ৰজনলৈ মেচেজ পঠিয়াব
-            // মন কৰিব: ফোন নম্বৰৰ আগত 91 যোগ কৰা হৈছে
-            const waMsg = `🙏নমস্কাৰ ${name}, তোমাৰ KS Gyan Mondir একাউণ্টটো Approve কৰা হ'ল। তুমি এতিয়া লগইন কৰিব পাৰিবা।`;
-            
-            // এইটোৱে WhatsApp খুলি দিব
-            window.location.href = `https://wa.me/91${ph}?text=${encodeURIComponent(waMsg)}`;
-
-            showToast("অনুমোদন কৰা হ'ল! WhatsApp ত মেচেজ পঠিয়াওক।");
-        } else {
-             showToast("ছাত্ৰজনক Lock কৰা হ'ল!");
-        }
-    });
-}
+    function handleApprove(ph, name, status) {
+        db.ref('students/' + ph).update({ active: status }).then(() => {
+            if(status === true) {
+                const msg = `প্ৰিয় ${name}, KS Gyan Mondir লৈ তোমাক স্বাগতম। তুমি এতিয়া লগইন কৰিব পাৰিবা।`;
+                db.ref(`messages/${ph}`).push({ text: msg, time: new Date().toLocaleString() });
+                const waMsg = `নমস্কাৰ ${name}, তোমাৰ KS Gyan Mondir একাউণ্টটো Approve কৰা হ'ল। তুমি এতিয়া লগইন কৰিব পাৰিবা।`;
+                window.location.href = `https://wa.me/91${ph}?text=${encodeURIComponent(waMsg)}`;
+                showToast("অনুমোদন কৰা হ'ল! WhatsApp ত মেচেজ পঠিয়াওক।");
+            } else {
+                 showToast("ছাত্ৰজনক Lock কৰা হ'ল!");
+            }
+        });
+    }
 
     function sendDirectMsg(ph) {
         const txt = document.getElementById('direct-msg-' + ph).value; if(txt) db.ref(`messages/${ph}`).push({ text: "ADMIN: " + txt, time: new Date().toLocaleString() }).then(() => { document.getElementById('direct-msg-' + ph).value = ""; showToast("Message sent!"); });
@@ -506,29 +498,14 @@ function handleApprove(ph, name, status) {
         x.className = "show";
         setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
     }
-    function showToast(message) {
-        var x = document.getElementById("custom-toast");
-        x.innerHTML = message;
-        x.className = "show";
-        setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
-    }
-
-    // --- এইখিনিতে মই দিয়া নতুন ফাংচনটো পেষ্ট কৰিব --- 
-
+    
+    // --- (FOR BACK BUTTON LOGIC) ---
     function getAndroidState() {
         if (!document.getElementById('course-view').classList.contains('hidden')) {
             return 'VIDEO';
         }
         return 'EXIT';
     }
-
 </script>
 </body>
 </html>
-</script>
-</body>
-</html>
-
-
-
-
