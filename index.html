@@ -56,7 +56,7 @@
         <input id="s-phone" placeholder="মোবাইল আইডি (Phone) *" class="input-box">
         <input id="s-pass" placeholder="পাছৱৰ্ড বনোৱা *" class="input-box">
         <select id="s-class" class="input-box font-bold"><option value="">শ্ৰেণী বাচনি কৰা *</option><script>for(let i=3; i<=12; i++) document.write(`<option value="${i}">Class ${i}</option>`);</script></select>
-        <button onclick="showFeesTable()" class="w-full bg-orange-500 text-white py-2 rounded-xl font-bold text-[10px] mb-4 uppercase">মাচুল চাওক</button>
+        <button onclick="showFeesTable()" class="w-full bg-orange-500 text-white py-2 rounded-xl font-bold text-[10px] mb-4 uppercase">মাচুল চাওক (Fee Chart)</button>
         <select id="s-school" class="input-box font-bold"><option value="">বিদ্যালয় বাচনি কৰা *</option><option value="শংকৰদেৱ শিশু নিকেতন">শংকৰদেৱ শিশু নিকেতন</option><option value="চৰকাৰী বিদ্যালয়">চৰকাৰী বিদ্যালয়</option><option value="জাতীয় বিদ্যালয়">জাতীয় বিদ্যালয়</option></select>
         <div class="grid grid-cols-2 gap-2">
             <input id="s-vill" placeholder="গাঁও *" class="input-box text-xs"><input id="s-po" placeholder="ডাকঘৰ *" class="input-box text-xs">
@@ -352,21 +352,44 @@
 </div>
 
 <script>
+    // --- 1. FIREBASE INIT ---
     const firebaseConfig = { databaseURL: "https://ks-gyan-mondir-default-rtdb.firebaseio.com/" };
-    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    
+    try {
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    } catch(e) {
+        console.error("Firebase Init Error:", e);
+        alert("Internet Problem! Check Connection.");
+    }
     const db = firebase.database();
     
-    let currentUPI = "", activeAdminPIN = "", adminWA = "", clicks = 0;
+    // --- 2. GLOBAL VARIABLES ---
+    let currentUPI = "";
+    let activeAdminPIN = "";
+    let adminWA = "";
+    let clicks = 0;
     let currentQuizId = null; 
     let allStudentsCache = [];
     let showDueOnly = false;
 
-    const subjects = [ { name: "অসমীয়া", icon: "📚" }, { name: "ইংৰাজী", icon: "🅰️" }, { name: "গণিত", icon: "🧮" }, { name: "বিজ্ঞান", icon: "🔬" }, { name: "সমাজ বিজ্ঞান", icon: "🌍" }, { name: "হিন্দী", icon: "🕉️" }, { name: "সংস্কৃত", icon: "✡️" }, { name: "ঐচ্ছিক গণিত", icon: "📐" }, { name: "নীতিশিক্ষা", icon: "🪷" }, { name: "সকলো বিষয়", icon: "🎒" } ];
+    const subjects = [
+        { name: "অসমীয়া", icon: "📚" }, { name: "ইংৰাজী", icon: "🅰️" },
+        { name: "গণিত", icon: "🧮" }, { name: "বিজ্ঞান", icon: "🔬" },
+        { name: "সমাজ বিজ্ঞান", icon: "🌍" }, { name: "হিন্দী", icon: "🕉️" },
+        { name: "সংস্কৃত", icon: "✡️" }, { name: "ঐচ্ছিক গণিত", icon: "📐" },
+        { name: "নীতিশিক্ষা", icon: "🪷" }, { name: "সকলো বিষয়", icon: "🎒" }
+    ];
 
+    // --- 3. ON LOAD ---
     window.onload = function() {
         const user = localStorage.getItem('ks_student_id');
-        if(user) loginAuto(user); else showScreen('reg-screen');
+        if(user) {
+            loginAuto(user);
+        } else {
+            showScreen('reg-screen');
+        }
         
+        // Load Admin Config
         db.ref('admin/config').on('value', s => {
             const d = s.val() || {}; 
             currentUPI = d.upi || ""; 
@@ -378,13 +401,26 @@
             if(d.qr) { document.getElementById('qr-img-display').src = d.qr; document.getElementById('qr-img-display').classList.remove('hidden'); }
             if(d.notif) document.getElementById('notif-text').innerText = d.notif;
         });
-        db.ref('admin/fees').on('value', s => { window.feesData = s.val() || {}; });
-        db.ref('admin/revenue').on('value', s => { document.getElementById('stat-revenue').innerText = "₹" + (s.val() || 0); });
 
-        const cSub = document.getElementById('c-sub');
-        if(cSub) subjects.forEach(s => { cSub.innerHTML += `<option value="${s.name}">${s.name}</option>`; });
+        // Load Fees Data
+        db.ref('admin/fees').on('value', s => { window.feesData = s.val() || {}; });
         
+        // Load Revenue
+        db.ref('admin/revenue').on('value', s => { 
+            const total = s.val() || 0;
+            const el = document.getElementById('stat-revenue');
+            if(el) el.innerText = "₹" + total;
+        });
+
+        // Populate Subjects in Dropdown
+        const cSub = document.getElementById('c-sub');
+        if(cSub) {
+            subjects.forEach(s => { cSub.innerHTML += `<option value="${s.name}">${s.name}</option>`; });
+        }
+        
+        // --- BACK BUTTON LOGIC ---
         window.onpopstate = function(event) {
+            // Close any open modals first
             const modals = document.querySelectorAll('.modal-overlay');
             let modalWasOpen = false;
             modals.forEach(m => {
@@ -395,10 +431,14 @@
             });
             if (modalWasOpen) return; 
 
+            // Navigate screens
             if(event.state && event.state.id) {
                 document.querySelectorAll('main').forEach(s => s.classList.add('hidden'));
                 document.getElementById(event.state.id).classList.remove('hidden');
+                
+                // Handle special cases
                 if(event.state.id !== 'course-view') stopVideo();
+                
                 if(['home-screen', 'admin-panel', 'course-view'].includes(event.state.id)) 
                     document.getElementById('logout-btn').classList.remove('hidden');
                 else 
@@ -407,25 +447,66 @@
         };
     };
 
+    // --- 4. NAVIGATION ---
     function showScreen(id) {
         if (id !== 'home-screen') {
             history.pushState({id: id}, null, "");
         } else {
             history.replaceState({id: 'home-screen'}, null, "");
         }
+        
         document.querySelectorAll('main').forEach(s => s.classList.add('hidden')); 
         document.getElementById(id).classList.remove('hidden');
-        if(['home-screen', 'admin-panel', 'course-view'].includes(id)) document.getElementById('logout-btn').classList.remove('hidden');
-        else document.getElementById('logout-btn').classList.add('hidden');
+        
+        if(['home-screen', 'admin-panel', 'course-view'].includes(id)) 
+            document.getElementById('logout-btn').classList.remove('hidden');
+        else 
+            document.getElementById('logout-btn').classList.add('hidden');
         
         if(id === 'admin-panel') { fetchStudentsAdmin(); fetchAdminDoubts(); fetchAdminQuizzes(); }
         if(id === 'quiz-list-screen') fetchQuizzesStudent();
     }
 
+    // --- 5. AUTHENTICATION ---
+    function register() {
+        const ph = document.getElementById('s-phone').value;
+        const n = document.getElementById('s-name').value;
+        const ps = document.getElementById('s-pass').value;
+        
+        if(!ph || !n || !ps) return showToast("অনুগ্ৰহ কৰি সকলো তথ্য ভৰাওক!");
+        
+        const photoFile = document.getElementById('s-photo').files[0];
+        if(!photoFile) return showToast("ফটো আপলোড কৰা!");
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            db.ref('students/' + ph).set({ 
+                name: n, ph: ph, ps: ps, utr: "", 
+                cls: document.getElementById('s-class').value, 
+                school: document.getElementById('s-school').value, 
+                vill: document.getElementById('s-vill').value, 
+                po: document.getElementById('s-po').value, 
+                dist: document.getElementById('s-dist').value, 
+                state: document.getElementById('s-state').value, 
+                pin: document.getElementById('s-pin').value, 
+                studentPhoto: e.target.result, 
+                payShot: "", 
+                active: false 
+            }).then(() => { 
+                showToast("পঞ্জীয়ন সফল! লগইন কৰক।"); 
+                showScreen('login-screen'); 
+            }).catch(err => {
+                showToast("Error: " + err.message);
+            });
+        };
+        reader.readAsDataURL(photoFile);
+    }
+
     function doLogin() { 
         const ph = document.getElementById('l-phone').value;
         const ps = document.getElementById('l-pass').value;
-        if(!ph || !ps) return showToast("Enter ID and Password");
+        
+        if(!ph || !ps) return showToast("আইডি আৰু পাছৱৰ্ড লিখা!");
         
         db.ref('students/' + ph).once('value', s => { 
             const u = s.val(); 
@@ -433,7 +514,7 @@
                 localStorage.setItem('ks_student_id', ph); 
                 loginAuto(ph); 
             } else {
-                showToast("Wrong ID or Password!");
+                showToast("ভুল আইডি বা পাছৱৰ্ড!");
             }
         }); 
     }
@@ -444,7 +525,7 @@
             showScreen('admin-panel');
             document.getElementById('adm-pass-login').value = "";
         } else {
-            showToast("❌ Wrong PIN!");
+            showToast("❌ ভুল পিন!");
         }
     }
 
@@ -452,9 +533,12 @@
         history.replaceState({id: 'home-screen'}, null, "");
         document.getElementById('home-screen').classList.remove('hidden');
         document.getElementById('logout-btn').classList.remove('hidden');
+        
         db.ref('students/' + ph).on('value', s => { 
             const u = s.val(); 
-            if(!u || !u.active) { 
+            if(!u) return; // Handle deleted user case
+
+            if(!u.active) { 
                 document.getElementById('lock-msg').classList.remove('hidden'); 
                 document.getElementById('main-content').classList.add('hidden'); 
             } else { 
@@ -463,6 +547,7 @@
                 renderGrid();
                 loadInboxCount(ph); 
                 
+                // --- FEE STATUS LOGIC ---
                 const statusDiv = document.getElementById('stu-fee-stat');
                 if (u.lastPaymentDate) {
                     const daysPassed = Math.floor((Date.now() - u.lastPaymentDate) / (1000 * 60 * 60 * 24));
@@ -479,6 +564,12 @@
         }); 
     }
 
+    function logout() { 
+        localStorage.removeItem('ks_student_id'); 
+        location.reload(); 
+    }
+
+    // --- 6. STUDENT DASHBOARD FUNCTIONS ---
     function renderGrid() { 
         const area = document.getElementById('subject-grid'); 
         if(!area) return;
@@ -488,6 +579,64 @@
         }); 
     }
 
+    function openSubject(sub) {
+        stopVideo();
+        const ph = localStorage.getItem('ks_student_id'); 
+        document.getElementById('current-subject-name').innerText = sub; 
+        showScreen('course-view');
+        
+        const listArea = document.getElementById('course-content-list');
+        listArea.innerHTML = "<p class='text-center mt-5 text-gray-400'>Loading...</p>";
+        
+        db.ref(`content/${ph}/${sub}`).once('value', s => {
+            listArea.innerHTML = "";
+            const data = s.val();
+            if(!data) { listArea.innerHTML = "<p class='text-center mt-10 text-gray-400 font-bold'>একো নাই।</p>"; return; }
+            
+            if(data.videos) {
+                for(let k in data.videos) {
+                    const v = data.videos[k]; 
+                    let pdf = "";
+                    if(data.pdfs) {
+                        for(let pk in data.pdfs) {
+                            if(data.pdfs[pk].title === v.title) pdf = data.pdfs[pk].fileData;
+                        }
+                    }
+                    listArea.innerHTML += `<div onclick="playVideo('${v.title}', '${v.link}', '${pdf}')" class="bg-white p-5 rounded-3xl shadow-sm border flex items-center gap-4 cursor-pointer active:scale-95 transition">▶️ <div class="font-bold text-[10px] uppercase tracking-tighter">${v.title}</div></div>`;
+                }
+            }
+        });
+    }
+
+    function playVideo(t, url, pdf) {
+        document.getElementById('current-video-title').innerText = t;
+        let vid = "";
+        try {
+            vid = url.split("v=")[1] || url.split("/").pop();
+        } catch(e) { vid = ""; }
+        
+        document.getElementById('course-video-wrapper').innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube-nocookie.com/embed/${vid}?autoplay=1&rel=0" frameborder="0" allowfullscreen></iframe>`;
+        
+        const btn = document.getElementById('pdf-download-btn');
+        if(pdf && pdf !== "undefined") { 
+            btn.classList.remove('hidden'); 
+            btn.onclick = () => window.location.href = pdf; 
+        } else {
+            btn.classList.add('hidden');
+        }
+    }
+
+    function stopVideo() { 
+        document.getElementById('course-video-wrapper').innerHTML = "ভিডিঅ' বাচনি কৰা..."; 
+        document.getElementById('pdf-download-btn').classList.add('hidden'); 
+    }
+    
+    function stopVideoAndBack() { 
+        stopVideo(); 
+        history.back(); 
+    }
+
+    // --- 7. ADMIN FUNCTIONS ---
     function fetchStudentsAdmin() {
         db.ref('students').on('value', s => {
             allStudentsCache = [];
@@ -495,6 +644,19 @@
             updateStatistics();
             filterStudents();
         });
+    }
+
+    function updateStatistics() {
+        document.getElementById('stat-total').innerText = allStudentsCache.length;
+        const classCounts = {};
+        allStudentsCache.forEach(u => { classCounts[u.cls] = (classCounts[u.cls] || 0) + 1; });
+        
+        const grid = document.getElementById('stat-class-grid');
+        grid.innerHTML = "";
+        for(let i=3; i<=12; i++) {
+            const count = classCounts[i] || 0;
+            grid.innerHTML += `<div class="bg-gray-100 p-2 rounded text-center text-[10px] font-bold">Cls ${i}<br><span class="text-indigo-600 text-xs">${count}</span></div>`;
+        }
     }
 
     function filterStudents() {
@@ -507,8 +669,9 @@
             const matchName = u.name.toLowerCase().includes(searchText) || u.ph.includes(searchText);
             const matchClass = (filterClass === "All") || (u.cls == filterClass);
             
-            let isDue = false;
             let feeStatus = "";
+            let isDue = false;
+            
             if (u.lastPaymentDate) {
                 const daysPassed = Math.floor((Date.now() - u.lastPaymentDate) / (1000 * 60 * 60 * 24));
                 const daysLeft = 30 - daysPassed;
@@ -555,130 +718,357 @@
         if(area.innerHTML === "") area.innerHTML = "<p class='text-center text-gray-400'>No students found.</p>";
     }
 
+    function handleApprove(ph, name, status) {
+        db.ref('students/' + ph).update({ active: status }).then(() => {
+            if(status === true) {
+                const msg = `প্ৰিয় ${name}, KS Gyan Mondir লৈ তোমাক স্বাগতম।`;
+                db.ref(`messages/${ph}`).push({ text: msg, time: new Date().toLocaleString() });
+                const waMsg = `নমস্কাৰ ${name}, তোমাৰ KS Gyan Mondir একাউণ্টটো Approve কৰা হ'ল।`;
+                window.location.href = `https://wa.me/91${ph}?text=${encodeURIComponent(waMsg)}`;
+                showToast("Approved!");
+            } else {
+                 showToast("User Locked!");
+            }
+        });
+    }
+
     function confirmFee(ph) {
         let amount = prompt("Enter Amount Received (₹):", "");
         if(amount && !isNaN(amount)) {
-            db.ref('students/' + ph).update({ lastPaymentDate: Date.now(), active: true });
+            // Update user
+            db.ref('students/' + ph).update({ 
+                lastPaymentDate: Date.now(),
+                active: true 
+            });
+            // Update Revenue
             db.ref('admin/revenue').once('value', s => {
                 let current = parseInt(s.val() || 0);
-                db.ref('admin/revenue').set(current + parseInt(amount));
+                let newTotal = current + parseInt(amount);
+                db.ref('admin/revenue').set(newTotal);
             });
-            showToast("Payment Confirmed!");
+            showToast("Payment Confirmed & Revenue Updated!");
         } else if (amount !== null) {
             showToast("Invalid Amount!");
         }
     }
 
-    function updateStatistics() {
-        document.getElementById('stat-total').innerText = allStudentsCache.length;
-        const classCounts = {};
-        allStudentsCache.forEach(u => { classCounts[u.cls] = (classCounts[u.cls] || 0) + 1; });
-        const grid = document.getElementById('stat-class-grid');
-        grid.innerHTML = "";
-        for(let i=3; i<=12; i++) {
-            const count = classCounts[i] || 0;
-            grid.innerHTML += `<div class="bg-gray-100 p-2 rounded text-center text-[10px] font-bold">Cls ${i}<br><span class="text-indigo-600 text-xs">${count}</span></div>`;
+    function toggleDueFilter() {
+        showDueOnly = !showDueOnly;
+        const btn = document.getElementById('btn-due-filter');
+        const bulkArea = document.getElementById('bulk-action-area');
+        
+        if(showDueOnly) {
+            btn.classList.remove('bg-gray-200', 'text-gray-700');
+            btn.classList.add('bg-red-600', 'text-white');
+            btn.innerText = "Showing: FEES DUE ONLY (Tap to Reset)";
+            bulkArea.classList.remove('hidden'); 
+        } else {
+            btn.classList.add('bg-gray-200', 'text-gray-700');
+            btn.classList.remove('bg-red-600', 'text-white');
+            btn.innerText = "Show Fees Due Only";
+            bulkArea.classList.add('hidden'); 
+        }
+        filterStudents();
+    }
+
+    function bulkLockDueStudents() {
+        let duePhones = [];
+        allStudentsCache.forEach(u => {
+            let isDue = false;
+            if (u.lastPaymentDate) {
+                const days = Math.floor((Date.now() - u.lastPaymentDate) / (1000 * 60 * 60 * 24));
+                if (days > 30) isDue = true;
+            } else { isDue = true; }
+            if(isDue && u.active) duePhones.push(u.ph);
+        });
+
+        if(duePhones.length === 0) return showToast("No active due students!");
+
+        if(confirm(`Lock ${duePhones.length} students?`)) {
+            let updates = {};
+            duePhones.forEach(ph => { updates[`students/${ph}/active`] = false; });
+            db.ref().update(updates).then(() => { showToast("Locked Successfully!"); });
         }
     }
 
-    function openSubject(sub) {
-        stopVideo();
-        const ph = localStorage.getItem('ks_student_id'); document.getElementById('current-subject-name').innerText = sub; showScreen('course-view');
-        const listArea = document.getElementById('course-content-list');
-        listArea.innerHTML = "<p class='text-center mt-5 text-gray-400'>Loading...</p>";
-        db.ref(`content/${ph}/${sub}`).once('value', s => {
-            listArea.innerHTML = "";
-            const data = s.val();
-            if(!data) { listArea.innerHTML = "<p class='text-center mt-10 text-gray-400 font-bold'>একো নাই।</p>"; return; }
-            if(data.videos) for(let k in data.videos) {
-                const v = data.videos[k]; let pdf = "";
-                if(data.pdfs) for(let pk in data.pdfs) if(data.pdfs[pk].title === v.title) pdf = data.pdfs[pk].fileData;
-                listArea.innerHTML += `<div onclick="playVideo('${v.title}', '${v.link}', '${pdf}')" class="bg-white p-5 rounded-3xl shadow-sm border flex items-center gap-4 cursor-pointer active:scale-95 transition">▶️ <div class="font-bold text-[10px] uppercase tracking-tighter">${v.title}</div></div>`;
-            }
-        });
+    function bulkUnlockDueStudents() {
+        if(confirm(`Unlock ALL listed students?`)) {
+            let updates = {};
+            const filterClass = document.getElementById('filter-class').value;
+            allStudentsCache.forEach(u => {
+                if(filterClass === "All" || u.cls == filterClass) {
+                    updates[`students/${u.ph}/active`] = true;
+                }
+            });
+            db.ref().update(updates).then(() => { showToast("Unlocked Successfully!"); });
+        }
     }
 
+    function sendBroadcast() {
+        const msg = document.getElementById('broadcast-msg').value;
+        const target = document.getElementById('broadcast-target').value;
+        
+        if(!msg) return showToast("Message empty!");
+        if(!confirm(`Send to ${target}?`)) return;
+
+        let count = 0;
+        allStudentsCache.forEach(u => {
+            if(target === "All" || u.cls == target) {
+                db.ref(`messages/${u.ph}`).push({ text: "📢 " + msg, time: new Date().toLocaleString() });
+                count++;
+            }
+        });
+        showToast(`Sent to ${count} students!`);
+        document.getElementById('broadcast-msg').value = "";
+    }
+
+    // --- 8. UTILS ---
     function openModalWithState(modalId) {
         document.getElementById(modalId).classList.remove('hidden');
         history.pushState({modal: true}, null, ""); 
     }
 
-    function openAddQuestionModal(key) { currentQuizId = key; document.getElementById('add-q-modal').classList.remove('hidden'); }
-    function saveQuestion() {
-        const q = { q: document.getElementById('q-text').value, a: document.getElementById('op-a').value, b: document.getElementById('op-b').value, c: document.getElementById('op-c').value, d: document.getElementById('op-d').value, correct: document.getElementById('q-correct').value };
-        if(!q.q || !q.a) return showToast("Fields required!");
-        db.ref(`quizzes/${currentQuizId}/questions`).push(q).then(() => { showToast("Question Added!"); document.getElementById('add-q-modal').classList.add('hidden'); });
+    function showFeesTable() { 
+        const cls = document.getElementById('s-class').value; 
+        if(!cls) return showToast("শ্ৰেণী বাচনি কৰা!"); 
+        
+        let table = `<div class='bg-white p-6 rounded-3xl w-80 shadow-2xl'><h3 class='font-black mb-4 border-b pb-2 text-sm uppercase text-center text-indigo-900'>Class ${cls} Fees</h3><table class='w-full text-xs'>`; 
+        subjects.forEach(s => { 
+            const p = (window.feesData && window.feesData[cls] && window.feesData[cls][s.name]) ? window.feesData[cls][s.name] : '0'; 
+            table += `<tr><td class='p-2 border uppercase font-bold text-gray-400'>${s.name}</td><td class='p-2 border font-bold text-orange-600'>₹${p}</td></tr>`; 
+        }); 
+        table += `</table><button onclick='this.parentElement.parentElement.remove()' class='btn-3d mt-4 py-2 text-xs shadow-md'>CLOSE</button></div>`; 
+        
+        const div = document.createElement('div'); 
+        div.className = 'fixed inset-0 bg-black/70 z-[300] flex items-center justify-center p-4'; 
+        div.innerHTML = table; 
+        document.body.appendChild(div); 
     }
 
-    function createQuiz() {
-        const title = document.getElementById('new-quiz-title').value;
-        const targetClass = document.getElementById('new-quiz-class').value; 
-        if(!title) return showToast("Quiz Title is required!");
-        db.ref('quizzes').push({ title: title, targetClass: targetClass, active: true }).then(() => {
-            document.getElementById('new-quiz-title').value = ""; showToast("Quiz Created!");
+    function triggerAdmin() { 
+        clicks++; 
+        if(clicks>=5) { 
+            showScreen('admin-login-screen'); 
+            clicks=0; 
+        } 
+        setTimeout(()=>clicks=0, 2000); 
+    }
+
+    function loadInboxCount(ph) { 
+        db.ref(`messages/${ph}`).on('value', s => {
+            const count = s.exists() ? Object.keys(s.val()).length : 0;
+            document.getElementById('msg-count').innerText = count;
         });
     }
 
-    let currentQuestions = [];
+    function submitPayment() {
+        const ph = localStorage.getItem('ks_student_id');
+        const utr = document.getElementById('s-utr').value;
+        const file = document.getElementById('s-pay-shot').files[0];
+        if(!utr || !file) return showToast("Fill all fields!");
+        const r = new FileReader();
+        r.onload = e => db.ref('students/' + ph).update({ utr: utr, payShot: e.target.result }).then(() => showToast("Submitted!"));
+        r.readAsDataURL(file);
+    }
+
+    function payDirect() { 
+        if(!currentUPI) return showToast("UPI ID Not Set!");
+        const trID = "T" + Date.now();
+        window.location.href = `upi://pay?pa=${currentUPI}&pn=KSGyanMondir&tn=SchoolFees&tr=${trID}&cu=INR`;
+    }
+
+    function saveAdminSettings() { 
+        const upi = document.getElementById('adm-upi').value;
+        const wa = document.getElementById('adm-wa').value;
+        const notif = document.getElementById('adm-notif').value;
+        const logo = document.getElementById('adm-logo-file').files[0];
+        const qr = document.getElementById('adm-qr-file').files[0];
+        
+        const updateDB = (l, q) => { 
+            let obj = { upi, wa, notif }; 
+            if(l) obj.appLogo = l; 
+            if(q) obj.qr = q; 
+            db.ref('admin/config').update(obj).then(() => showToast("Saved!")); 
+        };
+        
+        if(logo || qr) {
+            if(logo) { let r=new FileReader(); r.onload=e=>updateDB(e.target.result, null); r.readAsDataURL(logo); }
+            if(qr) { let r=new FileReader(); r.onload=e=>updateDB(null, e.target.result); r.readAsDataURL(qr); }
+        } else updateDB();
+    }
+
+    function uploadContent(type) {
+        const ph = document.getElementById('c-ph').value;
+        const sub = document.getElementById('c-sub').value;
+        const t = document.getElementById('c-title').value;
+        
+        if(!ph || !t) return showToast("Missing details!");
+        
+        if(type==='video') {
+            const link = document.getElementById('c-link').value;
+            db.ref(`content/${ph}/${sub}/videos`).push({title:t, link:link}).then(()=>showToast("Video Added!"));
+        } else {
+            const file = document.getElementById('c-pdf-file').files[0];
+            if(!file) return showToast("Select PDF!");
+            const r = new FileReader(); 
+            r.onload = e => db.ref(`content/${ph}/${sub}/pdfs`).push({title:t, fileData: e.target.result}).then(()=>showToast("PDF Added!")); 
+            r.readAsDataURL(file);
+        }
+    }
+
+    function manageContent() { 
+        const ph = document.getElementById('c-ph').value;
+        const sub = document.getElementById('c-sub').value;
+        const area = document.getElementById('manage-area');
+        
+        db.ref(`content/${ph}/${sub}`).once('value', s => { 
+            const d = s.val(); 
+            area.innerHTML = ""; 
+            if(!d) { area.innerHTML = "<p>No content found.</p>"; return; }
+            
+            for(let ty in d) {
+                for(let k in d[ty]) {
+                    area.innerHTML += `<div class="flex justify-between p-2 bg-gray-100 mb-1 text-[9px] rounded font-bold uppercase shadow-sm">
+                        <span>${d[ty][k].title} (${ty})</span>
+                        <button onclick="deleteContent('${ph}','${sub}','${ty}','${k}')" class="text-red-600 font-bold uppercase">Del</button>
+                    </div>`; 
+                }
+            }
+        }); 
+    }
+
+    function deleteContent(ph, sub, ty, k) {
+        if(confirm("Delete this content?")) {
+            db.ref(`content/${ph}/${sub}/${ty}/${k}`).remove().then(() => manageContent());
+        }
+    }
+
+    function updateFeesInDB() { 
+        const cls = document.getElementById('fee-cls').value;
+        const sub = document.getElementById('fee-sub').value;
+        const amt = document.getElementById('fee-amount').value;
+        if(cls && sub && amt) {
+            db.ref(`admin/fees/${cls}/${sub}`).set(amt).then(()=>showToast("Fees Updated!"));
+        }
+    }
+
+    function showToast(m) { 
+        var x = document.getElementById("custom-toast"); 
+        x.innerHTML = m; 
+        x.className = "show"; 
+        setTimeout(() => x.className = x.className.replace("show", ""), 3000); 
+    }
+
+    function sendDirectMsg(ph) { 
+        const t = document.getElementById('direct-msg-'+ph).value; 
+        if(t) db.ref(`messages/${ph}`).push({text:"ADMIN: "+t}).then(()=>showToast("Sent")); 
+    }
+
+    function forgotPass() { 
+        if(adminWA) window.location.href = `https://wa.me/${adminWA}?text=Forgot Pass ${document.getElementById('l-phone').value}`; 
+        else showToast("Admin WhatsApp not set!");
+    }
+
+    // --- QUIZ & DOUBT & INBOX MODALS ---
+    function openDoubtModal() { openModalWithState('doubt-modal'); }
+    function submitDoubt() { 
+        const q = document.getElementById('doubt-input').value; 
+        if(q) db.ref('doubts').push({ ph: localStorage.getItem('ks_student_id'), question: q }).then(() => { 
+            showToast("Sent!"); history.back(); 
+        }); 
+    }
+    
+    function showInbox() { 
+        const ph = localStorage.getItem('ks_student_id'); 
+        db.ref(`messages/${ph}`).once('value', s => { 
+            const area = document.getElementById('inbox-list'); 
+            area.innerHTML = ""; 
+            if(!s.exists()) area.innerHTML = "<p class='text-center mt-4'>No messages.</p>"; 
+            else s.forEach(m => area.innerHTML += `<div class="bg-indigo-50 p-4 mb-4 border-l-4 border-indigo-600 relative"><p class="text-xs font-bold text-gray-500">${m.val().time || ''}</p><p>${m.val().text}</p><button onclick="delMsg('${ph}','${m.key}')" class="absolute top-2 right-2 text-red-500 font-bold">X</button></div>`); 
+            
+            openModalWithState('inbox-modal'); 
+        }); 
+    }
+    
+    function delMsg(ph, k) {
+        if(confirm("Delete?")) db.ref(`messages/${ph}/${k}`).remove().then(() => showInbox());
+    }
+
+    function showIDCard() { 
+        const ph = localStorage.getItem('ks_student_id'); 
+        db.ref('students/' + ph).once('value', s => { 
+            const u = s.val(); 
+            document.getElementById('id-card-content').innerHTML = `<img src="${u.studentPhoto}" class="w-24 h-24 mx-auto rounded-full border mb-4"><h3 class="text-xl font-bold">${u.name}</h3><p>Class ${u.cls}</p><button onclick="history.back()" class="w-full bg-gray-100 p-2 mt-4 font-bold">Close</button>`; 
+            openModalWithState('id-card-modal'); 
+        }); 
+    }
+
+    // QUIZ STUDENT
+    function fetchQuizzesStudent() {
+        const ph = localStorage.getItem('ks_student_id');
+        db.ref('students/' + ph).once('value', st => {
+            const cls = st.val().cls;
+            db.ref('quizzes').on('value', s => {
+                const area = document.getElementById('student-quiz-list');
+                area.innerHTML = "";
+                if(!s.exists()) { area.innerHTML = "<p class='text-center text-gray-400'>No quizzes active.</p>"; return; }
+                s.forEach(q => {
+                    const v = q.val();
+                    if(v.active && (v.targetClass === 'All' || v.targetClass == cls)) {
+                        area.innerHTML += `<div onclick="startQuiz('${q.key}','${v.title}')" class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-indigo-500 cursor-pointer mb-2"><h3 class="font-bold">${v.title}</h3><p class="text-xs">Tap to Start</p></div>`;
+                    }
+                });
+            });
+        });
+    }
+
     function startQuiz(key, title) {
         currentQuizId = key;
         showScreen('quiz-play-screen');
         document.getElementById('play-quiz-title').innerText = title;
-        const area = document.getElementById('quiz-questions-area'); area.innerHTML = "Loading...";
+        const area = document.getElementById('quiz-questions-area');
+        area.innerHTML = "Loading...";
+        
         db.ref(`quizzes/${key}/questions`).once('value', s => {
-            area.innerHTML = ""; if(!s.exists()) { area.innerHTML = "No questions."; return; }
-            currentQuestions = []; let idx = 1;
+            area.innerHTML = "";
+            currentQuestions = [];
+            let idx = 1;
             s.forEach(q => {
-                const qData = q.val(); currentQuestions.push({...qData, key: q.key});
-                area.innerHTML += `<div class="bg-white p-5 rounded-2xl shadow-sm mb-4 border"><p class="font-bold text-sm text-gray-800 mb-3"><span class="text-indigo-600">Q${idx}.</span> ${qData.q}</p><div class="space-y-2"><label class="block bg-gray-50 p-3 rounded-xl border flex items-center gap-2"><input type="radio" name="q-${idx}" value="a"> <span class="text-xs font-bold text-gray-600">${qData.a}</span></label><label class="block bg-gray-50 p-3 rounded-xl border flex items-center gap-2"><input type="radio" name="q-${idx}" value="b"> <span class="text-xs font-bold text-gray-600">${qData.b}</span></label><label class="block bg-gray-50 p-3 rounded-xl border flex items-center gap-2"><input type="radio" name="q-${idx}" value="c"> <span class="text-xs font-bold text-gray-600">${qData.c}</span></label><label class="block bg-gray-50 p-3 rounded-xl border flex items-center gap-2"><input type="radio" name="q-${idx}" value="d"> <span class="text-xs font-bold text-gray-600">${qData.d}</span></label></div></div>`; idx++;
+                const d = q.val();
+                currentQuestions.push({...d, key: q.key});
+                area.innerHTML += `<div class="bg-white p-4 rounded-xl mb-4 border"><p class="font-bold mb-2">Q${idx}. ${d.q}</p>
+                <div class="space-y-1 text-sm">
+                    <label class="block bg-gray-50 p-2 rounded border"><input type="radio" name="q-${idx}" value="a"> ${d.a}</label>
+                    <label class="block bg-gray-50 p-2 rounded border"><input type="radio" name="q-${idx}" value="b"> ${d.b}</label>
+                    <label class="block bg-gray-50 p-2 rounded border"><input type="radio" name="q-${idx}" value="c"> ${d.c}</label>
+                    <label class="block bg-gray-50 p-2 rounded border"><input type="radio" name="q-${idx}" value="d"> ${d.d}</label>
+                </div></div>`;
+                idx++;
             });
-            area.innerHTML += `<button onclick="submitQuizAns()" class="w-full bg-green-600 text-white py-4 rounded-xl font-black uppercase shadow-xl text-sm">SUBMIT EXAM</button>`;
+            area.innerHTML += `<button onclick="submitQuizAns()" class="btn-3d shadow-lg">Submit Exam</button>`;
         });
     }
 
-    function submitQuizAns() { openModalWithState('confirm-submit-modal'); }
-    function finalSubmit() {
-        history.back();
-        let score = 0, total = currentQuestions.length;
-        currentQuestions.forEach((q, i) => { const idx = i + 1; const radios = document.getElementsByName(`q-${idx}`); for(let r of radios) if(r.checked && r.value === q.correct) score++; });
-        const ph = localStorage.getItem('ks_student_id'); const percent = Math.round((score / total) * 100) + "%";
-        db.ref('students/' + ph).once('value', s => {
-            db.ref(`quiz_results/${currentQuizId}/${ph}`).set({ studentName: s.val().name, score, total, percent, time: Date.now() }).then(() => {
-                document.getElementById('score-display').innerText = score + " / " + total;
-                document.getElementById('percent-display').innerText = percent;
-                openModalWithState('quiz-score-modal');
+    // ADMIN QUIZ & DOUBTS
+    function fetchAdminDoubts() {
+        db.ref('doubts').on('value', s => {
+            const area = document.getElementById('admin-doubts-area');
+            area.innerHTML = "";
+            s.forEach(d => {
+                area.innerHTML += `<div class="bg-white p-4 border rounded-xl mb-2 text-xs"><p class="font-bold text-blue-600">${d.val().ph}</p><p class="mb-2">${d.val().question}</p><div class="flex gap-2"><input id="reply-${d.key}" placeholder="Reply..." class="input-box text-xs py-1 mb-0 flex-1"><button onclick="replyDoubt('${d.val().ph}','${d.key}')" class="bg-green-600 text-white px-3 rounded">Reply</button><button onclick="db.ref('doubts/${d.key}').remove()" class="text-red-500 font-bold px-2">X</button></div></div>`;
             });
         });
     }
-    function closeScoreModal() { history.go(-2); }
 
-    function openDoubtModal() { openModalWithState('doubt-modal'); }
-    function submitDoubt() { const q = document.getElementById('doubt-input').value; if(q) db.ref('doubts').push({ ph: localStorage.getItem('ks_student_id'), question: q }).then(() => { showToast("Sent!"); history.back(); }); }
-    function showInbox() { const ph = localStorage.getItem('ks_student_id'); db.ref(`messages/${ph}`).once('value', s => { const area = document.getElementById('inbox-list'); area.innerHTML = ""; if(!s.exists()) area.innerHTML = "Empty"; else s.forEach(m => area.innerHTML += `<div class="bg-indigo-50 p-4 mb-4 border-l-4 border-indigo-600 relative"><p>${m.val().text}</p></div>`); openModalWithState('inbox-modal'); }); }
-    function showIDCard() { const ph = localStorage.getItem('ks_student_id'); db.ref('students/' + ph).once('value', s => { const u = s.val(); document.getElementById('id-card-content').innerHTML = `<img src="${u.studentPhoto}" class="w-24 h-24 mx-auto rounded-full"><h3 class="text-xl font-bold">${u.name}</h3><p>Class ${u.cls}</p><button onclick="history.back()" class="w-full bg-gray-100 p-2 mt-4">Close</button>`; openModalWithState('id-card-modal'); }); }
-    function playVideo(t, url, pdf) { document.getElementById('current-video-title').innerText = t; let vid = url.split("v=")[1] || url.split("/").pop(); document.getElementById('course-video-wrapper').innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube-nocookie.com/embed/${vid}?autoplay=1&rel=0" frameborder="0" allowfullscreen></iframe>`; const btn = document.getElementById('pdf-download-btn'); if(pdf && pdf !== "undefined") { btn.classList.remove('hidden'); btn.onclick = () => window.location.href = pdf; } else btn.classList.add('hidden'); }
-    function stopVideo() { document.getElementById('course-video-wrapper').innerHTML = ""; document.getElementById('pdf-download-btn').classList.add('hidden'); }
-    function stopVideoAndBack() { stopVideo(); history.back(); }
-    function showFeesTable() { const cls = document.getElementById('s-class').value; if(!cls) return showToast("শ্ৰেণী বাচনি কৰা!"); let table = `<div class='bg-white p-6 rounded-3xl w-80 shadow-2xl'><h3 class='font-black mb-4 border-b pb-2 text-sm uppercase text-center text-indigo-900'>Class ${cls} Fees</h3><table class='w-full text-xs'>`; subjects.forEach(s => { const p = (window.feesData && window.feesData[cls] && window.feesData[cls][s.name]) ? window.feesData[cls][s.name] : '0'; table += `<tr><td class='p-2 border uppercase font-bold text-gray-400'>${s.name}</td><td class='p-2 border font-bold text-orange-600'>₹${p}</td></tr>`; }); table += `</table><button onclick='this.parentElement.parentElement.remove()' class='btn-3d mt-4 py-2 text-xs shadow-md'>CLOSE</button></div>`; const div = document.createElement('div'); div.className = 'fixed inset-0 bg-black/70 z-[300] flex items-center justify-center p-4'; div.innerHTML = table; document.body.appendChild(div); }
-    function manageContent() { const ph = document.getElementById('c-ph').value, sub = document.getElementById('c-sub').value; db.ref(`content/${ph}/${sub}`).once('value', s => { const d = s.val(); const area = document.getElementById('manage-area'); area.innerHTML = ""; if(!d) { area.innerHTML = "No Content"; return; } for(let ty in d) for(let k in d[ty]) area.innerHTML += `<div class="flex justify-between p-2 bg-gray-100 mb-1 text-[9px] rounded font-bold uppercase shadow-sm"><span>${d[ty][k].title}</span><button onclick="db.ref('content/${ph}/${sub}/${ty}/${k}').remove().then(()=>manageContent())" class="text-red-600 font-bold uppercase">Del</button></div>`; }); }
-    function updateFeesInDB() { db.ref(`admin/fees/${document.getElementById('fee-cls').value}/${document.getElementById('fee-sub').value}`).set(document.getElementById('fee-amount').value).then(()=>showToast("Updated")); }
-    function toggleDueFilter() { showDueOnly = !showDueOnly; const btn = document.getElementById('btn-due-filter'); const bulkArea = document.getElementById('bulk-action-area'); if(showDueOnly) { btn.classList.add('bg-red-600', 'text-white'); btn.innerText = "Showing: FEES DUE ONLY"; bulkArea.classList.remove('hidden'); } else { btn.classList.remove('bg-red-600', 'text-white'); btn.classList.add('bg-gray-200'); btn.innerText = "Show Fees Due Only"; bulkArea.classList.add('hidden'); } filterStudents(); }
-    function bulkLockDueStudents() { if(confirm("Lock All Due Students?")) { let updates = {}; allStudentsCache.forEach(u => { if(!u.lastPaymentDate || (Date.now() - u.lastPaymentDate)/(1000*60*60*24) > 30) updates[`students/${u.ph}/active`] = false; }); db.ref().update(updates).then(() => showToast("Locked!")); } }
-    function bulkUnlockDueStudents() { if(confirm("Unlock All in List?")) { let updates = {}; allStudentsCache.forEach(u => updates[`students/${u.ph}/active`] = true); db.ref().update(updates).then(() => showToast("Unlocked!")); } }
-    function showToast(m) { var x = document.getElementById("custom-toast"); x.innerHTML = m; x.className = "show"; setTimeout(() => x.className = x.className.replace("show", ""), 3000); }
-    function sendDirectMsg(ph) { const t = document.getElementById('direct-msg-'+ph).value; if(t) db.ref(`messages/${ph}`).push({text:"ADMIN: "+t}).then(()=>showToast("Sent")); }
-    function forgotPass() { window.location.href = `https://wa.me/${adminWA}?text=Forgot Pass ${document.getElementById('l-phone').value}`; }
-    function logout() { localStorage.removeItem('ks_student_id'); location.reload(); }
-    function triggerAdmin() { clicks++; if(clicks>=5) { showScreen('admin-login-screen'); clicks=0; } setTimeout(()=>clicks=0, 2000); }
-    function loadInboxCount(ph) { db.ref(`messages/${ph}`).on('value', s => document.getElementById('msg-count').innerText = s.exists() ? Object.keys(s.val()).length : 0); }
-    function submitPayment() { const ph = localStorage.getItem('ks_student_id'), utr = document.getElementById('s-utr').value, file = document.getElementById('s-pay-shot').files[0]; if(!utr || !file) return showToast("Required!"); const reader = new FileReader(); reader.onload = e => db.ref('students/' + ph).update({ utr, payShot: e.target.result }).then(() => { showToast("Submitted!"); }); reader.readAsDataURL(file); }
-    function payDirect() { window.location.href = `upi://pay?pa=${currentUPI}&pn=KSGyanMondir&tn=SchoolFees&cu=INR`; }
-    function saveAdminSettings() { const upi = document.getElementById('adm-upi').value, wa = document.getElementById('adm-wa').value, notif = document.getElementById('adm-notif').value; const logo = document.getElementById('adm-logo-file').files[0], qr = document.getElementById('adm-qr-file').files[0]; const updateDB = (l, q) => { let obj = { upi, wa, notif }; if(l) obj.appLogo = l; if(q) obj.qr = q; db.ref('admin/config').update(obj).then(() => showToast("Saved!")); }; if(logo || qr) { if(logo) { let r=new FileReader(); r.onload=e=>updateDB(e.target.result, null); r.readAsDataURL(logo); } if(qr) { let r=new FileReader(); r.onload=e=>updateDB(null, e.target.result); r.readAsDataURL(qr); } } else updateDB(); }
-    function uploadContent(type) { const ph = document.getElementById('c-ph').value, sub = document.getElementById('c-sub').value, t = document.getElementById('c-title').value; if(!ph || !t) return showToast("Missing fields!"); if(type==='video') db.ref(`content/${ph}/${sub}/videos`).push({title:t, link:document.getElementById('c-link').value}).then(()=>showToast("Success!")); else { const file = document.getElementById('c-pdf-file').files[0]; const r = new FileReader(); r.onload = e => db.ref(`content/${ph}/${sub}/pdfs`).push({title:t, fileData: e.target.result}).then(()=>showToast("Success!")); r.readAsDataURL(file); } }
-    function fetchAdminDoubts() { db.ref('doubts').on('value', s => { const area = document.getElementById('admin-doubts-area'); area.innerHTML = ""; s.forEach(d => area.innerHTML += `<div class="bg-white p-4 border rounded-2xl mb-4 text-xs shadow-sm border-l-4 border-yellow-500"><p class="text-blue-600 font-bold mb-1 uppercase">Student ID: ${d.val().ph}</p><p class="font-bold text-gray-800 bg-gray-50 p-2 rounded-lg mb-3">${d.val().question}</p><div class="flex gap-2"><input id="reply-${d.key}" placeholder="Type reply..." class="input-box text-[10px] mb-0 flex-1 py-2 shadow-inner"><button onclick="replyDoubt('${d.val().ph}', '${d.key}')" class="bg-green-600 text-white px-4 rounded-xl text-[10px] font-bold shadow-md uppercase">Reply</button><button onclick="db.ref('doubts/${d.key}').remove()" class="bg-red-500 text-white px-3 rounded-xl text-[10px] font-bold shadow-md">X</button></div></div>`); }); }
-    function replyDoubt(ph, doubtKey) { const rTxt = document.getElementById('reply-' + doubtKey).value; if(rTxt) db.ref(`messages/${ph}`).push({ text: "উত্তৰ: " + rTxt, time: new Date().toLocaleString() }).then(() => { document.getElementById('reply-' + doubtKey).value = ""; db.ref(`doubts/${doubtKey}`).remove(); showToast("Replied!"); }); }
-    function handleApprove(ph, name, status) { db.ref('students/' + ph).update({ active: status }).then(() => { if(status === true) { const msg = `প্ৰিয় ${name}, KS Gyan Mondir লৈ তোমাক স্বাগতম। তুমি এতিয়া লগইন কৰিব পাৰিবা।`; db.ref(`messages/${ph}`).push({ text: msg, time: new Date().toLocaleString() }); window.location.href = `https://wa.me/91${ph}?text=${encodeURIComponent(msg)}`; showToast("Approved!"); } else { showToast("User Locked!"); } }); }
-    function register() { const ph = document.getElementById('s-phone').value, n = document.getElementById('s-name').value, ps = document.getElementById('s-pass').value; if(!ph || !n || !ps) return showToast("Fill all fields!"); const photo = document.getElementById('s-photo').files[0]; if(!photo) return showToast("Upload Photo!"); const r1 = new FileReader(); r1.onload = e1 => { db.ref('students/' + ph).set({ name: n, ph, ps, utr: "", cls: document.getElementById('s-class').value, school: document.getElementById('s-school').value, vill: document.getElementById('s-vill').value, po: document.getElementById('s-po').value, dist: document.getElementById('s-dist').value, state: document.getElementById('s-state').value, pin: document.getElementById('s-pin').value, studentPhoto: e1.target.result, payShot: "", active: false }).then(() => { showToast("Registration Successful!"); showScreen('login-screen'); }); }; r1.readAsDataURL(photo); }
+    function replyDoubt(ph, k) {
+        const t = document.getElementById('reply-'+k).value;
+        if(t) {
+            db.ref(`messages/${ph}`).push({text: "Reply: "+t, time: new Date().toLocaleString()});
+            db.ref(`doubts/${k}`).remove();
+            showToast("Replied!");
+        }
+    }
+
 </script>
 </body>
 </html>
