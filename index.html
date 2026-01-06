@@ -160,8 +160,11 @@
 
     <div class="glass-card p-4 mb-8 border-l-8 border-blue-500 shadow-lg">
         <div class="flex justify-between items-center mb-3">
-            <h3 class="text-[10px] font-black uppercase text-blue-700 tracking-widest">Student Summary (Click to View Days)</h3>
-            <span class="bg-blue-600 text-white px-2 py-1 rounded text-[10px] font-bold">Total: <span id="total-std-count">0</span></span>
+            <div>
+                <h3 class="text-[10px] font-black uppercase text-blue-700 tracking-widest">Student Summary</h3>
+                <p class="text-[10px] font-bold text-green-600 mt-1">Total Earned: ₹<span id="total-revenue-display">0</span></p>
+            </div>
+            <span class="bg-blue-600 text-white px-2 py-1 rounded text-[10px] font-bold">Total Students: <span id="total-std-count">0</span></span>
         </div>
         <div id="admin-class-summary" class="grid grid-cols-4 gap-2">Loading...</div>
     </div>
@@ -789,23 +792,26 @@
                 allStudentsData.push(d.val());
             });
             filterStudents();
-            updateClassSummary(); // Added this
+            updateClassSummary(); 
         });
     }
 
-    // New Function to show class summary with Total
     function updateClassSummary() {
         const counts = {};
         for(let i=3; i<=12; i++) counts[i] = 0;
+        let totalIncome = 0; // REVENUE CALCULATION
 
         allStudentsData.forEach(u => {
             if(u.cls && counts[u.cls] !== undefined) {
                 counts[u.cls]++;
             }
+            if(u.paidAmount) {
+                totalIncome += parseInt(u.paidAmount);
+            }
         });
 
-        // Update Total
         document.getElementById('total-std-count').innerText = allStudentsData.length;
+        document.getElementById('total-revenue-display').innerText = totalIncome; // DISPLAY REVENUE
 
         const area = document.getElementById('admin-class-summary');
         area.innerHTML = "";
@@ -821,7 +827,6 @@
         if(allStudentsData.length === 0) area.innerHTML = "<p class='text-[10px]'>No data.</p>";
     }
 
-    // Function to open modal showing student list with joined days
     function openClassDetails(cls) {
         const list = allStudentsData.filter(u => u.cls == cls);
         const area = document.getElementById('class-student-list');
@@ -875,6 +880,7 @@
 
             if(matchStatus && matchSearch) {
                 foundCount++;
+                // ADDED ONCLICK EVENT TO IMAGE TO VIEW FULL SIZE WITHOUT RELOAD
                 area.innerHTML += `<div class="glass-card p-5 mb-4 border-l-8 ${u.active?'border-green-600':'border-red-600'}">
                     <div class="flex gap-4">
                         <img src="${u.studentPhoto}" class="w-16 h-16 rounded-xl object-cover border">
@@ -919,7 +925,13 @@
     }
 
     function handleApprove(ph, name, status) {
-        db.ref('students/' + ph).update({ active: status }).then(() => {
+        let amount = 0;
+        if(status === true) {
+            let input = prompt(`Enter payment amount for ${name}:`, "0");
+            amount = parseInt(input) || 0;
+        }
+
+        db.ref('students/' + ph).update({ active: status, paidAmount: amount }).then(() => {
             if(status === true) {
                 const msg = `প্ৰিয় ${name}, KS Gyan Mondir লৈ তোমাক স্বাগতম। তুমি এতিয়া লগইন কৰিব পাৰিবা।`;
                 db.ref(`messages/${ph}`).push({ text: msg, time: new Date().toLocaleString() });
