@@ -223,6 +223,16 @@
     <div id="admin-doubts-area" class="space-y-4 mb-10"></div>
 
     <h3 class="text-[10px] font-black uppercase mb-4 text-gray-500 tracking-[3px] mt-10 text-center">Student Management (Approvals)</h3>
+    
+    <div class="flex gap-2 mb-4">
+        <input id="adm-search-input" oninput="filterStudents()" placeholder="🔍 Search Name or Phone..." class="input-box text-xs mb-0">
+        <select id="adm-filter-select" onchange="filterStudents()" class="input-box text-xs mb-0 w-1/3 font-bold bg-indigo-50">
+            <option value="all">All</option>
+            <option value="pending">Pending</option>
+            <option value="active">Active</option>
+        </select>
+    </div>
+    
     <div id="admin-student-list" class="space-y-6"></div>
 </main>
 
@@ -313,6 +323,7 @@
     
     let currentUPI = "", activeAdminPIN = "", adminWA = "", clicks = 0;
     let currentQuizId = null; 
+    let allStudentsData = []; // STORE DATA FOR FILTERING
 
     const subjects = [ { name: "অসমীয়া", icon: "📚" }, { name: "ইংৰাজী", icon: "🅰️" }, { name: "গণিত", icon: "🧮" }, { name: "বিজ্ঞান", icon: "🔬" }, { name: "সমাজ বিজ্ঞান", icon: "🌍" }, { name: "হিন্দী", icon: "🕉️" }, { name: "সংস্কৃত", icon: "✡️" }, { name: "ঐচ্ছিক গণিত", icon: "📐" }, { name: "নীতিশিক্ষা", icon: "🪷" }, { name: "সকলো বিষয়", icon: "🎒" } ];
 
@@ -384,7 +395,6 @@
     }
 
     function loginAuto(ph) { 
-        // এই লাইনটোৱে আগৰ সকলো পেজ (Login/Register) লুকুৱাই দিব
         document.querySelectorAll('main').forEach(s => s.classList.add('hidden'));
 
         history.replaceState({id: 'home-screen'}, null, "");
@@ -752,9 +762,34 @@
 
     function fetchStudentsAdmin() {
         db.ref('students').on('value', s => {
-            const area = document.getElementById('admin-student-list'); area.innerHTML = "";
+            allStudentsData = [];
             s.forEach(d => {
-                const u = d.val();
+                allStudentsData.push(d.val());
+            });
+            filterStudents();
+        });
+    }
+
+    function filterStudents() {
+        const searchText = document.getElementById('adm-search-input').value.toLowerCase();
+        const filterType = document.getElementById('adm-filter-select').value;
+        const area = document.getElementById('admin-student-list');
+        
+        area.innerHTML = "";
+
+        let foundCount = 0;
+
+        allStudentsData.forEach(u => {
+            let matchStatus = false;
+            if(filterType === 'all') matchStatus = true;
+            else if(filterType === 'pending' && !u.active) matchStatus = true;
+            else if(filterType === 'active' && u.active) matchStatus = true;
+
+            let matchSearch = false;
+            if(u.name.toLowerCase().includes(searchText) || u.ph.includes(searchText)) matchSearch = true;
+
+            if(matchStatus && matchSearch) {
+                foundCount++;
                 area.innerHTML += `<div class="glass-card p-5 mb-4 border-l-8 ${u.active?'border-green-600':'border-red-600'}">
                     <div class="flex gap-4">
                         <img src="${u.studentPhoto}" class="w-16 h-16 rounded-xl object-cover border">
@@ -773,8 +808,12 @@
                     </div>
                     <div class="flex gap-2 mt-3"><input id="direct-msg-${u.ph}" placeholder="Personal Message..." class="input-box text-[9px] mb-0 flex-1 py-1"><button onclick="sendDirectMsg('${u.ph}')" class="bg-gray-800 text-white px-3 rounded text-[9px] font-bold uppercase">Send</button></div>
                 </div>`;
-            });
+            }
         });
+
+        if(foundCount === 0) {
+            area.innerHTML = "<p class='text-center text-gray-400 font-bold text-xs'>No students found.</p>";
+        }
     }
 
     function fetchAdminDoubts() {
