@@ -384,6 +384,9 @@
     }
 
     function loginAuto(ph) { 
+        // এই লাইনটোৱে আগৰ সকলো পেজ (Login/Register) লুকুৱাই দিব
+        document.querySelectorAll('main').forEach(s => s.classList.add('hidden'));
+
         history.replaceState({id: 'home-screen'}, null, "");
         document.getElementById('home-screen').classList.remove('hidden');
         document.getElementById('logout-btn').classList.remove('hidden');
