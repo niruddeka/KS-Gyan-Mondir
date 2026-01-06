@@ -252,6 +252,10 @@
     </div>
 </main>
 
+<div id="img-modal" class="modal-overlay hidden fixed inset-0 bg-black/95 z-[500] flex items-center justify-center p-4" onclick="this.classList.add('hidden')">
+    <img id="img-viewer-src" src="" class="max-w-full max-h-full rounded shadow-2xl">
+</div>
+
 <div id="class-details-modal" class="modal-overlay hidden fixed inset-0 bg-black/90 z-[300] flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl overflow-hidden flex flex-col h-[80vh]">
         <div class="flex justify-between items-center mb-4 border-b pb-2">
@@ -883,7 +887,7 @@
                         </div>
                     </div>
                     <div class="flex gap-2 mt-4">
-                        <img src="${u.payShot}" onclick="window.open(this.src)" class="h-10 w-1/4 rounded border object-cover cursor-pointer">
+                        <img src="${u.payShot}" onclick="viewFullImage('${u.payShot}')" class="h-10 w-1/4 rounded border object-cover cursor-pointer">
                         <button onclick="handleApprove('${u.ph}', '${u.name}', ${!u.active})" class="bg-indigo-600 text-white px-3 py-1 rounded text-[8px] font-bold uppercase flex-1 shadow-md">${u.active?'Lock User':'Approve User'}</button>
                         <button onclick="if(confirm('Delete student?')) db.ref('students/${u.ph}').remove()" class="bg-red-600 text-white px-3 py-1 rounded text-[8px] font-bold uppercase shadow-md">Delete</button>
                     </div>
@@ -895,6 +899,12 @@
         if(foundCount === 0) {
             area.innerHTML = "<p class='text-center text-gray-400 font-bold text-xs'>No students found.</p>";
         }
+    }
+
+    // NEW FUNCTION TO VIEW FULL IMAGE
+    function viewFullImage(src) {
+        document.getElementById('img-viewer-src').src = src;
+        document.getElementById('img-modal').classList.remove('hidden');
     }
 
     function fetchAdminDoubts() {
