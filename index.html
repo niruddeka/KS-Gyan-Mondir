@@ -158,6 +158,11 @@
         <button onclick="logout()" class="bg-white text-indigo-900 px-3 py-1 rounded-lg text-[10px] font-black uppercase">Exit</button>
     </div>
 
+    <div class="glass-card p-4 mb-8 border-l-8 border-blue-500 shadow-lg">
+        <h3 class="text-[10px] font-black uppercase mb-3 text-blue-700 tracking-widest">Student Summary</h3>
+        <div id="admin-class-summary" class="grid grid-cols-4 gap-2">Loading...</div>
+    </div>
+
     <div class="glass-card p-5 mb-8 border-l-8 border-purple-600 shadow-lg">
         <h3 class="text-[10px] font-black uppercase mb-4 text-purple-700 tracking-widest">Manage Quizzes</h3>
         <input id="new-quiz-title" placeholder="Quiz Title (e.g. Science Test)" class="input-box text-xs">
@@ -767,7 +772,33 @@
                 allStudentsData.push(d.val());
             });
             filterStudents();
+            updateClassSummary(); // Added this
         });
+    }
+
+    // New Function to show class summary
+    function updateClassSummary() {
+        const counts = {};
+        for(let i=3; i<=12; i++) counts[i] = 0;
+
+        allStudentsData.forEach(u => {
+            if(u.cls && counts[u.cls] !== undefined) {
+                counts[u.cls]++;
+            }
+        });
+
+        const area = document.getElementById('admin-class-summary');
+        area.innerHTML = "";
+        for(let i=3; i<=12; i++) {
+            if(counts[i] > 0) {
+                 area.innerHTML += `
+                    <div class="bg-blue-50 p-2 rounded text-center border border-blue-100">
+                        <div class="text-[10px] font-bold text-gray-500">Class ${i}</div>
+                        <div class="text-sm font-black text-blue-600">${counts[i]}</div>
+                    </div>`;
+            }
+        }
+        if(allStudentsData.length === 0) area.innerHTML = "<p class='text-[10px]'>No data.</p>";
     }
 
     function filterStudents() {
