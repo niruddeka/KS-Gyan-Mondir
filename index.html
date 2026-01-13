@@ -8,10 +8,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    
-    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
-    <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
-
     <style>
         body { font-family: 'Hind Siliguri', sans-serif; background: #f1f5f9; margin: 0; padding-bottom: 60px; overscroll-behavior-y: contain; user-select: none; -webkit-tap-highlight-color: transparent; }
         .hidden { display: none !important; }
@@ -38,10 +34,6 @@
         @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
         
         .modal-overlay { z-index: 9999; }
-
-        /* --- দৰকাৰী VIDEO PROTECTION LAYER --- */
-        .video-blocker { position: absolute; top: 0; left: 0; width: 100%; height: 60px; z-index: 100; background: transparent; }
-        .video-blocker-bottom { position: absolute; bottom: 0; right: 0; width: 80px; height: 45px; z-index: 100; background: transparent; }
     </style>
 </head>
 <body>
@@ -70,6 +62,7 @@
         </div>
         <p class="text-[10px] font-bold text-gray-400 mt-2 uppercase">তোমাৰ ফটো আপলোড কৰা *</p>
         <input type="file" id="s-photo" class="text-[10px] w-full mb-4">
+        
         <button onclick="register()" class="btn-3d w-full shadow-2xl">পঞ্জীয়ন কৰক</button>
         <p onclick="showScreen('login-screen')" class="text-center mt-6 text-indigo-700 font-bold cursor-pointer underline text-sm">Login কৰক</p>
     </div>
@@ -88,7 +81,11 @@
 </main>
 
 <main id="home-screen" class="container mx-auto p-4 hidden">
-    <div id="main-content">
+    <div id="lock-msg" class="hidden text-center glass-card p-10 mt-10 border-t-8 border-red-600 shadow-2xl animate-pulse">
+        <h2 class="text-red-600 font-black text-xl mb-2">Account Locked</h2>
+        <p class="text-gray-600 font-bold text-sm">অনুগ্ৰহ কৰি অনুমোদনৰ বাবে অপেক্ষা কৰা।</p>
+    </div>
+    <div id="main-content" class="hidden">
         <div class="grid grid-cols-4 gap-3 mb-6">
             <div onclick="showIDCard()" class="dash-icon">🆔<div class="text-[8px] font-bold mt-1 uppercase">ID Card</div></div>
             <div onclick="showInbox()" class="dash-icon relative">📩<div class="text-[8px] font-bold mt-1 uppercase">Inbox</div><div id="msg-count" class="absolute -top-1 -right-1 bg-red-600 text-white text-[8px] rounded-full w-4 h-4 flex items-center justify-center font-bold">0</div></div>
@@ -117,6 +114,7 @@
         </div>
 
         <div id="validity-box" class="hidden bg-indigo-900 text-white p-4 rounded-2xl mb-6 text-center shadow-xl border-4 border-indigo-200">
+            <p class="text-[10px] font-bold uppercase opacity-70 mb-1">Your Plan Validity</p>
             <h2 id="validity-days-text" class="text-xl font-black tracking-widest text-yellow-400">Loading...</h2>
         </div>
 
@@ -125,18 +123,29 @@
     </div>
 </main>
 
+<main id="quiz-list-screen" class="container mx-auto p-4 hidden">
+    <div class="flex justify-between items-center mb-6">
+        <button onclick="history.back()" class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs font-bold">⬅️ Back</button>
+        <h2 class="font-black text-indigo-900 text-lg uppercase">All Quizzes</h2>
+    </div>
+    <div id="student-quiz-list" class="space-y-4"></div>
+</main>
+
+<main id="quiz-play-screen" class="container mx-auto p-4 hidden">
+    <div class="flex justify-between items-center mb-4">
+        <button onclick="history.back()" class="bg-red-500 text-white px-3 py-1 rounded text-[10px] font-bold">Cancel Quiz</button>
+        <h2 id="play-quiz-title" class="font-bold text-indigo-900 text-sm">Quiz Title</h2>
+    </div>
+    <div id="quiz-questions-area" class="pb-20"></div>
+</main>
+
 <main id="course-view" class="container mx-auto p-4 hidden">
     <div class="flex justify-between items-center mb-4">
         <button onclick="stopVideoAndBack()" class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs font-bold">⬅️ পাছলৈ</button>
         <h2 id="current-subject-name" class="font-bold text-indigo-900 text-sm">Subject</h2>
     </div>
-    <div class="glass-card overflow-hidden shadow-2xl mb-6 relative">
-        <div id="video-protection-wrapper" class="relative w-full aspect-video bg-black">
-            <div id="course-video-wrapper" class="w-full">ভিডিঅ' বাচনি কৰা...</div>
-            <div id="t-block" class="video-blocker hidden"></div>
-            <div id="b-block" class="video-blocker-bottom hidden"></div>
-        </div>
-        
+    <div class="glass-card overflow-hidden shadow-2xl mb-6">
+        <div id="course-video-wrapper" class="w-full aspect-video bg-black flex items-center justify-center text-white text-[10px]">ভিডিঅ' বাচনি কৰা...</div>
         <div class="p-6 text-center">
             <h3 id="current-video-title" class="font-bold text-sm mb-4">Class Title</h3>
             <div class="flex gap-2">
@@ -153,8 +162,189 @@
         <span class="font-black text-xs uppercase tracking-widest">Admin Dashboard</span>
         <button onclick="logout()" class="bg-white text-indigo-900 px-3 py-1 rounded-lg text-[10px] font-black uppercase">Exit</button>
     </div>
+
+    <div class="glass-card p-4 mb-8 border-l-8 border-blue-500 shadow-lg">
+        <div class="flex justify-between items-center mb-3">
+            <div>
+                <h3 class="text-[10px] font-black uppercase text-blue-700 tracking-widest">Student Summary</h3>
+                <p class="text-[10px] font-bold text-green-600 mt-1">Total Earned: ₹<span id="total-revenue-display">0</span></p>
+            </div>
+            <span class="bg-blue-600 text-white px-2 py-1 rounded text-[10px] font-bold">Total Students: <span id="total-std-count">0</span></span>
+        </div>
+        <div id="admin-class-summary" class="grid grid-cols-4 gap-2">Loading...</div>
+    </div>
+
+    <div class="glass-card p-5 mb-8 border-l-8 border-purple-600 shadow-lg">
+        <h3 class="text-[10px] font-black uppercase mb-4 text-purple-700 tracking-widest">Manage Quizzes</h3>
+        <input id="new-quiz-title" placeholder="Quiz Title (e.g. Science Test)" class="input-box text-xs">
+        
+        <select id="new-quiz-class" class="input-box text-xs font-bold bg-purple-50">
+            <option value="All">All Classes (For GK etc.)</option>
+            <script>for(let i=3; i<=12; i++) document.write(`<option value="${i}">Class ${i}</option>`);</script>
+        </select>
+        
+        <button onclick="createQuiz()" class="bg-purple-600 text-white w-full py-3 rounded-xl text-xs font-black uppercase shadow-md mb-6">Create New Quiz</button>
+        <div id="admin-quiz-list" class="space-y-3"></div>
+    </div>
+
+    <div class="glass-card p-5 mb-8 border-l-8 border-orange-500 shadow-lg">
+        <h3 class="text-[10px] font-black uppercase mb-4 text-orange-700 tracking-widest italic">Update Student Fees</h3>
+        <div class="grid grid-cols-2 gap-3 mb-4">
+            <select id="fee-cls" class="input-box text-xs font-bold">
+                <option value="">শ্ৰেণী বাচনি কৰা</option>
+                <script>for(let i=3; i<=12; i++) document.write(`<option value="${i}">Class ${i}</option>`);</script>
+            </select>
+            <select id="fee-sub" class="input-box text-xs font-bold">
+                <option value="">বিষয় বাচনি কৰা</option>
+                <script>
+                    const subs = ["অসমীয়া", "ইংৰাজী", "গণিত", "বিজ্ঞান", "সমাজ বিজ্ঞান", "হিন্দী", "সংস্কৃত", "ঐচ্ছিক গণিত", "নীতিশিক্ষা", "সকলো বিষয়"];
+                    subs.forEach(s => document.write(`<option value="${s}">${s}</option>`));
+                </script>
+            </select>
+        </div>
+        <input id="fee-amount" placeholder="মাচুলৰ পৰিমাণ (যেনে: 500)" class="input-box text-xs text-center font-bold">
+        <button onclick="updateFeesInDB()" class="bg-orange-600 text-white w-full py-3 rounded-xl text-xs font-black uppercase shadow-md">Update Fees Now</button>
+    </div> 
+    <div class="glass-card p-5 mb-8 border-l-8 border-yellow-500 shadow-lg">
+        <h3 class="text-[10px] font-black uppercase mb-4 text-yellow-700 tracking-widest">App Branding (Logo & QR)</h3>
+        <div class="grid grid-cols-2 gap-4 text-[9px] font-bold text-gray-500 mb-4">
+            <div class="bg-gray-50 p-2 rounded-lg">App Logo:<br><input type="file" id="adm-logo-file" class="mt-1 w-full"></div>
+            <div class="bg-gray-50 p-2 rounded-lg">Payment QR:<br><input type="file" id="adm-qr-file" class="mt-1 w-full"></div>
+        </div>
+        <button onclick="saveAdminSettings()" class="bg-blue-600 text-white w-full py-3 rounded-xl text-xs font-black uppercase shadow-md mb-6">Update Branding & Settings</button>
+        
+        <input id="adm-upi" placeholder="Update UPI ID" class="input-box text-xs">
+        <input id="adm-wa" placeholder="WhatsApp Number" class="input-box text-xs">
+        <input id="adm-notif" placeholder="Global Notice Text (Scrolling)" class="input-box text-xs">
+    </div>
+
+    <div class="glass-card p-5 mb-8 border-l-8 border-indigo-600 shadow-lg">
+        <h3 class="text-[10px] font-black uppercase mb-4">Upload New Class</h3>
+        <input id="c-ph" placeholder="Student Phone ID" class="input-box text-xs">
+        <select id="c-sub" class="input-box text-xs font-bold"></select>
+        <input id="c-title" placeholder="Topic Title" class="input-box text-xs">
+        <input id="c-link" placeholder="YouTube URL" class="input-box text-xs">
+        <p class="text-[10px] font-bold mb-1 uppercase text-gray-400">Choose PDF Material:</p>
+        <input type="file" id="c-pdf-file" accept="application/pdf" class="text-[10px] w-full mb-4">
+
+        <div class="grid grid-cols-2 gap-2">
+            <button onclick="uploadContent('video')" class="bg-red-600 text-white py-3 rounded-xl text-[10px] font-black shadow-md uppercase">Upload Video</button>
+            <button onclick="uploadContent('pdf')" class="bg-teal-600 text-white py-3 rounded-xl text-[10px] font-black shadow-md uppercase">Upload PDF</button>
+        </div>
+        <button onclick="manageContent()" class="w-full mt-4 bg-gray-800 text-white py-2 rounded-xl text-[9px] font-black uppercase italic">Manage Content</button>
+        <div id="manage-area" class="mt-4"></div>
+    </div>
+
+    <h3 class="text-[10px] font-black uppercase mb-4 text-gray-500 tracking-[3px] mt-10">ছাত্ৰৰ প্ৰশ্ন আৰু ৰিপ্লাই (Doubts)</h3>
+    <div id="admin-doubts-area" class="space-y-4 mb-10"></div>
+
+    <h3 class="text-[10px] font-black uppercase mb-4 text-gray-500 tracking-[3px] mt-10 text-center">Student Management (Approvals)</h3>
+    
+    <div class="flex gap-2 mb-4">
+        <input id="adm-search-input" oninput="filterStudents()" placeholder="🔍 Search Name or Phone..." class="input-box text-xs mb-0">
+        <select id="adm-filter-select" onchange="filterStudents()" class="input-box text-xs mb-0 w-1/3 font-bold bg-indigo-50">
+            <option value="all">All</option>
+            <option value="pending">Pending</option>
+            <option value="active">Active</option>
+        </select>
+    </div>
+    
     <div id="admin-student-list" class="space-y-6"></div>
 </main>
+
+<main id="admin-login-screen" class="container mx-auto p-4 hidden text-center">
+    <div class="bg-gray-900 p-12 mt-24 rounded-[40px] text-white shadow-2xl max-w-sm mx-auto">
+        <h2 class="font-black mb-8 text-red-500 uppercase tracking-widest text-lg">Admin Login</h2>
+        <input id="adm-pass-login" type="password" placeholder="PIN" class="input-box text-black text-center text-2xl tracking-[10px]">
+        <button onclick="verifyAdminPIN()" class="bg-red-700 w-full py-5 rounded-3xl font-black uppercase text-sm shadow-md">Verify Security PIN</button>
+    </div>
+</main>
+
+<div id="img-modal" class="modal-overlay hidden fixed inset-0 bg-black/95 z-[500] flex items-center justify-center p-4" onclick="this.classList.add('hidden')">
+    <img id="img-viewer-src" src="" class="max-w-full max-h-full rounded shadow-2xl">
+</div>
+
+<div id="class-details-modal" class="modal-overlay hidden fixed inset-0 bg-black/90 z-[300] flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl overflow-hidden flex flex-col h-[80vh]">
+        <div class="flex justify-between items-center mb-4 border-b pb-2">
+            <h3 id="class-detail-title" class="font-black text-indigo-900 text-sm uppercase">Class Details</h3>
+            <button onclick="document.getElementById('class-details-modal').classList.add('hidden')" class="text-red-600 font-bold text-xs">✕ CLOSE</button>
+        </div>
+        <div id="class-student-list" class="flex-1 overflow-auto space-y-2"></div>
+    </div>
+</div>
+
+<div id="doubt-modal" class="modal-overlay hidden fixed inset-0 bg-black/80 z-[200] flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-sm rounded-3xl p-6 text-center shadow-2xl">
+        <h3 class="font-black text-indigo-900 text-lg mb-4 uppercase tracking-tighter">Ask a Doubt</h3>
+        <textarea id="doubt-input" class="input-box h-32" placeholder="তোমাৰ প্ৰশ্নটো ইয়াত লিখা..."></textarea>
+        <div class="flex gap-2">
+            <button onclick="history.back()" class="bg-red-500 text-white py-2 rounded-xl flex-1 font-bold uppercase text-xs">Cancel</button>
+            <button onclick="submitDoubt()" class="bg-indigo-600 text-white py-2 rounded-xl flex-1 font-bold uppercase text-xs shadow-lg">Send Doubt</button>
+        </div>
+    </div>
+</div>
+
+<div id="id-card-modal" class="modal-overlay hidden fixed inset-0 bg-black/80 z-[200] flex items-center justify-center p-4">
+    <div id="id-card-content" class="bg-white w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl text-center p-6"></div>
+</div>
+
+<div id="inbox-modal" class="modal-overlay hidden fixed inset-0 bg-white z-[200] p-6 flex flex-col">
+    <h2 class="font-black text-xl mb-4 border-b pb-2 uppercase tracking-tighter">My Inbox</h2>
+    <div id="inbox-list" class="flex-1 overflow-auto"></div>
+    <button onclick="history.back()" class="btn-3d mt-4 shadow-xl">Close</button>
+</div>
+
+<div id="add-q-modal" class="modal-overlay hidden fixed inset-0 bg-black/90 z-[300] flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl overflow-y-auto max-h-[90vh]">
+        <h3 class="font-black text-indigo-900 text-sm mb-4 uppercase">Add Question</h3>
+        <input id="q-text" placeholder="প্ৰশ্নটো লিখা..." class="input-box text-xs font-bold">
+        <input id="op-a" placeholder="Option A" class="input-box text-xs">
+        <input id="op-b" placeholder="Option B" class="input-box text-xs">
+        <input id="op-c" placeholder="Option C" class="input-box text-xs">
+        <input id="op-d" placeholder="Option D" class="input-box text-xs">
+        <p class="text-[10px] font-bold text-gray-500 mb-1">Correct Answer:</p>
+        <select id="q-correct" class="input-box font-bold"><option value="a">Option A</option><option value="b">Option B</option><option value="c">Option C</option><option value="d">Option D</option></select>
+        <div class="flex gap-2">
+            <button onclick="document.getElementById('add-q-modal').classList.add('hidden')" class="bg-gray-400 text-white py-3 rounded-xl flex-1 font-black text-xs">CLOSE</button>
+            <button onclick="saveQuestion()" class="bg-green-600 text-white py-3 rounded-xl flex-1 font-black text-xs shadow-md">SAVE QUESTION</button>
+        </div>
+    </div>
+</div>
+
+<div id="result-modal" class="modal-overlay hidden fixed inset-0 bg-black/90 z-[300] flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl overflow-hidden flex flex-col h-[80vh]">
+        <div class="flex justify-between items-center mb-4 border-b pb-2">
+            <h3 class="font-black text-indigo-900 text-sm uppercase">Quiz Results</h3>
+            <button onclick="document.getElementById('result-modal').classList.add('hidden')" class="text-red-600 font-bold text-xs">✕ CLOSE</button>
+        </div>
+        <div id="result-list-area" class="flex-1 overflow-auto space-y-2"></div>
+    </div>
+</div>
+
+<div id="confirm-submit-modal" class="modal-overlay hidden fixed inset-0 bg-black/90 z-[500] flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-sm rounded-3xl p-6 text-center shadow-2xl">
+        <h3 class="font-black text-indigo-900 text-lg mb-2 uppercase">Submit Exam?</h3>
+        <p class="text-gray-500 text-xs font-bold mb-6">Are you sure you want to finish?</p>
+        <div class="flex gap-2">
+            <button onclick="history.back()" class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-xl font-black uppercase text-xs">No, Wait</button>
+            <button onclick="finalSubmit()" class="flex-1 bg-green-600 text-white py-3 rounded-xl font-black uppercase text-xs shadow-lg">Yes, Submit</button>
+        </div>
+    </div>
+</div>
+
+<div id="quiz-score-modal" class="modal-overlay hidden fixed inset-0 bg-black/95 z-[500] flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-sm rounded-3xl p-8 text-center shadow-2xl border-4 border-indigo-600 animate-bounce">
+        <h2 class="text-2xl font-black text-indigo-900 uppercase mb-2">🎉 Exam Submitted!</h2>
+        <p class="text-gray-500 text-xs font-bold mb-6">তোমাৰ ৰিজাল্ট তলত দিয়া হ'ল</p>
+        <div class="bg-indigo-50 p-6 rounded-2xl mb-6">
+            <p class="text-xs font-bold text-gray-500 uppercase">Your Score</p>
+            <h1 id="score-display" class="text-4xl font-black text-indigo-600 my-2">0 / 0</h1>
+            <p id="percent-display" class="text-sm font-bold bg-yellow-400 inline-block px-3 py-1 rounded-full text-black">0%</p>
+        </div>
+        <button onclick="closeScoreModal()" class="w-full bg-green-600 text-white py-4 rounded-xl font-black uppercase shadow-lg text-sm">OK, GO BACK</button>
+    </div>
+</div>
 
 <script>
     const firebaseConfig = { databaseURL: "https://ks-gyan-mondir-default-rtdb.firebaseio.com/" };
@@ -163,8 +353,7 @@
     
     let currentUPI = "", activeAdminPIN = "", adminWA = "", clicks = 0;
     let currentQuizId = null; 
-    let allStudentsData = [];
-    let plyrPlayer;
+    let allStudentsData = []; // STORE DATA FOR FILTERING
 
     const subjects = [ { name: "অসমীয়া", icon: "📚" }, { name: "ইংৰাজী", icon: "🅰️" }, { name: "গণিত", icon: "🧮" }, { name: "বিজ্ঞান", icon: "🔬" }, { name: "সমাজ বিজ্ঞান", icon: "🌍" }, { name: "হিন্দী", icon: "🕉️" }, { name: "সংস্কৃত", icon: "✡️" }, { name: "ঐচ্ছিক গণিত", icon: "📐" }, { name: "নীতিশিক্ষা", icon: "🪷" }, { name: "সকলো বিষয়", icon: "🎒" } ];
 
@@ -177,32 +366,111 @@
             currentUPI = d.upi || ""; 
             if(d.adminPin) activeAdminPIN = d.adminPin;
             if(d.wa) { adminWA = d.wa; document.getElementById('wa-link').href = "https://wa.me/" + d.wa; }
+
             if(d.appLogo) document.getElementById('main-logo').src = d.appLogo;
             document.getElementById('upi-txt').innerText = "UPI ID: " + currentUPI;
             if(d.qr) { document.getElementById('qr-img-display').src = d.qr; document.getElementById('qr-img-display').classList.remove('hidden'); }
             if(d.notif) document.getElementById('notif-text').innerText = d.notif;
         });
+        db.ref('admin/fees').on('value', s => { window.feesData = s.val() || {}; });
+        const cSub = document.getElementById('c-sub');
+        subjects.forEach(s => { if(cSub) cSub.innerHTML += `<option value="${s.name}">${s.name}</option>`; });
+        
+        // --- 100% RELIABLE BACK BUTTON LOGIC ---
+        window.onpopstate = function(event) {
+            const modals = document.querySelectorAll('.modal-overlay:not(.hidden)');
+            if (modals.length > 0) {
+                modals.forEach(m => m.classList.add('hidden'));
+                return;
+            }
+
+            if(event.state && event.state.id) {
+                if (event.state.id === 'home-screen') {
+                    document.querySelectorAll('main').forEach(s => s.classList.add('hidden'));
+                    document.getElementById('home-screen').classList.remove('hidden');
+                    document.getElementById('logout-btn').classList.remove('hidden');
+                } else {
+                    document.querySelectorAll('main').forEach(s => s.classList.add('hidden'));
+                    document.getElementById(event.state.id).classList.remove('hidden');
+                    if(event.state.id !== 'course-view') stopVideo();
+                }
+            } else {
+                document.querySelectorAll('main').forEach(s => s.classList.add('hidden'));
+                document.getElementById('home-screen').classList.remove('hidden');
+                document.getElementById('logout-btn').classList.remove('hidden');
+            }
+        };
     };
 
+    function openModalWithState(modalId) {
+        document.getElementById(modalId).classList.remove('hidden');
+        history.pushState({modal: true}, null, ""); 
+    }
+
     function showScreen(id) {
+        if (id !== 'home-screen') {
+            history.pushState({id: id}, null, "");
+        } else {
+            history.replaceState({id: 'home-screen'}, null, "");
+        }
+        
         document.querySelectorAll('main').forEach(s => s.classList.add('hidden')); 
         document.getElementById(id).classList.remove('hidden');
+        
+        if(['home-screen', 'admin-panel', 'course-view'].includes(id)) document.getElementById('logout-btn').classList.remove('hidden');
+        else document.getElementById('logout-btn').classList.add('hidden');
+        
+        if(id === 'admin-panel') { fetchStudentsAdmin(); fetchAdminDoubts(); fetchAdminQuizzes(); }
+        if(id === 'quiz-list-screen') fetchQuizzesStudent();
     }
 
     function loginAuto(ph) { 
+        document.querySelectorAll('main').forEach(s => s.classList.add('hidden'));
+
+        history.replaceState({id: 'home-screen'}, null, "");
+        document.getElementById('home-screen').classList.remove('hidden');
+        document.getElementById('logout-btn').classList.remove('hidden');
+        
         db.ref('students/' + ph).on('value', s => { 
             const u = s.val(); 
-            if(u && u.active) { 
-                document.getElementById('home-screen').classList.remove('hidden'); 
-                renderGrid(); loadInboxCount(ph); 
-                showScreen('home-screen');
+            if(!u || !u.active) { 
+                document.getElementById('lock-msg').classList.remove('hidden'); 
+                document.getElementById('main-content').classList.add('hidden'); 
+            } else { 
+                document.getElementById('lock-msg').classList.add('hidden'); 
+                document.getElementById('main-content').classList.remove('hidden'); 
+                
+                // NEW VALIDITY LOGIC ON HOME SCREEN
+                if(u.approvalDate) {
+                    const passed = Math.floor((Date.now() - u.approvalDate) / (1000 * 60 * 60 * 24));
+                    const left = 30 - passed;
+                    const vBox = document.getElementById('validity-box');
+                    const vText = document.getElementById('validity-days-text');
+                    
+                    vBox.classList.remove('hidden');
+                    
+                    if(left > 0) {
+                        vText.innerText = `${left} DAYS LEFT`;
+                        vText.className = "text-xl font-black tracking-widest text-yellow-400";
+                    } else {
+                        vText.innerText = "PLAN EXPIRED ⚠️";
+                        vText.className = "text-xl font-black tracking-widest text-red-500";
+                    }
+                }
+
+                renderGrid();
+                loadInboxCount(ph); 
             } 
         }); 
     }
 
     function renderGrid() { 
-        const area = document.getElementById('subject-grid'); area.innerHTML = ""; 
-        subjects.forEach(s => { area.innerHTML += `<div onclick="openSubject('${s.name}')" class="subject-card"><div class="text-3xl mb-2">${s.icon}</div><div class="font-bold text-xs uppercase">${s.name}</div></div>`; }); 
+        const area = document.getElementById('subject-grid'); 
+        if(!area) return;
+        area.innerHTML = ""; 
+        subjects.forEach(s => { 
+            area.innerHTML += `<div onclick="openSubject('${s.name}')" class="subject-card"><div class="text-3xl mb-2">${s.icon}</div><div class="font-bold text-xs uppercase">${s.name}</div></div>`; 
+        }); 
     }
 
     function openSubject(sub) {
@@ -211,68 +479,592 @@
         document.getElementById('current-subject-name').innerText = sub; 
         showScreen('course-view');
         const listArea = document.getElementById('course-content-list');
+        listArea.innerHTML = "<p class='text-center mt-5 text-gray-400'>Loading...</p>";
+        
         db.ref(`content/${ph}/${sub}`).once('value', s => {
-            listArea.innerHTML = ""; const data = s.val();
-            if(!data || !data.videos) return;
-            for(let k in data.videos) {
-                const v = data.videos[k];
-                listArea.innerHTML += `<div onclick="playVideo('${v.title}', '${v.link}')" class="bg-white p-5 rounded-3xl shadow-sm border mb-2 cursor-pointer font-bold text-[10px]">▶️ ${v.title}</div>`;
+            listArea.innerHTML = "";
+            const data = s.val();
+            if(!data) { listArea.innerHTML = "<p class='text-center mt-10 text-gray-400 font-bold'>একো নাই।</p>"; return; }
+            if(data.videos) for(let k in data.videos) {
+                const v = data.videos[k]; let pdf = "";
+                if(data.pdfs) for(let pk in data.pdfs) if(data.pdfs[pk].title === v.title) pdf = data.pdfs[pk].fileData;
+                listArea.innerHTML += `<div onclick="playVideo('${v.title}', '${v.link}', '${pdf}')" class="bg-white p-5 rounded-3xl shadow-sm border flex items-center gap-4 cursor-pointer active:scale-95 transition">▶️ <div class="font-bold text-[10px] uppercase tracking-tighter">${v.title}</div></div>`;
             }
         });
     }
 
-    // --- ভিডিও প্লে ফিচাৰ (নিখুঁত ব্লক কৰাৰ সৈতে) ---
-    function playVideo(t, url) {
-        document.getElementById('current-video-title').innerText = t;
-        let vid = url.split("v=")[1] || url.split("/").pop();
+    function createQuiz() {
+        const title = document.getElementById('new-quiz-title').value;
+        const targetClass = document.getElementById('new-quiz-class').value; 
         
-        if (plyrPlayer) plyrPlayer.destroy();
-
-        // Shields অন কৰা হ'ল
-        document.getElementById('t-block').classList.remove('hidden');
-        document.getElementById('b-block').classList.remove('hidden');
-
-        document.getElementById('course-video-wrapper').innerHTML = `<div id="player" data-plyr-provider="youtube" data-plyr-embed-id="${vid}"></div>`;
+        if(!title) return showToast("Quiz Title is required!");
         
-        plyrPlayer = new Plyr('#player', {
-            settings: ['quality', 'speed'],
-            youtube: { noCookie: true, rel: 0, showinfo: 0, iv_load_policy: 3, modestbranding: 1 }
+        db.ref('quizzes').push({ 
+            title: title, 
+            targetClass: targetClass, 
+            active: true 
+        }).then(() => {
+            document.getElementById('new-quiz-title').value = "";
+            showToast("Quiz Created!");
+        });
+    }
+
+    function fetchAdminQuizzes() {
+        db.ref('quizzes').on('value', s => {
+            const area = document.getElementById('admin-quiz-list'); area.innerHTML = "";
+            if(!s.exists()) return;
+            s.forEach(q => {
+                const quiz = q.val();
+                const classLabel = (quiz.targetClass === 'All') ? "All Classes" : "Class " + quiz.targetClass;
+                
+                area.innerHTML += `
+                <div class="bg-white p-4 rounded-xl shadow-sm border mb-2">
+                    <h4 class="font-black text-indigo-900 text-xs mb-1 uppercase">${quiz.title}</h4>
+                    <p class="text-[9px] font-bold text-gray-500 mb-2 bg-gray-100 inline-block px-1 rounded">Target: ${classLabel}</p>
+                    <div class="flex gap-2">
+                        <button onclick="openAddQuestionModal('${q.key}')" class="bg-indigo-600 text-white px-2 py-1 rounded text-[9px] font-bold">ADD Q</button>
+                        <button onclick="viewQuizResults('${q.key}')" class="bg-teal-600 text-white px-2 py-1 rounded text-[9px] font-bold">RESULTS</button>
+                        <button onclick="if(confirm('Delete Quiz?')) db.ref('quizzes/${q.key}').remove()" class="bg-red-500 text-white px-2 py-1 rounded text-[9px] font-bold">DEL</button>
+                    </div>
+                </div>`;
+            });
+        });
+    }
+
+    function openAddQuestionModal(key) {
+        currentQuizId = key;
+        document.getElementById('add-q-modal').classList.remove('hidden');
+        document.getElementById('q-text').value = "";
+        document.getElementById('op-a').value = "";
+        document.getElementById('op-b').value = "";
+        document.getElementById('op-c').value = "";
+        document.getElementById('op-d').value = "";
+    }
+
+    function saveQuestion() {
+        const q = {
+            q: document.getElementById('q-text').value,
+            a: document.getElementById('op-a').value,
+            b: document.getElementById('op-b').value,
+            c: document.getElementById('op-c').value,
+            d: document.getElementById('op-d').value,
+            correct: document.getElementById('q-correct').value
+        };
+        if(!q.q || !q.a || !q.b) return showToast("Question & options required!");
+        db.ref(`quizzes/${currentQuizId}/questions`).push(q).then(() => {
+            showToast("Question Added!");
+            document.getElementById('add-q-modal').classList.add('hidden');
+        });
+    }
+
+    function viewQuizResults(key) {
+        document.getElementById('result-modal').classList.remove('hidden');
+        const area = document.getElementById('result-list-area');
+        area.innerHTML = "<p class='text-center text-gray-400'>Loading...</p>";
+        
+        db.ref(`quiz_results/${key}`).once('value', s => {
+            area.innerHTML = "";
+            if(!s.exists()) { area.innerHTML = "<p class='text-center font-bold'>No results yet.</p>"; return; }
+            s.forEach(r => {
+                const val = r.val();
+                const scoreText = val.score + " / " + val.total;
+                const percentText = val.percent;
+                area.innerHTML += `
+                <div class="bg-gray-50 p-3 rounded-xl border flex justify-between items-center">
+                    <div>
+                        <p class="font-black text-xs text-indigo-900">${val.studentName}</p>
+                        <p class="text-[9px] text-gray-500">${new Date(val.time).toLocaleDateString()}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-black text-indigo-600 text-sm">${scoreText}</p>
+                        <p class="text-[9px] font-bold bg-yellow-200 px-1 rounded inline-block">${percentText}</p>
+                    </div>
+                </div>`;
+            });
+        });
+    }
+
+    function fetchQuizzesStudent() {
+        const ph = localStorage.getItem('ks_student_id');
+        db.ref('students/' + ph).once('value', st => {
+            const studentData = st.val();
+            const studentClass = studentData.cls; 
+            
+            db.ref('quizzes').on('value', s => {
+                const area = document.getElementById('student-quiz-list'); area.innerHTML = "";
+                if(!s.exists()) { area.innerHTML = "<p class='text-center mt-10'>No Quizzes Available.</p>"; return; }
+                
+                let found = false;
+                s.forEach(q => {
+                    const val = q.val();
+                    if(val.active && (val.targetClass === 'All' || val.targetClass == studentClass)) {
+                        found = true;
+                        area.innerHTML += `
+                        <div onclick="startQuiz('${q.key}', '${val.title}')" class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-indigo-500 cursor-pointer active:scale-95 transition">
+                            <h3 class="font-black text-indigo-900 uppercase text-sm">${val.title}</h3>
+                            <p class="text-[10px] text-gray-500 font-bold mt-1">Tap to Start Exam</p>
+                        </div>`;
+                    }
+                });
+                
+                if(!found) area.innerHTML = "<p class='text-center mt-10 text-gray-500 font-bold'>No quizzes for your class yet.</p>";
+            });
+        });
+    }
+
+    let currentQuestions = [];
+    function startQuiz(key, title) {
+        currentQuizId = key;
+        showScreen('quiz-play-screen');
+        document.getElementById('play-quiz-title').innerText = title;
+        const area = document.getElementById('quiz-questions-area');
+        area.innerHTML = "<p class='text-center mt-10'>Loading Questions...</p>";
+        
+        db.ref(`quizzes/${key}/questions`).once('value', s => {
+            area.innerHTML = "";
+            if(!s.exists()) { area.innerHTML = "<p class='text-center mt-10'>No questions in this quiz.</p>"; return; }
+            
+            currentQuestions = [];
+            let idx = 1;
+            s.forEach(q => {
+                const qData = q.val();
+                qData.key = q.key;
+                currentQuestions.push(qData);
+                
+                area.innerHTML += `
+                <div class="bg-white p-5 rounded-2xl shadow-sm mb-4 border">
+                    <p class="font-bold text-sm text-gray-800 mb-3"><span class="text-indigo-600">Q${idx}.</span> ${qData.q}</p>
+                    <div class="space-y-2">
+                        <label class="block bg-gray-50 p-3 rounded-xl border flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="q-${idx}" value="a"> <span class="text-xs font-bold text-gray-600">${qData.a}</span>
+                        </label>
+                        <label class="block bg-gray-50 p-3 rounded-xl border flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="q-${idx}" value="b"> <span class="text-xs font-bold text-gray-600">${qData.b}</span>
+                        </label>
+                        <label class="block bg-gray-50 p-3 rounded-xl border flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="q-${idx}" value="c"> <span class="text-xs font-bold text-gray-600">${qData.c}</span>
+                        </label>
+                        <label class="block bg-gray-50 p-3 rounded-xl border flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="q-${idx}" value="d"> <span class="text-xs font-bold text-gray-600">${qData.d}</span>
+                        </label>
+                    </div>
+                </div>`;
+                idx++;
+            });
+            area.innerHTML += `<button onclick="submitQuizAns()" class="w-full bg-green-600 text-white py-4 rounded-xl font-black uppercase shadow-xl text-sm">SUBMIT EXAM</button>`;
+        });
+    }
+
+    function submitQuizAns() {
+        openModalWithState('confirm-submit-modal');
+    }
+
+    function finalSubmit() {
+        history.back(); 
+        
+        let score = 0;
+        let total = currentQuestions.length;
+        
+        currentQuestions.forEach((q, i) => {
+            const idx = i + 1;
+            const radios = document.getElementsByName(`q-${idx}`);
+            let selected = null;
+            for(let r of radios) if(r.checked) selected = r.value;
+            if(selected === q.correct) score++;
         });
 
-        plyrPlayer.on('ready', () => plyrPlayer.play());
+        const ph = localStorage.getItem('ks_student_id');
+        const percent = Math.round((score / total) * 100) + "%";
+        
+        showToast("Processing Result...");
+        
+        db.ref('students/' + ph).once('value', s => {
+            const studentData = s.val() || {};
+            const name = studentData.name || "Student";
+            
+            db.ref(`quiz_results/${currentQuizId}/${ph}`).set({
+                studentName: name,
+                score: score,
+                total: total,
+                percent: percent,
+                time: Date.now()
+            }).then(() => {
+                document.getElementById('score-display').innerText = score + " / " + total;
+                document.getElementById('percent-display').innerText = percent;
+                openModalWithState('quiz-score-modal');
+            }).catch(e => {
+                showToast("Error saving result: " + e.message);
+            });
+        });
     }
 
-    function stopVideo() { 
-        if (plyrPlayer) plyrPlayer.destroy();
-        document.getElementById('t-block').classList.add('hidden');
-        document.getElementById('b-block').classList.add('hidden');
-        document.getElementById('course-video-wrapper').innerHTML = "ভিডিঅ' বাচনি কৰা..."; 
+    function closeScoreModal() {
+        history.go(-2); 
     }
+
+    function openDoubtModal() {
+        openModalWithState('doubt-modal');
+    }
+    
+    function submitDoubt() {
+        const ph = localStorage.getItem('ks_student_id');
+        const q = document.getElementById('doubt-input').value;
+        if(q && q.trim() !== "") {
+            db.ref(`doubts`).push({ ph: ph, question: q, time: new Date().toLocaleString() }).then(() => {
+                showToast("✅ প্ৰশ্নটো এডমিনলৈ পঠোৱা হ'ল!");
+                history.back(); 
+                document.getElementById('doubt-input').value = "";
+            }).catch(e => showToast("Error: " + e.message));
+        } else {
+            showToast("⚠️ কিবা এটা লিখা!");
+        }
+    }
+
+    function showInbox() {
+        const ph = localStorage.getItem('ks_student_id');
+        db.ref(`messages/${ph}`).once('value', s => {
+            const listArea = document.getElementById('inbox-list');
+            listArea.innerHTML = "";
+            if(!s.exists()) listArea.innerHTML = "<p class='text-gray-400 font-bold mt-10 text-center uppercase tracking-widest'>একো নাই।</p>"; 
+            else s.forEach(m => listArea.innerHTML += `<div class="bg-indigo-50 p-4 rounded-xl mb-4 border-l-4 border-indigo-600 shadow-sm relative"><p class="text-[9px] text-gray-500 mb-1">${m.val().time || ""}</p><p class="text-sm font-bold text-indigo-900 pr-8">${m.val().text}</p><button onclick="deleteMessage('${ph}', '${m.key}')" class="absolute top-2 right-2 text-red-500 font-bold p-2">✕</button></div>`);
+            
+            openModalWithState('inbox-modal');
+        });
+    }
+
+    function deleteMessage(ph, key) { if(confirm("Delete message?")) { db.ref(`messages/${ph}/${key}`).remove().then(() => { history.back(); showInbox(); }); } } 
+    
+    function showIDCard() { 
+        const ph = localStorage.getItem('ks_student_id'); 
+        db.ref('students/' + ph).once('value', s => { 
+            const u = s.val(); 
+            const html = `<img src="${u.studentPhoto}" class="w-24 h-24 mx-auto rounded-full border-4 border-indigo-100 object-cover mb-4"><h3 class="text-xl font-bold text-indigo-900 tracking-tighter">${u.name}</h3><p class="text-indigo-600 font-bold uppercase text-[10px]">Class ${u.cls}</p><button onclick="history.back()" class="w-full bg-gray-100 p-2 font-bold text-gray-500 uppercase text-[9px] mt-6 tracking-widest">Close</button>`; 
+            document.getElementById('id-card-content').innerHTML = html;
+            openModalWithState('id-card-modal');
+        }); 
+    }
+
+    function playVideo(t, url, pdf) {
+        document.getElementById('current-video-title').innerText = t;
+        let vid = url.split("v=")[1] || url.split("/").pop();
+        document.getElementById('course-video-wrapper').innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube-nocookie.com/embed/${vid}?autoplay=1&rel=0" frameborder="0" allowfullscreen></iframe>`;
+        const btn = document.getElementById('pdf-download-btn');
+        if(pdf && pdf !== "undefined") { 
+            btn.classList.remove('hidden'); 
+            btn.onclick = () => window.location.href = pdf; 
+        } else {
+            btn.classList.add('hidden');
+        }
+    }
+
+    function stopVideo() { document.getElementById('course-video-wrapper').innerHTML = "ভিডিঅ' বাচনি কৰা..."; document.getElementById('current-video-title').innerText = "Class Title"; document.getElementById('pdf-download-btn').classList.add('hidden'); }
     
     function stopVideoAndBack() { stopVideo(); history.back(); }
 
-    function doLogin() { 
-        const ph = document.getElementById('l-phone').value, ps = document.getElementById('l-pass').value; 
-        db.ref('students/' + ph).once('value', s => { 
-            const u = s.val(); 
-            if(u && u.ps === ps) { localStorage.setItem('ks_student_id', ph); loginAuto(ph); } 
-            else alert("ভুল পাছৱৰ্ড!"); 
-        }); 
+    function submitPayment() {
+        const ph = localStorage.getItem('ks_student_id');
+        const utr = document.getElementById('s-utr').value;
+        const payShot = document.getElementById('s-pay-shot').files[0];
+
+        if(!utr || !payShot) return showToast("⚠️ UTR নম্বৰ আৰু স্ক্ৰীনশ্বট দিয়াটো জৰুৰী!");
+
+        const reader = new FileReader();
+        reader.onload = e => {
+            db.ref('students/' + ph).update({
+                utr: utr,
+                payShot: e.target.result
+            }).then(() => {
+                showToast("✅ পেমেন্ট তথ্য আপডেট কৰা হ'ল। এডমিনে চেক কৰিব।");
+                document.getElementById('s-utr').value = "";
+                document.getElementById('s-pay-shot').value = "";
+            });
+        };
+        reader.readAsDataURL(payShot);
+    }
+    
+    function payDirect() {
+        if(!currentUPI) return showToast("⚠️ এডমিনে UPI ID দিয়া নাই!");
+        const trID = "T" + Date.now(); 
+        const url = `upi://pay?pa=${currentUPI}&pn=KSGyanMondir&tn=SchoolFees&tr=${trID}&cu=INR`;
+        window.location.href = url;
+    }
+
+    function saveAdminSettings() { 
+        const upi = document.getElementById('adm-upi').value, wa = document.getElementById('adm-wa').value, notif = document.getElementById('adm-notif').value;
+        const logo = document.getElementById('adm-logo-file').files[0], qr = document.getElementById('adm-qr-file').files[0];
+        const updateDB = (l=null, q=null) => {
+            let obj = { upi, wa, notif }; if(l) obj.appLogo = l; if(q) obj.qr = q;
+            db.ref('admin/config').update(obj).then(() => showToast("Saved!"));
+        };
+        if(logo || qr) {
+            if(logo) { let r=new FileReader(); r.onload=e=>updateDB(e.target.result, null); r.readAsDataURL(logo); }
+            if(qr) { let r=new FileReader(); r.onload=e=>updateDB(null, e.target.result); r.readAsDataURL(qr); }
+        } else updateDB();
+    }
+
+    function uploadContent(type) {
+        const ph = document.getElementById('c-ph').value, sub = document.getElementById('c-sub').value, t = document.getElementById('c-title').value;
+        if(!ph || !sub || !t) return showToast("⚠️ ছাত্ৰৰ আইডি আৰু শিৰোনাম ভৰাওক!");
+        if(type==='video') { const link = document.getElementById('c-link').value; db.ref(`content/${ph}/${sub}/videos`).push({title:t, link:link}).then(()=>showToast("Success!")); }
+        else { const file = document.getElementById('c-pdf-file').files[0]; if(!file) return showToast("Select PDF!"); const reader = new FileReader(); reader.onload = e => db.ref(`content/${ph}/${sub}/pdfs`).push({title:t, fileData: e.target.result}).then(()=>showToast("PDF Saved!")); reader.readAsDataURL(file); }
+    }
+
+    function fetchStudentsAdmin() {
+        db.ref('students').on('value', s => {
+            allStudentsData = [];
+            s.forEach(d => {
+                allStudentsData.push(d.val());
+            });
+            filterStudents();
+            updateClassSummary(); 
+        });
+    }
+
+    function updateClassSummary() {
+        const counts = {};
+        for(let i=3; i<=12; i++) counts[i] = 0;
+        let totalIncome = 0; 
+
+        allStudentsData.forEach(u => {
+            if(u.cls && counts[u.cls] !== undefined) {
+                counts[u.cls]++;
+            }
+            if(u.paidAmount) {
+                totalIncome += parseInt(u.paidAmount);
+            }
+        });
+
+        document.getElementById('total-std-count').innerText = allStudentsData.length;
+        document.getElementById('total-revenue-display').innerText = totalIncome; 
+
+        const area = document.getElementById('admin-class-summary');
+        area.innerHTML = "";
+        for(let i=3; i<=12; i++) {
+            if(counts[i] > 0) {
+                 area.innerHTML += `
+                    <div onclick="openClassDetails('${i}')" class="bg-blue-50 p-2 rounded text-center border border-blue-100 cursor-pointer active:bg-blue-100">
+                        <div class="text-[10px] font-bold text-gray-500">Class ${i}</div>
+                        <div class="text-sm font-black text-blue-600">${counts[i]}</div>
+                    </div>`;
+            }
+        }
+        if(allStudentsData.length === 0) area.innerHTML = "<p class='text-[10px]'>No data.</p>";
+    }
+
+    function openClassDetails(cls) {
+        const list = allStudentsData.filter(u => u.cls == cls);
+        const area = document.getElementById('class-student-list');
+        document.getElementById('class-detail-title').innerText = `Class ${cls} Students (${list.length})`;
+        area.innerHTML = "";
+
+        if(list.length === 0) { area.innerHTML = "<p class='text-center text-xs text-gray-500'>No students.</p>"; }
+
+        list.forEach(u => {
+            let daysTxt = "N/A";
+            if(u.regDate) {
+                const diff = Date.now() - u.regDate;
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                daysTxt = days + " Days";
+            } else {
+                daysTxt = "Old Data";
+            }
+
+            area.innerHTML += `
+            <div class="bg-gray-50 p-3 rounded-xl border flex justify-between items-center">
+                <div>
+                    <p class="font-black text-xs text-indigo-900">${u.name}</p>
+                    <p class="text-[9px] text-gray-500">Ph: ${u.ph}</p>
+                </div>
+                <div class="text-right">
+                    <p class="font-black text-orange-600 text-xs">${daysTxt}</p>
+                    <p class="text-[8px] text-gray-400">Joined</p>
+                </div>
+            </div>`;
+        });
+        openModalWithState('class-details-modal');
+    }
+
+    function filterStudents() {
+        const searchText = document.getElementById('adm-search-input').value.toLowerCase();
+        const filterType = document.getElementById('adm-filter-select').value;
+        const area = document.getElementById('admin-student-list');
+        
+        area.innerHTML = "";
+
+        let foundCount = 0;
+
+        allStudentsData.forEach(u => {
+            let matchStatus = false;
+            if(filterType === 'all') matchStatus = true;
+            else if(filterType === 'pending' && !u.active) matchStatus = true;
+            else if(filterType === 'active' && u.active) matchStatus = true;
+
+            let matchSearch = false;
+            if(u.name.toLowerCase().includes(searchText) || u.ph.includes(searchText)) matchSearch = true;
+
+            if(matchStatus && matchSearch) {
+                foundCount++;
+                // ADDED ONCLICK EVENT TO IMAGE TO VIEW FULL SIZE WITHOUT RELOAD
+                area.innerHTML += `<div class="glass-card p-5 mb-4 border-l-8 ${u.active?'border-green-600':'border-red-600'}">
+                    <div class="flex gap-4">
+                        <img src="${u.studentPhoto}" class="w-16 h-16 rounded-xl object-cover border">
+                        <div class="text-[9px] flex-1">
+                            <h4 class="font-black text-indigo-900 text-sm">${u.name}</h4>
+                            <p>📞 Phone/ID: ${u.ph} | 🔐 Pass: <b class="text-red-500">${u.ps}</b></p>
+                            <p>🏫 School: ${u.school} | Cls: ${u.cls}</p>
+                            <p>📍 Addr: ${u.vill}, ${u.po}, ${u.dist}, <b class="text-indigo-600">${u.state}</b>, ${u.pin}</p>
+                            <p class="text-blue-600 font-bold mt-1">🆔 UTR: ${u.utr}</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 mt-4">
+                        <img src="${u.payShot}" onclick="viewFullImage('${u.payShot}')" class="h-10 w-1/4 rounded border object-cover cursor-pointer">
+                        <button onclick="handleApprove('${u.ph}', '${u.name}', ${!u.active})" class="bg-indigo-600 text-white px-3 py-1 rounded text-[8px] font-bold uppercase flex-1 shadow-md">${u.active?'Lock User':'Approve User'}</button>
+                        <button onclick="if(confirm('Delete student?')) db.ref('students/${u.ph}').remove()" class="bg-red-600 text-white px-3 py-1 rounded text-[8px] font-bold uppercase shadow-md">Delete</button>
+                    </div>
+                    <div class="flex gap-2 mt-3"><input id="direct-msg-${u.ph}" placeholder="Personal Message..." class="input-box text-[9px] mb-0 flex-1 py-1"><button onclick="sendDirectMsg('${u.ph}')" class="bg-gray-800 text-white px-3 rounded text-[9px] font-bold uppercase">Send</button></div>
+                </div>`;
+            }
+        });
+
+        if(foundCount === 0) {
+            area.innerHTML = "<p class='text-center text-gray-400 font-bold text-xs'>No students found.</p>";
+        }
+    }
+
+    // NEW FUNCTION TO VIEW FULL IMAGE
+    function viewFullImage(src) {
+        document.getElementById('img-viewer-src').src = src;
+        document.getElementById('img-modal').classList.remove('hidden');
+    }
+
+    function fetchAdminDoubts() {
+        db.ref('doubts').on('value', s => {
+            const area = document.getElementById('admin-doubts-area'); area.innerHTML = "";
+            s.forEach(d => area.innerHTML += `<div class="bg-white p-4 border rounded-2xl mb-4 text-xs shadow-sm border-l-4 border-yellow-500"><p class="text-blue-600 font-bold mb-1 uppercase">Student ID: ${d.val().ph}</p><p class="font-bold text-gray-800 bg-gray-50 p-2 rounded-lg mb-3">${d.val().question}</p><div class="flex gap-2"><input id="reply-${d.key}" placeholder="Type reply..." class="input-box text-[10px] mb-0 flex-1 py-2 shadow-inner"><button onclick="replyDoubt('${d.val().ph}', '${d.key}')" class="bg-green-600 text-white px-4 rounded-xl text-[10px] font-bold shadow-md uppercase">Reply</button><button onclick="db.ref('doubts/${d.key}').remove()" class="bg-red-500 text-white px-3 rounded-xl text-[10px] font-bold shadow-md">X</button></div></div>`);
+        });
+    }
+
+    function replyDoubt(ph, doubtKey) {
+        const rTxt = document.getElementById('reply-' + doubtKey).value; if(rTxt) db.ref(`messages/${ph}`).push({ text: "উত্তৰ: " + rTxt, time: new Date().toLocaleString() }).then(() => { document.getElementById('reply-' + doubtKey).value = ""; db.ref(`doubts/${doubtKey}`).remove(); showToast("Replied!"); });
+    }
+
+    function handleApprove(ph, name, status) {
+        let amount = 0;
+        if(status === true) {
+            let input = prompt(`Enter payment amount for ${name}:`, "0");
+            amount = parseInt(input) || 0;
+        }
+
+        db.ref('students/' + ph).update({ active: status, paidAmount: amount, approvalDate: Date.now() }).then(() => { // Added approvalDate
+            if(status === true) {
+                const msg = `প্ৰিয় ${name}, KS Gyan Mondir লৈ তোমাক স্বাগতম। তুমি এতিয়া লগইন কৰিব পাৰিবা।`;
+                db.ref(`messages/${ph}`).push({ text: msg, time: new Date().toLocaleString() });
+                const waMsg = `নমস্কাৰ ${name}, তোমাৰ KS Gyan Mondir একাউণ্টটো Approve কৰা হ'ল। তুমি এতিয়া লগইন কৰিব পাৰিবা।`;
+                window.location.href = `https://wa.me/91${ph}?text=${encodeURIComponent(waMsg)}`;
+                showToast("অনুমোদন কৰা হ'ল! WhatsApp ত মেচেজ পঠিয়াওক।");
+            } else {
+                 showToast("ছাত্ৰজনক Lock কৰা হ'ল!");
+            }
+        });
+    }
+
+    function sendDirectMsg(ph) {
+        const txt = document.getElementById('direct-msg-' + ph).value; if(txt) db.ref(`messages/${ph}`).push({ text: "ADMIN: " + txt, time: new Date().toLocaleString() }).then(() => { document.getElementById('direct-msg-' + ph).value = ""; showToast("Message sent!"); });
     }
 
     function register() {
         const ph = document.getElementById('s-phone').value, n = document.getElementById('s-name').value, ps = document.getElementById('s-pass').value;
+        if(!ph || !n || !ps) return showToast("সকলো তথ্য পূৰণ কৰা!");
         const photo = document.getElementById('s-photo').files[0];
-        if(!ph || !n || !photo) return alert("Fill all!");
-        let r = new FileReader(); r.onload = e => {
-            db.ref('students/' + ph).set({ name: n, ph, ps, cls: document.getElementById('s-class').value, school: document.getElementById('s-school').value, studentPhoto: e.target.result, active: true })
-            .then(() => { alert("পঞ্জীয়ন সফল!"); showScreen('login-screen'); });
-        }; r.readAsDataURL(photo);
+        if(!photo) return showToast("ফটো আপলোড কৰা!");
+        
+        try {
+            const r1 = new FileReader();
+            r1.onload = e1 => {
+                db.ref('students/' + ph).set({ 
+                    name: n, ph, ps, utr: "", 
+                    cls: document.getElementById('s-class').value, 
+                    school: document.getElementById('s-school').value, 
+                    vill: document.getElementById('s-vill').value, 
+                    po: document.getElementById('s-po').value, 
+                    dist: document.getElementById('s-dist').value, 
+                    state: document.getElementById('s-state').value, 
+                    pin: document.getElementById('s-pin').value, 
+                    studentPhoto: e1.target.result, 
+                    payShot: "", 
+                    active: false,
+                    regDate: Date.now() // Added Registration Date
+                }).then(() => { 
+                    showToast("পঞ্জীয়ন সফল! এতিয়া লগইন কৰি মাচুল জমা দিয়ক।"); 
+                    showScreen('login-screen'); 
+                }).catch(err => {
+                    showToast("Error: " + err.message);
+                });
+            };
+            r1.readAsDataURL(photo);
+        } catch(e) {
+            showToast("Photo error: File might be too big.");
+        }
     }
 
-    function logout() { localStorage.clear(); location.reload(); }
+    function doLogin() { const ph = document.getElementById('l-phone').value, ps = document.getElementById('l-pass').value; db.ref('students/' + ph).once('value', s => { const u = s.val(); if(u && u.ps === ps) { localStorage.setItem('ks_student_id', ph); loginAuto(ph); } else showToast("Wrong ID or Password!"); }); }
+    function logout() { localStorage.removeItem('ks_student_id'); location.reload(); }
+    function triggerAdmin() { clicks++; if(clicks>=5) { showScreen('admin-login-screen'); clicks=0; } setTimeout(()=>clicks=0, 2000); }
+    
+    function verifyAdminPIN() {
+        const entered = document.getElementById('adm-pass-login').value;
+        if (entered === activeAdminPIN && activeAdminPIN !== null && activeAdminPIN !== "") {
+            showScreen('admin-panel');
+            document.getElementById('adm-pass-login').value = "";
+        } else {
+            showToast("❌ ভুল পিন দিছে!");
+        }
+    }
+
     function loadInboxCount(ph) { db.ref(`messages/${ph}`).on('value', s => document.getElementById('msg-count').innerText = s.exists() ? Object.keys(s.val()).length : 0); }
-    function triggerAdmin() { clicks++; if(clicks>=5) showScreen('admin-panel'); setTimeout(()=>clicks=0, 2000); }
+    
+    function showFeesTable() { const cls = document.getElementById('s-class').value; if(!cls) return showToast("শ্ৰেণী বাচনি কৰা!"); let table = `<div class='bg-white p-6 rounded-3xl w-80 shadow-2xl'><h3 class='font-black mb-4 border-b pb-2 text-sm uppercase text-center text-indigo-900'>Class ${cls} Fees</h3><table class='w-full text-xs'>`; subjects.forEach(s => { const p = (window.feesData && window.feesData[cls] && window.feesData[cls][s.name]) ? window.feesData[cls][s.name] : '0'; table += `<tr><td class='p-2 border uppercase font-bold text-gray-400'>${s.name}</td><td class='p-2 border font-bold text-orange-600'>₹${p}</td></tr>`; }); table += `</table><button onclick='this.parentElement.parentElement.remove()' class='btn-3d mt-4 py-2 text-xs shadow-md'>CLOSE</button></div>`; const div = document.createElement('div'); div.className = 'fixed inset-0 bg-black/70 z-[300] flex items-center justify-center p-4'; div.innerHTML = table; document.body.appendChild(div); }
+    
+    function manageContent() { const ph = document.getElementById('c-ph').value, sub = document.getElementById('c-sub').value, area = document.getElementById('manage-area'); db.ref(`content/${ph}/${sub}`).once('value', s => { area.innerHTML = ""; const d = s.val(); if(!d) return; for(let ty in d) for(let k in d[ty]) area.innerHTML += `<div class="flex justify-between p-2 bg-gray-100 mb-1 text-[9px] rounded font-bold uppercase shadow-sm"><span>${d[ty][k].title}</span><button onclick="db.ref('content/${ph}/${sub}/${ty}/${k}').remove().then(()=>manageContent())" class="text-red-600 font-bold uppercase">Del</button></div>`; }); }
+    
+    function updateFeesInDB() {
+        const cls = document.getElementById('fee-cls').value;
+        const sub = document.getElementById('fee-sub').value;
+        const amt = document.getElementById('fee-amount').value;
+        if(!cls || !sub || !amt) { return showToast("শ্ৰেণী, বিষয় আৰু মাচুল ভৰোৱাটো জৰুৰী!"); }
+        db.ref(`admin/fees/${cls}/${sub}`).set(amt).then(() => {
+            showToast(`✅ Class ${cls} - ${sub} ৰ মাচুল ₹${amt} লৈ আপডেট কৰা হ'ল।`);
+            document.getElementById('fee-amount').value = "";
+        }).catch(e => showToast("Error: " + e.message));
+    }
+
+    function showToast(message) {
+        var x = document.getElementById("custom-toast");
+        x.innerHTML = message;
+        x.className = "show";
+        setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
+    }
+    
+    function getAndroidState() {
+        if (!document.getElementById('course-view').classList.contains('hidden')) {
+            return 'VIDEO';
+        }
+        return 'EXIT';
+    }
+
+    function forgotPass() {
+        const ph = document.getElementById('l-phone').value;
+        if(!ph) {
+            showToast("⚠️ অনুগ্ৰহ কৰি তোমাৰ 'মোবাইল আইডি' টো লিখা!");
+            return;
+        }
+        if(!adminWA) {
+            showToast("⚠️ এডমিনৰ নম্বৰ পোৱা নাই! চিধাকৈ যোগাযোগ কৰা।");
+            return;
+        }
+        const msg = `নমস্কাৰ ছাৰ, মই মোৰ KS Gyan Mondir একাউণ্টৰ পাছৱৰ্ড পাহৰিলো। মোৰ মোবাইল আইডি হ'ল: ${ph}। অনুগ্ৰহ কৰি সহায় কৰক।`;
+        window.location.href = `https://wa.me/${adminWA}?text=${encodeURIComponent(msg)}`;
+    }
 </script>
 </body>
 </html>
