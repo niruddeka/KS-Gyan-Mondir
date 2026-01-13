@@ -35,9 +35,9 @@
         
         .modal-overlay { z-index: 9999; }
 
-        /* --- নতুন Video Shield CSS (কেৱল টাইটেল আৰু ল'গ' ব্লক কৰিবলৈ) --- */
+        /* দৰকাৰী: ভিডিঅ' সুৰক্ষা ফিল্টাৰ */
         .yt-shield-top { position: absolute; top: 0; left: 0; width: 100%; height: 50px; z-index: 50; background: transparent; }
-        .yt-shield-bottom { position: absolute; bottom: 0; right: 0; width: 80px; height: 50px; z-index: 50; background: transparent; }
+        .yt-shield-bottom { position: absolute; bottom: 0; right: 0; width: 80px; height: 45px; z-index: 50; background: transparent; }
     </style>
 </head>
 <body>
@@ -149,7 +149,7 @@
         <h2 id="current-subject-name" class="font-bold text-indigo-900 text-sm">Subject</h2>
     </div>
     <div class="glass-card overflow-hidden shadow-2xl mb-6 relative">
-        <div id="video-box-relative" class="relative w-full aspect-video bg-black">
+        <div id="video-outer-container" class="relative w-full aspect-video bg-black">
             <div id="course-video-wrapper" class="w-full h-full flex items-center justify-center text-white text-[10px]">ভিডিঅ' বাচনি কৰা...</div>
             <div id="t-shield" class="yt-shield-top hidden"></div>
             <div id="b-shield" class="yt-shield-bottom hidden"></div>
@@ -752,19 +752,19 @@
         }); 
     }
 
-    // --- আপডেটেড প্লে ভিডিঅ' কড (যিটোৱে এপৰ পৰা ওলাই যোৱা বন্ধ কৰিব) ---
+    // --- আকৰ্ষণীয় ভিডিঅ' প্লে' ফিচাৰ (Smart Shield) ---
     function playVideo(t, url, pdf) {
         document.getElementById('current-video-title').innerText = t;
         let vid = url.split("v=")[1] || url.split("/").pop();
         
-        // Shield দেখুওৱা হ'ল (যাতে টাইটেল বা ইউটিউব ল'গ' চুব নোৱাৰে)
+        // Show protective shields
         document.getElementById('t-shield').classList.remove('hidden');
         document.getElementById('b-shield').classList.remove('hidden');
 
         document.getElementById('course-video-wrapper').innerHTML = `
             <iframe width="100%" height="100%" 
-                src="https://www.youtube-nocookie.com/embed/${vid}?autoplay=1&rel=0&modestbranding=1&controls=1&showinfo=0" 
-                frameborder="0" allowfullscreen>
+                src="https://www.youtube-nocookie.com/embed/${vid}?autoplay=1&rel=0&modestbranding=1&controls=1&showinfo=0&iv_load_policy=3" 
+                frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
             </iframe>`;
 
         const btn = document.getElementById('pdf-download-btn');
@@ -999,6 +999,7 @@
         const ph = document.getElementById('s-phone').value, n = document.getElementById('s-name').value, ps = document.getElementById('s-pass').value;
         const photo = document.getElementById('s-photo').files[0];
         if(!ph || !n || !ps) return showToast("সকলো তথ্য পূৰণ কৰা!");
+        if(!photo) return showToast("ফটো আপলোড কৰা!");
         
         try {
             const r1 = new FileReader();
@@ -1070,8 +1071,8 @@
     function forgotPass() {
         const ph = document.getElementById('l-phone').value;
         if(!ph) { showToast("⚠️ অনুগ্ৰহ কৰি তোমাৰ 'মোবাইল আইডি' টো লিখা!"); return; }
-        if(!adminWA) { showToast("⚠️ এডমিনৰ নম্বৰ পোৱা নাই!"); return; }
-        const msg = `নমস্কাৰ ছাৰ, মই মোৰ KS Gyan Mondir একাউণ্টৰ পাছৱৰ্ড পাহৰিলো। মোৰ মোবাইল আইডি হ'ল: ${ph}।`;
+        if(!adminWA) { showToast("⚠️ এডমিনৰ নম্বৰ পোৱা নাই! চিধাকৈ যোগাযোগ কৰা।"); return; }
+        const msg = `নমস্কাৰ ছাৰ, মই মোৰ KS Gyan Mondir একাউণ্টৰ পাছৱৰ্ড পাহৰিলো। মোৰ মোবাইল আইডি হ'ল: ${ph}। অনুগ্ৰহ কৰি সহায় কৰক।`;
         window.location.href = `https://wa.me/${adminWA}?text=${encodeURIComponent(msg)}`;
     }
 </script>
