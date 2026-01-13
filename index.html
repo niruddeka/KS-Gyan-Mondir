@@ -63,8 +63,8 @@
         <p class="text-[10px] font-bold text-gray-400 mt-2 uppercase">তোমাৰ ফটো আপলোড কৰা *</p>
         <input type="file" id="s-photo" class="text-[10px] w-full mb-4">
         
-        <button onclick="register()" class="btn-3d w-full shadow-2xl">পঞ্জীয়ন কৰক</button>
-        <p onclick="showScreen('login-screen')" class="text-center mt-6 text-indigo-700 font-bold cursor-pointer underline text-sm">Login কৰক</p>
+        <button onclick="register()" class="btn-3d w-full shadow-2xl">পঞ্জীয়ন কৰা</button>
+        <p onclick="showScreen('login-screen')" class="text-center mt-6 text-indigo-700 font-bold cursor-pointer underline text-sm">Login কৰা</p>
     </div>
     <footer class="mt-10 text-center pb-10"><p onclick="triggerAdmin()" class="text-gray-300 text-[10px] font-bold tracking-[5px] uppercase select-none cursor-pointer">© KS GYAN MONDIR</p></footer>
 </main>
@@ -76,7 +76,7 @@
         <input id="l-pass" type="password" placeholder="পাছৱৰ্ড" class="input-box text-center">
         <button onclick="doLogin()" class="btn-3d shadow-xl mb-4">Dashboard</button>
         <p onclick="forgotPass()" class="text-xs font-black text-red-500 cursor-pointer uppercase tracking-widest mb-6 border-b inline-block border-red-200 mt-2">পাছৱৰ্ড পাহৰিলা নেকি?</p>
-        <p onclick="showScreen('reg-screen')" class="mt-4 text-xs font-bold text-indigo-600 cursor-pointer underline">নতুন পঞ্জীয়ন কৰিবলৈ ইয়াত টিপক</p>
+        <p onclick="showScreen('reg-screen')" class="mt-4 text-xs font-bold text-indigo-600 cursor-pointer underline">নতুন পঞ্জীয়ন কৰিবলৈ ইয়াত টিপা</p>
     </div>
 </main>
 
@@ -995,7 +995,7 @@
                     active: false,
                     regDate: Date.now() // Added Registration Date
                 }).then(() => { 
-                    showToast("পঞ্জীয়ন সফল! এতিয়া লগইন কৰি মাচুল জমা দিয়ক।"); 
+                    showToast("পঞ্জীয়ন সফল! এতিয়া লগইন কৰি মাচুল জমা দিয়া।"); 
                     showScreen('login-screen'); 
                 }).catch(err => {
                     showToast("Error: " + err.message);
