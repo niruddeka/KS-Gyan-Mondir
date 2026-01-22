@@ -950,31 +950,27 @@
 
     function handleApprove(ph, name, status) {
     let amount = 0;
-    // status true হ'লে 'Approved' আৰু false হ'লে 'Pending' চেভ হ'ব
-    let statusText = status === true ? 'Approved' : 'Pending';
+    let statusText = (status === true) ? 'Approved' : 'Pending';
 
     if(status === true) {
         let input = prompt(`Enter payment amount for ${name}:`, "0");
         amount = parseInt(input) || 0;
     }
 
-    // ইয়াত 'st' কলমটো আপডেট কৰাটো খুবেই জৰুৰী কাৰণ লগইনৰ সময়ত এইটোৱেই চেক হয়
     db.ref('students/' + ph).update({ 
         active: status, 
         st: statusText, 
         paidAmount: amount, 
         approvalDate: Date.now() 
     }).then(() => {
+        showToast(status === true ? "✅ Approved!" : "🔒 Locked!");
         if(status === true) {
-            const msg = `প্ৰিয় ${name}, KS Gyan Mondir লৈ তোমাক স্বাগতম। তুমি এতিয়া লগইন কৰিব পাৰিবা।`;
+            const msg = `প্ৰিয় ${name}, KS Gyan Mondir লৈ স্বাগতম। তুমি এতিয়া লগইন কৰিব পাৰিবা।`;
             db.ref(`messages/${ph}`).push({ text: msg, time: new Date().toLocaleString() });
             
-            showToast("✅ একাউণ্টটো Approve কৰা হ'ল!");
-            
-            const waMsg = `নমস্কাৰ ${name}, তোমাৰ KS Gyan Mondir একাউণ্টটো Approve কৰা হ'ল। তুমি এতিয়া লগইন কৰিব পাৰিবা।`;
+            // WhatsApp মেচেজৰ বাবে
+            const waMsg = `নমস্কাৰ ${name}, তোমাৰ KS Gyan Mondir একাউণ্টটো Approve কৰা হ'ল।`;
             window.location.href = `https://wa.me/91${ph}?text=${encodeURIComponent(waMsg)}`;
-        } else {
-             showToast("🔒 ছাত্ৰজনকে Lock কৰা হ'ল!");
         }
     }).catch(err => {
         showToast("Error: " + err.message);
