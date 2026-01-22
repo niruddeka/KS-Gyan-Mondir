@@ -1007,7 +1007,29 @@
         }
     }
 
-    function doLogin() { const ph = document.getElementById('l-phone').value, ps = document.getElementById('l-pass').value; db.ref('students/' + ph).once('value', s => { const u = s.val(); if(u && u.ps === ps) { localStorage.setItem('ks_student_id', ph); loginAuto(ph); } else showToast("Wrong ID or Password!"); }); }
+    function doLogin() { 
+    const ph = document.getElementById('l-phone').value.trim(); 
+    const ps = document.getElementById('l-pass').value.trim(); 
+
+    if(!ph || !ps) {
+        showToast("⚠️ মোবাইল আইডি আৰু পাছৱৰ্ড দিয়াটো জৰুৰী!");
+        return;
+    }
+
+    db.ref('students/' + ph).once('value', s => { 
+        const u = s.val(); 
+        
+        if(!u) {
+            showToast("❌ এই মোবাইল নম্বৰটো ৰেজিষ্টাৰ হোৱা নাই!");
+        } else if(u.ps !== ps) {
+            showToast("❌ পাছৱৰ্ড ভুল হৈছে! (Capital/Small Letter পৰীক্ষা কৰা)");
+        } else {
+            localStorage.setItem('ks_student_id', ph); 
+            loginAuto(ph);
+            showToast("✅ লগইন সফল হৈছে!");
+        }
+    }); 
+}
     function logout() { localStorage.removeItem('ks_student_id'); location.reload(); }
     function triggerAdmin() { clicks++; if(clicks>=5) { showScreen('admin-login-screen'); clicks=0; } setTimeout(()=>clicks=0, 2000); }
     
@@ -1068,3 +1090,4 @@
 </script>
 </body>
 </html>
+
