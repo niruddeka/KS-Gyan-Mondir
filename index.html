@@ -977,6 +977,9 @@
     const n = document.getElementById('s-name').value.trim();
     const ps = document.getElementById('s-pass').value.trim();
     const btn = event.target; 
+    
+    // লগইন লিংকটো ধৰা হৈছে যাতে ইয়াক ডিজেবল কৰিব পৰা যায়
+    const loginLink = document.querySelector("p[onclick*='login-screen']");
 
     if(!ph || !n || !ps) return showToast("⚠️ সকলো তথ্য পূৰণ কৰা!");
     const photo = document.getElementById('s-photo').files[0];
@@ -986,6 +989,9 @@
     btn.innerText = "অপেক্ষা কৰক (Loading...)";
     btn.disabled = true;
     btn.style.opacity = "0.7";
+    
+    // লোডিং হৈ থকা সময়ত লগইন লিংকটো ইন-এক্টিভ কৰা হৈছে
+    if(loginLink) loginLink.style.pointerEvents = "none";
 
     try {
         const r1 = new FileReader();
@@ -1006,17 +1012,24 @@
             }).then(() => { 
                 showToast("✅ পঞ্জীয়ন সফল! এতিয়া লগইন কৰক।"); 
                 
-                // --- ইয়াত বুটামটো Reset কৰা হৈছে ---
+                // ১. বুটাম আৰু লিংক ৰিছেট কৰা
                 btn.innerText = originalText;
                 btn.disabled = false;
                 btn.style.opacity = "1";
-                
+                if(loginLink) loginLink.style.pointerEvents = "auto";
+
+                // ২. ফৰ্মৰ সকলো ডাটা খালী কৰা (Reset Form)
+                document.querySelectorAll('#reg-screen input').forEach(input => input.value = "");
+                document.querySelectorAll('#reg-screen select').forEach(select => select.value = "");
+                document.getElementById('s-state').value = "অসম"; // ডিফল্ট ৰখা হৈছে
+
                 showScreen('login-screen'); 
             }).catch(err => {
                 showToast("Error: " + err.message);
                 btn.innerText = originalText;
                 btn.disabled = false;
                 btn.style.opacity = "1";
+                if(loginLink) loginLink.style.pointerEvents = "auto";
             });
         };
         r1.readAsDataURL(photo);
@@ -1025,6 +1038,7 @@
         btn.innerText = originalText;
         btn.disabled = false;
         btn.style.opacity = "1";
+        if(loginLink) loginLink.style.pointerEvents = "auto";
     }
 }
     function doLogin() { 
@@ -1114,6 +1128,7 @@
 </script>
 </body>
 </html>
+
 
 
 
