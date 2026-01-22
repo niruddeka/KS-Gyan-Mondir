@@ -976,21 +976,20 @@
     const ph = document.getElementById('s-phone').value.trim();
     const n = document.getElementById('s-name').value.trim();
     const ps = document.getElementById('s-pass').value.trim();
-    const btn = event.target; 
     
-    // লগইন লিংকটো ধৰা হৈছে যাতে ইয়াক ডিজেবল কৰিব পৰা যায়
-    const loginLink = document.querySelector("p[onclick*='login-screen']");
+    // আমি HTML-ত দিয়া আইডি (ID) কেইটা ইয়াতে ব্যৱহাৰ কৰা হৈছে
+    const regBtn = document.getElementById('reg-btn-main');
+    const loginLink = document.getElementById('login-link-text');
 
     if(!ph || !n || !ps) return showToast("⚠️ সকলো তথ্য পূৰণ কৰা!");
     const photo = document.getElementById('s-photo').files[0];
     if(!photo) return showToast("⚠️ ফটো আপলোড কৰা!");
 
-    const originalText = btn.innerText;
-    btn.innerText = "অপেক্ষা কৰক (Loading...)";
-    btn.disabled = true;
-    btn.style.opacity = "0.7";
-    
-    // লোডিং হৈ থকা সময়ত লগইন লিংকটো ইন-এক্টিভ কৰা হৈছে
+    // পঞ্জীয়ন বুটাম আৰু লগইন লিংক দুয়োটা বন্ধ কৰা হৈছে
+    const originalText = regBtn.innerText;
+    regBtn.innerText = "অপেক্ষা কৰক (Loading...)";
+    regBtn.disabled = true;
+    regBtn.style.opacity = "0.5";
     if(loginLink) loginLink.style.pointerEvents = "none";
 
     try {
@@ -1012,32 +1011,39 @@
             }).then(() => { 
                 showToast("✅ পঞ্জীয়ন সফল! এতিয়া লগইন কৰক।"); 
                 
-                // ১. বুটাম আৰু লিংক ৰিছেট কৰা
-                btn.innerText = originalText;
-                btn.disabled = false;
-                btn.style.opacity = "1";
+                // ১. বুটাম আৰু লিংক পুনৰ সক্ৰিয় কৰা
+                regBtn.innerText = originalText;
+                regBtn.disabled = false;
+                regBtn.style.opacity = "1";
                 if(loginLink) loginLink.style.pointerEvents = "auto";
 
-                // ২. ফৰ্মৰ সকলো ডাটা খালী কৰা (Reset Form)
-                document.querySelectorAll('#reg-screen input').forEach(input => input.value = "");
-                document.querySelectorAll('#reg-screen select').forEach(select => select.value = "");
-                document.getElementById('s-state').value = "অসম"; // ডিফল্ট ৰখা হৈছে
+                // ২. ফৰ্মখন সম্পূৰ্ণ খালী কৰা (যাতে ঘূৰি আহিলে ফ্ৰেছ থাকে)
+                document.getElementById('s-name').value = "";
+                document.getElementById('s-phone').value = "";
+                document.getElementById('s-pass').value = "";
+                document.getElementById('s-class').value = "";
+                document.getElementById('s-school').value = "";
+                document.getElementById('s-vill').value = "";
+                document.getElementById('s-po').value = "";
+                document.getElementById('s-dist').value = "";
+                document.getElementById('s-pin').value = "";
+                document.getElementById('s-photo').value = "";
 
                 showScreen('login-screen'); 
             }).catch(err => {
                 showToast("Error: " + err.message);
-                btn.innerText = originalText;
-                btn.disabled = false;
-                btn.style.opacity = "1";
+                regBtn.innerText = originalText;
+                regBtn.disabled = false;
+                regBtn.style.opacity = "1";
                 if(loginLink) loginLink.style.pointerEvents = "auto";
             });
         };
         r1.readAsDataURL(photo);
     } catch(e) {
-        showToast("⚠️ Photo error: File might be too big.");
-        btn.innerText = originalText;
-        btn.disabled = false;
-        btn.style.opacity = "1";
+        showToast("⚠️ ফটোৰ ফাইলটো চাগে বহুত ডাঙৰ হৈছে!");
+        regBtn.innerText = originalText;
+        regBtn.disabled = false;
+        regBtn.style.opacity = "1";
         if(loginLink) loginLink.style.pointerEvents = "auto";
     }
 }
@@ -1128,6 +1134,7 @@
 </script>
 </body>
 </html>
+
 
 
 
