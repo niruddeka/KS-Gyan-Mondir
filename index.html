@@ -774,7 +774,7 @@
                 utr: utr,
                 payShot: e.target.result
             }).then(() => {
-                showToast("✅ পেমেন্ট তথ্য আপডেট কৰা হ'ল। এডমিনে চেক কৰিব।");
+                showToast("✅ তোমাৰ পেমেন্টৰ তথ্য আপডেট কৰা হ'ল। এডমিনে চেক কৰালৈ অপেক্ষা কৰা।");
                 document.getElementById('s-utr').value = "";
                 document.getElementById('s-pay-shot').value = "";
             });
@@ -983,80 +983,83 @@
         const txt = document.getElementById('direct-msg-' + ph).value; if(txt) db.ref(`messages/${ph}`).push({ text: "ADMIN: " + txt, time: new Date().toLocaleString() }).then(() => { document.getElementById('direct-msg-' + ph).value = ""; showToast("Message sent!"); });
     }
 
-    function register() {
+ function register() {
     const ph = document.getElementById('s-phone').value.trim();
     const n = document.getElementById('s-name').value.trim();
     const ps = document.getElementById('s-pass').value.trim();
     
-    // আমি HTML-ত দিয়া আইডি (ID) কেইটা ইয়াতে ব্যৱহাৰ কৰা হৈছে
     const regBtn = document.getElementById('reg-btn-main');
     const loginLink = document.getElementById('login-link-text');
 
+    // খালী থাকিলে বাধা দিব
     if(!ph || !n || !ps) return showToast("⚠️ সকলো তথ্য পূৰণ কৰা!");
+    if(ph.length < 10) return showToast("⚠️ ১০ টা সংখ্যাৰ সঠিক নম্বৰ দিয়া!");
+    
     const photo = document.getElementById('s-photo').files[0];
     if(!photo) return showToast("⚠️ ফটো আপলোড কৰা!");
 
-    // পঞ্জীয়ন বুটাম আৰু লগইন লিংক দুয়োটা বন্ধ কৰা হৈছে
+    // বুটামটো ডিজেবল কৰা হৈছে
     const originalText = regBtn.innerText;
-    regBtn.innerText = "অপেক্ষা কৰক (Loading...)";
+    regBtn.innerText = "পৰীক্ষা কৰি থকা হৈছে...";
     regBtn.disabled = true;
     regBtn.style.opacity = "0.5";
-    if(loginLink) loginLink.style.pointerEvents = "none";
 
-    try {
-        const r1 = new FileReader();
-        r1.onload = e1 => {
-            db.ref('students/' + ph).set({ 
-                name: n, ph, ps, utr: "", 
-                cls: document.getElementById('s-class').value, 
-                school: document.getElementById('s-school').value, 
-                vill: document.getElementById('s-vill').value, 
-                po: document.getElementById('s-po').value, 
-                dist: document.getElementById('s-dist').value, 
-                state: document.getElementById('s-state').value, 
-                pin: document.getElementById('s-pin').value, 
-                studentPhoto: e1.target.result, 
-                payShot: "", 
-                active: false,
-                regDate: Date.now() 
-            }).then(() => { 
-                showToast("✅ পঞ্জীয়ন সফল! এতিয়া লগইন কৰক।"); 
-                
-                // ১. বুটাম আৰু লিংক পুনৰ সক্ৰিয় কৰা
-                regBtn.innerText = originalText;
-                regBtn.disabled = false;
-                regBtn.style.opacity = "1";
-                if(loginLink) loginLink.style.pointerEvents = "auto";
+    // ১ম খোজ: ডাটাবেছত নম্বৰটো চেক কৰা (এইটোৱে ডুপ্লিকেট বন্ধ কৰিব)
+    db.ref('students/' + ph).once('value').then(snapshot => {
+        if (snapshot.exists()) {
+            showToast("❌ এই নম্বৰটোৰে ইতিমধ্যে পঞ্জীয়ন হৈছে!");
+            regBtn.innerText = originalText;
+            regBtn.disabled = false;
+            regBtn.style.opacity = "1";
+        } else {
+            // ২য় খোজ: যদি নম্বৰটো নতুন, তেতিয়াহে পঞ্জীয়ন হ’ব
+            regBtn.innerText = "অপেক্ষা কৰক (Loading...)";
+            
+            const r1 = new FileReader();
+            r1.onload = e1 => {
+                db.ref('students/' + ph).set({ 
+                    name: n, ph, ps, utr: "", 
+                    cls: document.getElementById('s-class').value, 
+                    school: document.getElementById('s-school').value, 
+                    vill: document.getElementById('s-vill').value, 
+                    po: document.getElementById('s-po').value, 
+                    dist: document.getElementById('s-dist').value, 
+                    state: document.getElementById('s-state').value, 
+                    pin: document.getElementById('s-pin').value, 
+                    studentPhoto: e1.target.result, 
+                    payShot: "", 
+                    active: false,
+                    st: "Pending", // পঞ্জীয়নৰ পিছত সদায় পেন্ডিং থাকিব
+                    regDate: Date.now() 
+                }).then(() => { 
+                    showToast("✅ পঞ্জীয়ন সফল! এতিয়া লগইন কৰক।"); 
+                    
+                    // সকলো ৰিছেট কৰা
+                    regBtn.innerText = originalText;
+                    regBtn.disabled = false;
+                    regBtn.style.opacity = "1";
 
-                // ২. ফৰ্মখন সম্পূৰ্ণ খালী কৰা (যাতে ঘূৰি আহিলে ফ্ৰেছ থাকে)
-                document.getElementById('s-name').value = "";
-                document.getElementById('s-phone').value = "";
-                document.getElementById('s-pass').value = "";
-                document.getElementById('s-class').value = "";
-                document.getElementById('s-school').value = "";
-                document.getElementById('s-vill').value = "";
-                document.getElementById('s-po').value = "";
-                document.getElementById('s-dist').value = "";
-                document.getElementById('s-pin').value = "";
-                document.getElementById('s-photo').value = "";
+                    document.getElementById('s-name').value = "";
+                    document.getElementById('s-phone').value = "";
+                    document.getElementById('s-pass').value = "";
+                    document.getElementById('s-photo').value = "";
 
-                showScreen('login-screen'); 
-            }).catch(err => {
-                showToast("Error: " + err.message);
-                regBtn.innerText = originalText;
-                regBtn.disabled = false;
-                regBtn.style.opacity = "1";
-                if(loginLink) loginLink.style.pointerEvents = "auto";
-            });
-        };
-        r1.readAsDataURL(photo);
-    } catch(e) {
-        showToast("⚠️ ফটোৰ ফাইলটো চাগে বহুত ডাঙৰ হৈছে!");
+                    showScreen('login-screen'); 
+                }).catch(err => {
+                    showToast("Error: " + err.message);
+                    regBtn.innerText = originalText;
+                    regBtn.disabled = false;
+                    regBtn.style.opacity = "1";
+                });
+            };
+            r1.readAsDataURL(photo);
+        }
+    }).catch(error => {
+        showToast("Network Error: " + error.message);
         regBtn.innerText = originalText;
         regBtn.disabled = false;
         regBtn.style.opacity = "1";
-        if(loginLink) loginLink.style.pointerEvents = "auto";
-    }
+    });
 }
     function doLogin() { 
     const ph = document.getElementById('l-phone').value.trim(); 
@@ -1076,7 +1079,7 @@
             showToast("❌ পাছৱৰ্ড ভুল হৈছে!");
         } else if(u.st !== 'Approved') {
             // যদি এডমিনে এতিয়াও Approve কৰা নাই
-            showToast("⏳ আপোনাৰ একাউণ্টটো এতিয়াও Approve হোৱা নাই। অনুগ্ৰহ কৰি অপেক্ষা কৰক!");
+            showToast("⏳ তোমাৰ একাউণ্টটো এতিয়াও Approve হোৱা নাই। অনুগ্ৰহ কৰি অপেক্ষা কৰা!");
         } else {
             // যদি সকলো ঠিকে আছে
             localStorage.setItem('ks_student_id', ph); 
@@ -1094,7 +1097,7 @@
             showScreen('admin-panel');
             document.getElementById('adm-pass-login').value = "";
         } else {
-            showToast("❌ ভুল পিন দিছে!");
+            showToast("❌ ভুল পিন দিছা!");
         }
     }
 
@@ -1132,19 +1135,20 @@
     function forgotPass() {
         const ph = document.getElementById('l-phone').value;
         if(!ph) {
-            showToast("⚠️ অনুগ্ৰহ কৰি তোমাৰ 'মোবাইল আইডি' টো লিখা!");
+            showToast("⚠️ অনুগ্ৰহ কৰি তোমাৰ 'মোবাইল নম্বৰটো লিখা!");
             return;
         }
         if(!adminWA) {
             showToast("⚠️ এডমিনৰ নম্বৰ পোৱা নাই! চিধাকৈ যোগাযোগ কৰা।");
             return;
         }
-        const msg = `নমস্কাৰ ছাৰ, মই মোৰ KS Gyan Mondir একাউণ্টৰ পাছৱৰ্ড পাহৰিলো। মোৰ মোবাইল আইডি হ'ল: ${ph}। অনুগ্ৰহ কৰি সহায় কৰক।`;
+        const msg = `নমস্কাৰ ছাৰ, মই মোৰ KS Gyan Mondir একাউণ্টৰ পাছৱৰ্ডটো পাহৰিলো। মোৰ মোবাইল নম্বৰটো হ'ল: ${ph}। অনুগ্ৰহ কৰি সহায় কৰক।`;
         window.location.href = `https://wa.me/${adminWA}?text=${encodeURIComponent(msg)}`;
     }
 </script>
 </body>
 </html>
+
 
 
 
