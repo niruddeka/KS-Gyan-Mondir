@@ -973,39 +973,56 @@
     }
 
     function register() {
-        const ph = document.getElementById('s-phone').value, n = document.getElementById('s-name').value, ps = document.getElementById('s-pass').value;
-        if(!ph || !n || !ps) return showToast("সকলো তথ্য পূৰণ কৰা!");
-        const photo = document.getElementById('s-photo').files[0];
-        if(!photo) return showToast("ফটো আপলোড কৰা!");
-        
-        try {
-            const r1 = new FileReader();
-            r1.onload = e1 => {
-                db.ref('students/' + ph).set({ 
-                    name: n, ph, ps, utr: "", 
-                    cls: document.getElementById('s-class').value, 
-                    school: document.getElementById('s-school').value, 
-                    vill: document.getElementById('s-vill').value, 
-                    po: document.getElementById('s-po').value, 
-                    dist: document.getElementById('s-dist').value, 
-                    state: document.getElementById('s-state').value, 
-                    pin: document.getElementById('s-pin').value, 
-                    studentPhoto: e1.target.result, 
-                    payShot: "", 
-                    active: false,
-                    regDate: Date.now() // Added Registration Date
-                }).then(() => { 
-                    showToast("পঞ্জীয়ন সফল! এতিয়া লগইন কৰি মাচুল জমা দিয়া।"); 
-                    showScreen('login-screen'); 
-                }).catch(err => {
-                    showToast("Error: " + err.message);
-                });
-            };
-            r1.readAsDataURL(photo);
-        } catch(e) {
-            showToast("Photo error: File might be too big.");
-        }
+    const ph = document.getElementById('s-phone').value.trim();
+    const n = document.getElementById('s-name').value.trim();
+    const ps = document.getElementById('s-pass').value.trim();
+    const btn = event.target; // যিটো বুটামত ক্লিক কৰিছে সেইটো ধৰিবলৈ
+
+    if(!ph || !n || !ps) return showToast("⚠️ সকলো তথ্য পূৰণ কৰা!");
+    const photo = document.getElementById('s-photo').files[0];
+    if(!photo) return showToast("⚠️ ফটো আপলোড কৰা!");
+
+    // বুটামটো Loading অৱস্থালৈ নিয়া হৈছে
+    const originalText = btn.innerText;
+    btn.innerText = "অপেক্ষা কৰক (Loading...)";
+    btn.disabled = true;
+    btn.style.opacity = "0.7";
+
+    try {
+        const r1 = new FileReader();
+        r1.onload = e1 => {
+            db.ref('students/' + ph).set({ 
+                name: n, ph, ps, utr: "", 
+                cls: document.getElementById('s-class').value, 
+                school: document.getElementById('s-school').value, 
+                vill: document.getElementById('s-vill').value, 
+                po: document.getElementById('s-po').value, 
+                dist: document.getElementById('s-dist').value, 
+                state: document.getElementById('s-state').value, 
+                pin: document.getElementById('s-pin').value, 
+                studentPhoto: e1.target.result, 
+                payShot: "", 
+                active: false,
+                regDate: Date.now() 
+            }).then(() => { 
+                showToast("✅ পঞ্জীয়ন সফল! এতিয়া লগইন কৰক।"); 
+                showScreen('login-screen'); 
+            }).catch(err => {
+                showToast("Error: " + err.message);
+                // ভুল হ'লে বুটামটো আকৌ আগৰ দৰে কৰিবলৈ
+                btn.innerText = originalText;
+                btn.disabled = false;
+                btn.style.opacity = "1";
+            });
+        };
+        r1.readAsDataURL(photo);
+    } catch(e) {
+        showToast("⚠️ Photo error: File might be too big.");
+        btn.innerText = originalText;
+        btn.disabled = false;
+        btn.style.opacity = "1";
     }
+}
 
     function doLogin() { 
     const ph = document.getElementById('l-phone').value.trim(); 
@@ -1094,5 +1111,6 @@
 </script>
 </body>
 </html>
+
 
 
