@@ -976,13 +976,12 @@
     const ph = document.getElementById('s-phone').value.trim();
     const n = document.getElementById('s-name').value.trim();
     const ps = document.getElementById('s-pass').value.trim();
-    const btn = event.target; // যিটো বুটামত ক্লিক কৰিছে সেইটো ধৰিবলৈ
+    const btn = event.target; 
 
     if(!ph || !n || !ps) return showToast("⚠️ সকলো তথ্য পূৰণ কৰা!");
     const photo = document.getElementById('s-photo').files[0];
     if(!photo) return showToast("⚠️ ফটো আপলোড কৰা!");
 
-    // বুটামটো Loading অৱস্থালৈ নিয়া হৈছে
     const originalText = btn.innerText;
     btn.innerText = "অপেক্ষা কৰক (Loading...)";
     btn.disabled = true;
@@ -1006,10 +1005,15 @@
                 regDate: Date.now() 
             }).then(() => { 
                 showToast("✅ পঞ্জীয়ন সফল! এতিয়া লগইন কৰক।"); 
+                
+                // --- ইয়াত বুটামটো Reset কৰা হৈছে ---
+                btn.innerText = originalText;
+                btn.disabled = false;
+                btn.style.opacity = "1";
+                
                 showScreen('login-screen'); 
             }).catch(err => {
                 showToast("Error: " + err.message);
-                // ভুল হ'লে বুটামটো আকৌ আগৰ দৰে কৰিবলৈ
                 btn.innerText = originalText;
                 btn.disabled = false;
                 btn.style.opacity = "1";
@@ -1023,7 +1027,6 @@
         btn.style.opacity = "1";
     }
 }
-
     function doLogin() { 
     const ph = document.getElementById('l-phone').value.trim(); 
     const ps = document.getElementById('l-pass').value.trim(); 
@@ -1111,6 +1114,7 @@
 </script>
 </body>
 </html>
+
 
 
 
